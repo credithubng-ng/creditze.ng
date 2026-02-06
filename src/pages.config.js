@@ -77,6 +77,7 @@ import SetupDirectDebit from './pages/SetupDirectDebit';
 import Tier1Verification from './pages/Tier1Verification';
 import VerifyEmployment from './pages/VerifyEmployment';
 import AdminLoanReview from './pages/AdminLoanReview';
+import AdminABTests from './pages/AdminABTests';
 import __Layout from './Layout.jsx';
 
 
@@ -111,6 +112,7 @@ export const PAGES = {
     "Tier1Verification": Tier1Verification,
     "VerifyEmployment": VerifyEmployment,
     "AdminLoanReview": AdminLoanReview,
+    "AdminABTests": AdminABTests,
 }
 
 export const pagesConfig = {

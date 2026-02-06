@@ -4,6 +4,7 @@ import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
 import { calculateMLScore, calculateCombinedScore } from '../components/scoring/MLScoreCalculator';
 import ScoreDisplay from '../components/scoring/ScoreDisplay';
+import { personalizeOffer, assignABTestVariant } from '../components/loan/OfferPersonalizer';
 import { motion } from 'framer-motion';
 import { 
   Zap, 
@@ -17,6 +18,7 @@ import {
   Calendar,
   Percent
 } from 'lucide-react';
+import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
@@ -43,6 +45,9 @@ export default function ApplyLoan() {
   const [behaviorData, setBehaviorData] = useState(null);
   const [referralConfig, setReferralConfig] = useState(null);
   const [loanConfig, setLoanConfig] = useState(null);
+  const [abTestVariant, setAbTestVariant] = useState(null);
+  const [personalizedOfferData, setPersonalizedOfferData] = useState(null);
+  const [selectedTenure, setSelectedTenure] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -53,7 +58,7 @@ export default function ApplyLoan() {
       const currentUser = await base44.auth.me();
       setUser(currentUser);
 
-      const [kycData, searchData, limitData, empData, mlConfigData, behaviorDataResult, refConfigData, loanConfigData] = await Promise.all([
+      const [kycData, searchData, limitData, empData, mlConfigData, behaviorDataResult, refConfigData, loanConfigData, activeTests] = await Promise.all([
         base44.entities.KYCProfile.filter({ user_id: currentUser.id }),
         base44.entities.CreditSearch.filter({ user_id: currentUser.id }, '-created_date', 1),
         base44.entities.UserCreditLimit.filter({ user_id: currentUser.id }),
@@ -61,7 +66,8 @@ export default function ApplyLoan() {
         base44.entities.MLScoringConfig.filter({ config_key: 'default' }),
         base44.entities.UserBehaviorData.filter({ user_id: currentUser.id }),
         base44.entities.ReferralConfig.filter({ config_key: 'default' }),
-        base44.entities.LoanConfig.filter({ config_key: 'default' })
+        base44.entities.LoanConfig.filter({ config_key: 'default' }),
+        base44.entities.ABTestConfig.filter({ status: 'active' })
       ]);
 
       setKyc(kycData[0]);
@@ -161,34 +167,114 @@ export default function ApplyLoan() {
     setSelectedProduct(product);
     const score = await calculateFullScore();
     
+    // Get active A/B tests and assign variant
+    const activeTests = await base44.entities.ABTestConfig.filter({ status: 'active' });
+    const variant = assignABTestVariant(user.id, activeTests, product);
+    
+    if (variant) {
+      setAbTestVariant(variant);
+      
+      // Record assignment
+      const existingAssignment = await base44.entities.ABTestAssignment.filter({
+        user_id: user.id,
+        test_key: variant.testKey,
+        loan_type: product
+      });
+      
+      if (existingAssignment.length === 0) {
+        await base44.entities.ABTestAssignment.create({
+          user_id: user.id,
+          test_id: variant.testId,
+          test_key: variant.testKey,
+          variant_id: variant.variantId,
+          variant_name: variant.variantName,
+          assigned_date: new Date().toISOString(),
+          loan_type: product
+        });
+        
+        // Increment sample size
+        const test = activeTests.find(t => t.id === variant.testId);
+        if (test) {
+          await base44.entities.ABTestConfig.update(variant.testId, {
+            current_sample_size: (test.current_sample_size || 0) + 1
+          });
+        }
+      }
+    }
+    
     if (product === 'urgent_10k') {
       const maxAmount = creditLimit?.current_limit || (loanConfig?.urgent_10k_base_amount || 10000);
-      setLoanAmount(Math.min(loanConfig?.urgent_10k_base_amount || 10000, maxAmount));
+      const baseRate = loanConfig?.urgent_10k_interest_rate || 15;
+      const baseTenure = loanConfig?.urgent_10k_tenure_days || 30;
+      
+      // Apply AI personalization
+      const personalized = personalizeOffer({
+        loanType: product,
+        baseInterestRate: baseRate,
+        baseMaxAmount: maxAmount,
+        baseTenureDays: baseTenure,
+        mlScoreResult,
+        creditLimit,
+        behaviorData,
+        abTestVariant: variant,
+        loanConfig
+      });
+      
+      setPersonalizedOfferData(personalized);
+      setLoanAmount(Math.min(loanConfig?.urgent_10k_base_amount || 10000, personalized.personalizedAmount));
+      setSelectedTenure(personalized.tenureOptions[0]);
+      
       setLoanDetails({
-        interestRate: loanConfig?.urgent_10k_interest_rate || 15,
-        tenureDays: loanConfig?.urgent_10k_tenure_days || 30,
+        interestRate: personalized.personalizedRate,
+        tenureDays: personalized.tenureOptions[0],
+        tenureOptions: personalized.tenureOptions,
         score,
         minScore: loanConfig?.urgent_10k_min_score || 60,
-        maxAmount
+        maxAmount: personalized.personalizedAmount,
+        isPersonalized: true,
+        adjustments: personalized.adjustments
       });
     } else {
       const configMax = loanConfig?.tier1_max_amount || 5000000;
       const scoreBasedMax = score >= 90 ? configMax : score >= 80 ? configMax * 0.6 : configMax * 0.2;
-      const maxAmount = Math.min(configMax, scoreBasedMax);
+      const baseMax = Math.min(configMax, scoreBasedMax);
+      const baseRate = loanConfig?.tier1_interest_rate || 12;
+      const baseTenure = loanConfig?.tier1_tenure_days || 90;
+      
+      // Apply AI personalization
+      const personalized = personalizeOffer({
+        loanType: product,
+        baseInterestRate: baseRate,
+        baseMaxAmount: baseMax,
+        baseTenureDays: baseTenure,
+        mlScoreResult,
+        creditLimit,
+        behaviorData,
+        abTestVariant: variant,
+        loanConfig
+      });
+      
+      setPersonalizedOfferData(personalized);
       setLoanAmount(loanConfig?.tier1_min_amount || 50000);
+      setSelectedTenure(personalized.tenureOptions[0]);
+      
       setLoanDetails({
-        interestRate: loanConfig?.tier1_interest_rate || 12,
-        tenureDays: loanConfig?.tier1_tenure_days || 90,
+        interestRate: personalized.personalizedRate,
+        tenureDays: personalized.tenureOptions[0],
+        tenureOptions: personalized.tenureOptions,
         score,
         minScore: loanConfig?.tier1_min_score || 75,
-        maxAmount
+        maxAmount: personalized.personalizedAmount,
+        isPersonalized: true,
+        adjustments: personalized.adjustments
       });
     }
   };
 
   const calculateRepayment = () => {
     if (!loanDetails) return 0;
-    const interest = (loanAmount * loanDetails.interestRate * loanDetails.tenureDays) / (365 * 100);
+    const tenure = selectedTenure || loanDetails.tenureDays;
+    const interest = (loanAmount * loanDetails.interestRate * tenure) / (365 * 100);
     return loanAmount + interest;
   };
 
@@ -225,13 +311,15 @@ export default function ApplyLoan() {
         reviewReason = `Risk flags detected: ${mlScoreResult.risk_flags_detected.join(', ')}`;
       }
 
+      const tenure = selectedTenure || loanDetails.tenureDays;
+      
       const application = await base44.entities.LoanApplication.create({
         user_id: user.id,
         loan_type: selectedProduct,
         amount_requested: loanAmount,
         amount_approved: loanAmount,
         interest_rate: loanDetails.interestRate,
-        tenure_days: loanDetails.tenureDays,
+        tenure_days: tenure,
         total_repayment: calculateRepayment(),
         status: needsReview ? 'pending' : 'approved',
         score: loanDetails.score,
@@ -250,6 +338,48 @@ export default function ApplyLoan() {
         original_score: loanDetails.score,
         affiliate_code: affiliateCode
       });
+      
+      // Save personalized offer
+      if (personalizedOfferData) {
+        await base44.entities.PersonalizedOffer.create({
+          user_id: user.id,
+          loan_type: selectedProduct,
+          base_interest_rate: selectedProduct === 'urgent_10k' 
+            ? (loanConfig?.urgent_10k_interest_rate || 15)
+            : (loanConfig?.tier1_interest_rate || 12),
+          personalized_interest_rate: loanDetails.interestRate,
+          base_max_amount: selectedProduct === 'urgent_10k'
+            ? (creditLimit?.current_limit || 10000)
+            : (loanConfig?.tier1_max_amount || 5000000),
+          personalized_max_amount: loanDetails.maxAmount,
+          base_tenure_days: selectedProduct === 'urgent_10k' 
+            ? (loanConfig?.urgent_10k_tenure_days || 30)
+            : (loanConfig?.tier1_tenure_days || 90),
+          personalized_tenure_options: loanDetails.tenureOptions,
+          personalization_factors: personalizedOfferData.personalizationFactors,
+          adjustments_applied: personalizedOfferData.adjustments,
+          ab_test_variant: abTestVariant?.variantName,
+          offer_accepted: true,
+          loan_id: application.id
+        });
+      }
+      
+      // Update A/B test conversion
+      if (abTestVariant) {
+        const assignments = await base44.entities.ABTestAssignment.filter({
+          user_id: user.id,
+          test_key: abTestVariant.testKey,
+          loan_type: selectedProduct
+        });
+        
+        if (assignments[0]) {
+          await base44.entities.ABTestAssignment.update(assignments[0].id, {
+            converted: true,
+            conversion_date: new Date().toISOString(),
+            loan_id: application.id
+          });
+        }
+      }
 
       // Save ML score result
       if (mlScoreResult) {
@@ -540,6 +670,54 @@ export default function ApplyLoan() {
                     <span>₦{selectedProduct === 'urgent_10k' ? '5,000' : '50,000'}</span>
                     <span>₦{loanDetails.maxAmount.toLocaleString()}</span>
                   </div>
+
+                  {/* Personalization Notice */}
+                  {loanDetails.isPersonalized && (
+                    <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
+                      <div className="flex items-start gap-3">
+                        <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <Zap className="w-4 h-4 text-emerald-600" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-semibold text-emerald-900 text-sm mb-1">Personalized for You</p>
+                          <p className="text-xs text-emerald-700 mb-2">AI-optimized offer based on your profile</p>
+                          {loanDetails.adjustments && loanDetails.adjustments.length > 0 && (
+                            <div className="space-y-1">
+                              {loanDetails.adjustments.slice(0, 3).map((adj, i) => (
+                                <div key={i} className="text-xs text-emerald-600">
+                                  <span className="font-medium">{adj.adjustment}</span> - {adj.impact}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Tenure Selection */}
+                  {loanDetails.tenureOptions && loanDetails.tenureOptions.length > 1 && (
+                    <div>
+                      <Label className="text-sm text-gray-600 mb-2 block">Select Repayment Period</Label>
+                      <div className="grid grid-cols-3 gap-2">
+                        {loanDetails.tenureOptions.map((tenure) => (
+                          <button
+                            key={tenure}
+                            type="button"
+                            onClick={() => setSelectedTenure(tenure)}
+                            className={`px-4 py-3 rounded-xl border-2 transition ${
+                              (selectedTenure || loanDetails.tenureDays) === tenure
+                                ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
+                                : 'border-gray-200 hover:border-gray-300'
+                            }`}
+                          >
+                            <div className="font-semibold">{tenure}</div>
+                            <div className="text-xs text-gray-500">days</div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   {/* ML Score Display */}
                   {mlScoreResult && (
