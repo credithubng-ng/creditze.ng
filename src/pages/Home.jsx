@@ -104,10 +104,11 @@ export default function Home() {
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-lg border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center">
-              <span className="text-white font-bold text-lg">G</span>
-            </div>
-            <span className="font-bold text-xl text-gray-900">getawin<span className="text-emerald-600">.ng</span></span>
+            <img 
+              src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69864d541609ebe758aa5d6d/ea48dae69_PHOTO-2026-02-05-09-26-23.jpg" 
+              alt="Creditze Logo" 
+              className="h-10"
+            />
           </div>
           <Button 
             onClick={handleGetStarted}
@@ -311,10 +312,11 @@ export default function Home() {
         <div className="max-w-5xl mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center">
-                <span className="text-white font-bold text-lg">G</span>
-              </div>
-              <span className="font-bold text-xl">getawin<span className="text-emerald-500">.ng</span></span>
+              <img 
+                src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69864d541609ebe758aa5d6d/ea48dae69_PHOTO-2026-02-05-09-26-23.jpg" 
+                alt="Creditze Logo" 
+                className="h-10"
+              />
             </div>
             <div className="flex gap-6 text-gray-400 text-sm">
               <Link to={createPageUrl('Terms')} className="hover:text-white transition">Terms</Link>
@@ -323,7 +325,7 @@ export default function Home() {
             </div>
           </div>
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-500 text-sm">
-            © 2026 getawin.ng. All rights reserved.
+            © 2026 Creditze. All rights reserved.
           </div>
         </div>
       </footer>
