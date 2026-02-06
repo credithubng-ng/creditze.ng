@@ -267,8 +267,8 @@ export default function Dashboard() {
               <CardTitle className="text-lg flex items-center justify-between">
                 <span>Your Loans</span>
                 {loans.length > 0 && (
-                  <Link to={createPageUrl('LoanHistory')} className="text-sm text-emerald-600 font-normal">
-                    View All
+                  <Link to={createPageUrl('CreditHistory')} className="text-sm text-emerald-600 font-normal">
+                    View History
                   </Link>
                 )}
               </CardTitle>

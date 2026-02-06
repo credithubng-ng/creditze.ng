@@ -78,6 +78,7 @@ import RaiseDispute from './pages/RaiseDispute';
 import SetupDirectDebit from './pages/SetupDirectDebit';
 import Tier1Verification from './pages/Tier1Verification';
 import VerifyEmployment from './pages/VerifyEmployment';
+import CreditHistory from './pages/CreditHistory';
 import __Layout from './Layout.jsx';
 
 
@@ -113,6 +114,7 @@ export const PAGES = {
     "SetupDirectDebit": SetupDirectDebit,
     "Tier1Verification": Tier1Verification,
     "VerifyEmployment": VerifyEmployment,
+    "CreditHistory": CreditHistory,
 }
 
 export const pagesConfig = {
