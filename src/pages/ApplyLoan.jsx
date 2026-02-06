@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
+import { calculateMLScore, calculateCombinedScore } from '../components/scoring/MLScoreCalculator';
+import ScoreDisplay from '../components/scoring/ScoreDisplay';
 import { motion } from 'framer-motion';
 import { 
   Zap, 
@@ -35,6 +37,9 @@ export default function ApplyLoan() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [loanAmount, setLoanAmount] = useState(10000);
   const [loanDetails, setLoanDetails] = useState(null);
+  const [mlScoreResult, setMlScoreResult] = useState(null);
+  const [mlConfig, setMlConfig] = useState(null);
+  const [behaviorData, setBehaviorData] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -45,17 +50,21 @@ export default function ApplyLoan() {
       const currentUser = await base44.auth.me();
       setUser(currentUser);
 
-      const [kycData, searchData, limitData, empData] = await Promise.all([
+      const [kycData, searchData, limitData, empData, mlConfigData, behaviorDataResult] = await Promise.all([
         base44.entities.KYCProfile.filter({ user_id: currentUser.id }),
         base44.entities.CreditSearch.filter({ user_id: currentUser.id }, '-created_date', 1),
         base44.entities.UserCreditLimit.filter({ user_id: currentUser.id }),
-        base44.entities.EmploymentVerification.filter({ user_id: currentUser.id, status: 'verified' })
+        base44.entities.EmploymentVerification.filter({ user_id: currentUser.id, status: 'verified' }),
+        base44.entities.MLScoringConfig.filter({ config_key: 'default' }),
+        base44.entities.UserBehaviorData.filter({ user_id: currentUser.id })
       ]);
 
       setKyc(kycData[0]);
       setCreditSearch(searchData[0]);
       setCreditLimit(limitData[0]);
       setEmploymentVerification(empData[0]);
+      setMlConfig(mlConfigData[0]);
+      setBehaviorData(behaviorDataResult[0]);
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
@@ -74,41 +83,76 @@ export default function ApplyLoan() {
   };
 
   const calculateScore = () => {
-    let score = 0;
+    let ruleScore = 0;
     
     // Credit bureau score (40 points)
     if (creditSearch?.bureau_score) {
       const bureauScore = creditSearch.bureau_score;
-      if (bureauScore >= 700) score += 40;
-      else if (bureauScore >= 600) score += 30;
-      else if (bureauScore >= 500) score += 20;
-      else score += 10;
+      if (bureauScore >= 700) ruleScore += 40;
+      else if (bureauScore >= 600) ruleScore += 30;
+      else if (bureauScore >= 500) ruleScore += 20;
+      else ruleScore += 10;
     }
 
     // Repayment behaviour (20 points)
     if (creditLimit) {
       const successRate = creditLimit.successful_repayments / Math.max(creditLimit.total_loans_taken, 1);
-      score += Math.floor(successRate * 20);
+      ruleScore += Math.floor(successRate * 20);
     }
 
     // Property stability (15 points)
-    if (kyc?.property_years >= 3) score += 15;
-    else if (kyc?.property_years >= 1) score += 10;
-    else score += 5;
+    if (kyc?.property_years >= 3) ruleScore += 15;
+    else if (kyc?.property_years >= 1) ruleScore += 10;
+    else ruleScore += 5;
 
     // Identity consistency (15 points)
-    if (kyc?.bvn_verified && kyc?.nin_verified) score += 15;
-    else if (kyc?.bvn_verified || kyc?.nin_verified) score += 8;
+    if (kyc?.bvn_verified && kyc?.nin_verified) ruleScore += 15;
+    else if (kyc?.bvn_verified || kyc?.nin_verified) ruleScore += 8;
 
     // Employment verification for Tier-1 (10 points)
-    if (employmentVerification) score += 10;
+    if (employmentVerification) ruleScore += 10;
 
-    return score;
+    return ruleScore;
   };
 
-  const selectProduct = (product) => {
+  const calculateFullScore = async () => {
+    const ruleScore = calculateScore();
+    
+    // Check if ML scoring is enabled
+    if (mlConfig?.enable_ml_scoring && behaviorData) {
+      const mlResult = await calculateMLScore(user.id, behaviorData, mlConfig);
+      const combinedScore = calculateCombinedScore(ruleScore, mlResult.ml_score, mlConfig.ml_score_weight);
+      
+      const fullResult = {
+        rule_based_score: ruleScore,
+        ml_score: mlResult.ml_score,
+        combined_score: combinedScore,
+        ml_score_breakdown: mlResult.ml_score_breakdown,
+        risk_flags_detected: mlResult.risk_flags_detected,
+        bonus_factors_applied: mlResult.bonus_factors_applied,
+        confidence_level: mlResult.confidence_level,
+        recommendation: mlResult.recommendation,
+        explanation: mlResult.explanation
+      };
+      
+      setMlScoreResult(fullResult);
+      return combinedScore;
+    }
+    
+    // Fallback to rule-based only
+    setMlScoreResult({
+      rule_based_score: ruleScore,
+      ml_score: null,
+      combined_score: ruleScore,
+      confidence_level: 'high',
+      recommendation: ruleScore >= 75 ? 'approve' : ruleScore >= 60 ? 'review' : 'reject'
+    });
+    return ruleScore;
+  };
+
+  const selectProduct = async (product) => {
     setSelectedProduct(product);
-    const score = calculateScore();
+    const score = await calculateFullScore();
     
     if (product === 'urgent_10k') {
       const maxAmount = creditLimit?.current_limit || 10000;
@@ -166,10 +210,23 @@ export default function ApplyLoan() {
           bureau: creditSearch?.bureau_score,
           repayment_history: creditLimit?.successful_repayments || 0,
           property_years: kyc?.property_years,
-          employment_verified: !!employmentVerification
+          employment_verified: !!employmentVerification,
+          ml_score: mlScoreResult?.ml_score,
+          ml_breakdown: mlScoreResult?.ml_score_breakdown,
+          risk_flags: mlScoreResult?.risk_flags_detected,
+          bonus_factors: mlScoreResult?.bonus_factors_applied
         },
         affiliate_code: affiliateCode
       });
+
+      // Save ML score result
+      if (mlScoreResult) {
+        await base44.entities.MLScoreResult.create({
+          user_id: user.id,
+          loan_id: application.id,
+          ...mlScoreResult
+        });
+      }
 
       // Update or create credit limit
       if (!creditLimit) {

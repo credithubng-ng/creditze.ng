@@ -15,7 +15,8 @@ import {
   Settings,
   ChevronRight,
   Search,
-  ArrowLeft
+  ArrowLeft,
+  Brain
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -274,6 +275,12 @@ export default function AdminDashboard() {
                 icon={Settings} 
                 label="Configuration" 
                 desc="Loan rules and thresholds"
+              />
+              <QuickLink 
+                href={createPageUrl('AdminMLScoring')} 
+                icon={Brain} 
+                label="ML Scoring" 
+                desc="AI scoring configuration"
               />
             </CardContent>
           </Card>

@@ -67,6 +67,7 @@ import AdminCollections from './pages/AdminCollections';
 import AdminLoanCollection from './pages/AdminLoanCollection';
 import AdminCollectionConfig from './pages/AdminCollectionConfig';
 import SetupDirectDebit from './pages/SetupDirectDebit';
+import AdminMLScoring from './pages/AdminMLScoring';
 import __Layout from './Layout.jsx';
 
 
@@ -91,6 +92,7 @@ export const PAGES = {
     "AdminLoanCollection": AdminLoanCollection,
     "AdminCollectionConfig": AdminCollectionConfig,
     "SetupDirectDebit": SetupDirectDebit,
+    "AdminMLScoring": AdminMLScoring,
 }
 
 export const pagesConfig = {
