@@ -47,68 +47,70 @@
  *
  * The mainPage value must match a key in the PAGES object exactly.
  */
-import Home from './pages/Home';
-import Dashboard from './pages/Dashboard';
-import KYC from './pages/KYC';
-import CreditSearch from './pages/CreditSearch';
+import AdminAffiliates from './pages/AdminAffiliates';
+import AdminCollectionConfig from './pages/AdminCollectionConfig';
+import AdminCollections from './pages/AdminCollections';
+import AdminDashboard from './pages/AdminDashboard';
+import AdminDisbursements from './pages/AdminDisbursements';
+import AdminDisputeDetail from './pages/AdminDisputeDetail';
+import AdminDisputes from './pages/AdminDisputes';
+import AdminEmployers from './pages/AdminEmployers';
+import AdminLoanCollection from './pages/AdminLoanCollection';
+import AdminLoans from './pages/AdminLoans';
+import AdminMLScoring from './pages/AdminMLScoring';
+import AdminReferrals from './pages/AdminReferrals';
+import AdminSettings from './pages/AdminSettings';
+import AdminUsers from './pages/AdminUsers';
 import ApplyLoan from './pages/ApplyLoan';
-import Tier1Verification from './pages/Tier1Verification';
-import VerifyEmployment from './pages/VerifyEmployment';
+import CreditSearch from './pages/CreditSearch';
+import Dashboard from './pages/Dashboard';
+import DisputeDetail from './pages/DisputeDetail';
+import Home from './pages/Home';
+import HowItWorks from './pages/HowItWorks';
+import KYC from './pages/KYC';
 import LoanDetails from './pages/LoanDetails';
 import LoanHistory from './pages/LoanHistory';
-import Profile from './pages/Profile';
-import AdminDashboard from './pages/AdminDashboard';
-import AdminUsers from './pages/AdminUsers';
-import AdminEmployers from './pages/AdminEmployers';
-import AdminAffiliates from './pages/AdminAffiliates';
-import AdminLoans from './pages/AdminLoans';
-import AdminSettings from './pages/AdminSettings';
-import AdminCollections from './pages/AdminCollections';
-import AdminLoanCollection from './pages/AdminLoanCollection';
-import AdminCollectionConfig from './pages/AdminCollectionConfig';
-import SetupDirectDebit from './pages/SetupDirectDebit';
-import AdminMLScoring from './pages/AdminMLScoring';
-import RaiseDispute from './pages/RaiseDispute';
 import MyDisputes from './pages/MyDisputes';
-import DisputeDetail from './pages/DisputeDetail';
-import AdminDisputes from './pages/AdminDisputes';
-import AdminDisputeDetail from './pages/AdminDisputeDetail';
-import AdminReferrals from './pages/AdminReferrals';
-import AdminDisbursements from './pages/AdminDisbursements';
-import HowItWorks from './pages/HowItWorks';
+import Profile from './pages/Profile';
+import RaiseDispute from './pages/RaiseDispute';
+import SetupDirectDebit from './pages/SetupDirectDebit';
+import Tier1Verification from './pages/Tier1Verification';
+import VerifyEmployment from './pages/VerifyEmployment';
+import AdminLoanReview from './pages/AdminLoanReview';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
-    "Home": Home,
-    "Dashboard": Dashboard,
-    "KYC": KYC,
-    "CreditSearch": CreditSearch,
+    "AdminAffiliates": AdminAffiliates,
+    "AdminCollectionConfig": AdminCollectionConfig,
+    "AdminCollections": AdminCollections,
+    "AdminDashboard": AdminDashboard,
+    "AdminDisbursements": AdminDisbursements,
+    "AdminDisputeDetail": AdminDisputeDetail,
+    "AdminDisputes": AdminDisputes,
+    "AdminEmployers": AdminEmployers,
+    "AdminLoanCollection": AdminLoanCollection,
+    "AdminLoans": AdminLoans,
+    "AdminMLScoring": AdminMLScoring,
+    "AdminReferrals": AdminReferrals,
+    "AdminSettings": AdminSettings,
+    "AdminUsers": AdminUsers,
     "ApplyLoan": ApplyLoan,
-    "Tier1Verification": Tier1Verification,
-    "VerifyEmployment": VerifyEmployment,
+    "CreditSearch": CreditSearch,
+    "Dashboard": Dashboard,
+    "DisputeDetail": DisputeDetail,
+    "Home": Home,
+    "HowItWorks": HowItWorks,
+    "KYC": KYC,
     "LoanDetails": LoanDetails,
     "LoanHistory": LoanHistory,
-    "Profile": Profile,
-    "AdminDashboard": AdminDashboard,
-    "AdminUsers": AdminUsers,
-    "AdminEmployers": AdminEmployers,
-    "AdminAffiliates": AdminAffiliates,
-    "AdminLoans": AdminLoans,
-    "AdminSettings": AdminSettings,
-    "AdminCollections": AdminCollections,
-    "AdminLoanCollection": AdminLoanCollection,
-    "AdminCollectionConfig": AdminCollectionConfig,
-    "SetupDirectDebit": SetupDirectDebit,
-    "AdminMLScoring": AdminMLScoring,
-    "RaiseDispute": RaiseDispute,
     "MyDisputes": MyDisputes,
-    "DisputeDetail": DisputeDetail,
-    "AdminDisputes": AdminDisputes,
-    "AdminDisputeDetail": AdminDisputeDetail,
-    "AdminReferrals": AdminReferrals,
-    "AdminDisbursements": AdminDisbursements,
-    "HowItWorks": HowItWorks,
+    "Profile": Profile,
+    "RaiseDispute": RaiseDispute,
+    "SetupDirectDebit": SetupDirectDebit,
+    "Tier1Verification": Tier1Verification,
+    "VerifyEmployment": VerifyEmployment,
+    "AdminLoanReview": AdminLoanReview,
 }
 
 export const pagesConfig = {
