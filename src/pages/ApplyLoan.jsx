@@ -33,6 +33,7 @@ export default function ApplyLoan() {
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
   
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [loanAmount, setLoanAmount] = useState(10000);
@@ -210,6 +211,20 @@ export default function ApplyLoan() {
         status: 'pending'
       });
 
+      // Determine if manual review is needed
+      const needsReview = loanDetails.score < 70 || 
+                          (mlScoreResult?.risk_flags_detected?.length > 0) ||
+                          (mlScoreResult?.confidence_level === 'low');
+
+      let reviewReason = '';
+      if (loanDetails.score < 70) {
+        reviewReason = 'Low credit score (below 70)';
+      } else if (mlScoreResult?.confidence_level === 'low') {
+        reviewReason = 'Low ML confidence level';
+      } else if (mlScoreResult?.risk_flags_detected?.length > 0) {
+        reviewReason = `Risk flags detected: ${mlScoreResult.risk_flags_detected.join(', ')}`;
+      }
+
       const application = await base44.entities.LoanApplication.create({
         user_id: user.id,
         loan_type: selectedProduct,
@@ -218,7 +233,7 @@ export default function ApplyLoan() {
         interest_rate: loanDetails.interestRate,
         tenure_days: loanDetails.tenureDays,
         total_repayment: calculateRepayment(),
-        status: 'approved',
+        status: needsReview ? 'pending' : 'approved',
         score: loanDetails.score,
         score_breakdown: {
           bureau: creditSearch?.bureau_score,
@@ -230,6 +245,9 @@ export default function ApplyLoan() {
           risk_flags: mlScoreResult?.risk_flags_detected,
           bonus_factors: mlScoreResult?.bonus_factors_applied
         },
+        manual_review_required: needsReview,
+        manual_review_reason: reviewReason,
+        original_score: loanDetails.score,
         affiliate_code: affiliateCode
       });
 
@@ -326,8 +344,14 @@ export default function ApplyLoan() {
         await Promise.all(rewardPromises);
       }
 
-      // Navigate to direct debit setup
-      navigate(createPageUrl(`SetupDirectDebit?loan_id=${application.id}`));
+      // Navigate based on review status
+      if (needsReview) {
+        setSuccessMessage('Application submitted for review. You will be notified via email once reviewed.');
+        setProcessing(false);
+        setTimeout(() => navigate(createPageUrl('Dashboard')), 3000);
+      } else {
+        navigate(createPageUrl(`SetupDirectDebit?loan_id=${application.id}`));
+      }
 
     } catch (err) {
       setError('Failed to submit application. Please try again.');
@@ -571,6 +595,13 @@ export default function ApplyLoan() {
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
+        {successMessage && (
+          <Alert className="bg-emerald-50 border-emerald-200">
+            <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+            <AlertDescription className="text-emerald-800">{successMessage}</AlertDescription>
           </Alert>
         )}
       </div>
