@@ -19,7 +19,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 
-const CREDIT_SEARCH_FEE = 500;
+const CREDIT_SEARCH_FEE = 850;
 
 export default function CreditSearch() {
   const navigate = useNavigate();

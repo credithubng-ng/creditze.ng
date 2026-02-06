@@ -279,7 +279,7 @@ export default function Home() {
           <div className="grid md:grid-cols-4 gap-8">
             {[
               { icon: Users, title: 'Complete KYC', desc: 'Verify your identity with BVN & NIN' },
-              { icon: Shield, title: 'Credit Check', desc: 'Pay for credit search (₦500)' },
+              { icon: Shield, title: 'Credit Check', desc: 'Pay for credit search (₦850)' },
               { icon: Clock, title: 'Get Scored', desc: 'Automated scoring in minutes' },
               { icon: TrendingUp, title: 'Receive Funds', desc: 'Instant disbursement to your bank' }
             ].map((step, i) => (

@@ -246,7 +246,7 @@ export default function Dashboard() {
                     </p>
                     <Button asChild className="bg-amber-500 hover:bg-amber-600">
                       <Link to={createPageUrl('CreditSearch')}>
-                        Pay ₦500 & Search <ArrowRight className="ml-2 w-4 h-4" />
+                        Pay ₦850 & Search <ArrowRight className="ml-2 w-4 h-4" />
                       </Link>
                     </Button>
                   </div>
