@@ -325,7 +325,7 @@ export default function HowItWorks() {
         >
           <h2 className="text-3xl font-bold text-gray-900 mb-4">Ready to Get Started?</h2>
           <p className="text-gray-600 mb-8 max-w-2xl mx-auto">
-            Join thousands of Nigerians who are building their credit and accessing quick loans with getawin.ng
+            Join thousands of Nigerians who are building their credit and accessing quick loans with Creditze.ng
           </p>
           <Button
             onClick={handleGetStarted}
