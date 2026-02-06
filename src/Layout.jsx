@@ -7,12 +7,14 @@ import {
   Wallet, 
   User, 
   Settings,
-  LayoutDashboard
+  LayoutDashboard,
+  MessageSquare
 } from 'lucide-react';
 
 const NAV_ITEMS = [
   { icon: Home, label: 'Home', page: 'Dashboard' },
   { icon: Wallet, label: 'Apply', page: 'ApplyLoan' },
+  { icon: MessageSquare, label: 'Disputes', page: 'MyDisputes' },
   { icon: User, label: 'Profile', page: 'Profile' }
 ];
 
