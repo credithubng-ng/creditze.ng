@@ -58,7 +58,7 @@ export default function ApplyLoan() {
       const currentUser = await base44.auth.me();
       setUser(currentUser);
 
-      const [kycData, searchData, limitData, empData, mlConfigData, behaviorDataResult, refConfigData, loanConfigData, activeTests] = await Promise.all([
+      const [kycData, searchData, limitData, empData, mlConfigData, behaviorDataResult, refConfigData, loanConfigData, activeTests, activeLoans] = await Promise.all([
         base44.entities.KYCProfile.filter({ user_id: currentUser.id }),
         base44.entities.CreditSearch.filter({ user_id: currentUser.id }, '-created_date', 1),
         base44.entities.UserCreditLimit.filter({ user_id: currentUser.id }),
@@ -67,8 +67,19 @@ export default function ApplyLoan() {
         base44.entities.UserBehaviorData.filter({ user_id: currentUser.id }),
         base44.entities.ReferralConfig.filter({ config_key: 'default' }),
         base44.entities.LoanConfig.filter({ config_key: 'default' }),
-        base44.entities.ABTestConfig.filter({ status: 'active' })
+        base44.entities.ABTestConfig.filter({ status: 'active' }),
+        base44.entities.LoanApplication.filter({ user_id: currentUser.id })
       ]);
+
+      // Check for active loans
+      const hasActiveLoan = activeLoans.some(loan => 
+        ['pending', 'under_review', 'approved', 'disbursed', 'overdue'].includes(loan.status)
+      );
+
+      if (hasActiveLoan) {
+        navigate(createPageUrl('Dashboard'));
+        return;
+      }
 
       setKyc(kycData[0]);
       setCreditSearch(searchData[0]);

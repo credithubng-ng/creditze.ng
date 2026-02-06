@@ -47,6 +47,7 @@
  *
  * The mainPage value must match a key in the PAGES object exactly.
  */
+import AdminABTests from './pages/AdminABTests';
 import AdminAffiliates from './pages/AdminAffiliates';
 import AdminCollectionConfig from './pages/AdminCollectionConfig';
 import AdminCollections from './pages/AdminCollections';
@@ -56,6 +57,7 @@ import AdminDisputeDetail from './pages/AdminDisputeDetail';
 import AdminDisputes from './pages/AdminDisputes';
 import AdminEmployers from './pages/AdminEmployers';
 import AdminLoanCollection from './pages/AdminLoanCollection';
+import AdminLoanReview from './pages/AdminLoanReview';
 import AdminLoans from './pages/AdminLoans';
 import AdminMLScoring from './pages/AdminMLScoring';
 import AdminReferrals from './pages/AdminReferrals';
@@ -76,12 +78,11 @@ import RaiseDispute from './pages/RaiseDispute';
 import SetupDirectDebit from './pages/SetupDirectDebit';
 import Tier1Verification from './pages/Tier1Verification';
 import VerifyEmployment from './pages/VerifyEmployment';
-import AdminLoanReview from './pages/AdminLoanReview';
-import AdminABTests from './pages/AdminABTests';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
+    "AdminABTests": AdminABTests,
     "AdminAffiliates": AdminAffiliates,
     "AdminCollectionConfig": AdminCollectionConfig,
     "AdminCollections": AdminCollections,
@@ -91,6 +92,7 @@ export const PAGES = {
     "AdminDisputes": AdminDisputes,
     "AdminEmployers": AdminEmployers,
     "AdminLoanCollection": AdminLoanCollection,
+    "AdminLoanReview": AdminLoanReview,
     "AdminLoans": AdminLoans,
     "AdminMLScoring": AdminMLScoring,
     "AdminReferrals": AdminReferrals,
@@ -111,8 +113,6 @@ export const PAGES = {
     "SetupDirectDebit": SetupDirectDebit,
     "Tier1Verification": Tier1Verification,
     "VerifyEmployment": VerifyEmployment,
-    "AdminLoanReview": AdminLoanReview,
-    "AdminABTests": AdminABTests,
 }
 
 export const pagesConfig = {
