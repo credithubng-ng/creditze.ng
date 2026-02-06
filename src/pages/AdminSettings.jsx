@@ -32,7 +32,7 @@ export default function AdminSettings() {
     urgent_10k_increment_percent: 20,
     tier1_min_score: 75,
     tier1_min_amount: 50000,
-    tier1_max_amount: 500000,
+    tier1_max_amount: 5000000,
     tier1_interest_rate: 12,
     tier1_tenure_days: 90,
     credit_search_fee: 500,
