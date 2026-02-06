@@ -432,6 +432,11 @@ export default function ApplyLoan() {
                     <span>₦{loanDetails.maxAmount.toLocaleString()}</span>
                   </div>
 
+                  {/* ML Score Display */}
+                  {mlScoreResult && (
+                    <ScoreDisplay scoreResult={mlScoreResult} showBreakdown={true} />
+                  )}
+
                   {/* Loan Summary */}
                   <div className="bg-gray-50 rounded-xl p-4 space-y-3">
                     <div className="flex items-center justify-between">
