@@ -10,7 +10,8 @@ import {
   CheckCircle2,
   Loader2,
   AlertCircle,
-  Building2
+  Building2,
+  Zap
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -142,6 +143,11 @@ export default function SetupDirectDebit() {
         }
       });
 
+      // Trigger automatic loan disbursement if loan is approved
+      if (loan && loan.status === 'approved') {
+        await disburseLoan(loan);
+      }
+
       toast.success('Direct debit mandate set up successfully!');
       
       if (loan) {
@@ -156,6 +162,108 @@ export default function SetupDirectDebit() {
     } finally {
       setProcessing(false);
     }
+  };
+
+  const disburseLoan = async (loanData) => {
+    try {
+      // Create initial disbursement log
+      const disbursementLog = await base44.entities.DisbursementLog.create({
+        loan_id: loanData.id,
+        user_id: user.id,
+        amount: loanData.amount_approved,
+        bank_name: formData.bank_name,
+        account_number: formData.account_number,
+        account_name: formData.account_name,
+        status: 'processing',
+        attempt_number: 1,
+        max_retries: 3,
+        initiated_by: 'system',
+        payment_reference: `DISB-${Date.now()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`
+      });
+
+      // Simulate disbursement (in production, integrate with payment provider API)
+      const success = await simulateDisbursement(disbursementLog);
+
+      if (success) {
+        // Update disbursement log
+        await base44.entities.DisbursementLog.update(disbursementLog.id, {
+          status: 'successful',
+          disbursement_date: new Date().toISOString(),
+          provider_response: { status: 'success', message: 'Disbursement successful' }
+        });
+
+        // Update loan status to disbursed
+        await base44.entities.LoanApplication.update(loanData.id, {
+          status: 'disbursed',
+          disbursement_date: new Date().toISOString()
+        });
+
+        // Log audit
+        await base44.entities.AuditLog.create({
+          action: 'loan_disbursed',
+          entity_type: 'LoanApplication',
+          entity_id: loanData.id,
+          user_id: user.id,
+          details: {
+            amount: loanData.amount_approved,
+            bank: formData.bank_name,
+            disbursement_ref: disbursementLog.payment_reference
+          }
+        });
+
+        toast.success('Loan disbursed successfully!');
+      } else {
+        // Schedule retry
+        await scheduleDisbursementRetry(disbursementLog);
+      }
+    } catch (error) {
+      console.error('Disbursement error:', error);
+      // Error will be logged in retry mechanism
+    }
+  };
+
+  const simulateDisbursement = async (disbursementLog) => {
+    // Simulate API call delay
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    // 90% success rate simulation (in production, this would be actual payment provider API)
+    const success = Math.random() > 0.1;
+    
+    if (!success) {
+      await base44.entities.DisbursementLog.update(disbursementLog.id, {
+        status: 'failed',
+        error_message: 'Simulated payment provider error - will retry'
+      });
+    }
+    
+    return success;
+  };
+
+  const scheduleDisbursementRetry = async (disbursementLog) => {
+    if (disbursementLog.attempt_number >= disbursementLog.max_retries) {
+      // Max retries reached
+      await base44.entities.DisbursementLog.update(disbursementLog.id, {
+        status: 'failed',
+        error_message: 'Maximum retry attempts reached'
+      });
+      
+      toast.error('Disbursement failed. Please contact support.');
+      return;
+    }
+
+    // Calculate next retry time (exponential backoff: 5min, 15min, 30min)
+    const retryDelays = [5, 15, 30]; // minutes
+    const nextRetryMinutes = retryDelays[disbursementLog.attempt_number - 1] || 30;
+    const nextRetryAt = new Date();
+    nextRetryAt.setMinutes(nextRetryAt.getMinutes() + nextRetryMinutes);
+
+    await base44.entities.DisbursementLog.update(disbursementLog.id, {
+      status: 'retrying',
+      next_retry_at: nextRetryAt.toISOString(),
+      error_message: `Retry scheduled in ${nextRetryMinutes} minutes`
+    });
+
+    toast.info(`Disbursement will retry in ${nextRetryMinutes} minutes`);
   };
 
   if (loading) {

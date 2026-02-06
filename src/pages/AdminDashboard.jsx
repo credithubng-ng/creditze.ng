@@ -246,6 +246,12 @@ export default function AdminDashboard() {
                 desc="Monitor referral program"
               />
               <QuickLink 
+                href={createPageUrl('AdminDisbursements')} 
+                icon={DollarSign} 
+                label="Disbursements" 
+                desc="Loan disbursement logs"
+              />
+              <QuickLink 
                 href={createPageUrl('AdminEmployers')} 
                 icon={Building2} 
                 label="Tier-1 Employers" 

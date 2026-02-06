@@ -74,6 +74,7 @@ import DisputeDetail from './pages/DisputeDetail';
 import AdminDisputes from './pages/AdminDisputes';
 import AdminDisputeDetail from './pages/AdminDisputeDetail';
 import AdminReferrals from './pages/AdminReferrals';
+import AdminDisbursements from './pages/AdminDisbursements';
 import __Layout from './Layout.jsx';
 
 
@@ -105,6 +106,7 @@ export const PAGES = {
     "AdminDisputes": AdminDisputes,
     "AdminDisputeDetail": AdminDisputeDetail,
     "AdminReferrals": AdminReferrals,
+    "AdminDisbursements": AdminDisbursements,
 }
 
 export const pagesConfig = {
