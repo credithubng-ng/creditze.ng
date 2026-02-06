@@ -40,6 +40,7 @@ export default function ApplyLoan() {
   const [mlScoreResult, setMlScoreResult] = useState(null);
   const [mlConfig, setMlConfig] = useState(null);
   const [behaviorData, setBehaviorData] = useState(null);
+  const [referralConfig, setReferralConfig] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -50,13 +51,14 @@ export default function ApplyLoan() {
       const currentUser = await base44.auth.me();
       setUser(currentUser);
 
-      const [kycData, searchData, limitData, empData, mlConfigData, behaviorDataResult] = await Promise.all([
+      const [kycData, searchData, limitData, empData, mlConfigData, behaviorDataResult, refConfigData] = await Promise.all([
         base44.entities.KYCProfile.filter({ user_id: currentUser.id }),
         base44.entities.CreditSearch.filter({ user_id: currentUser.id }, '-created_date', 1),
         base44.entities.UserCreditLimit.filter({ user_id: currentUser.id }),
         base44.entities.EmploymentVerification.filter({ user_id: currentUser.id, status: 'verified' }),
         base44.entities.MLScoringConfig.filter({ config_key: 'default' }),
-        base44.entities.UserBehaviorData.filter({ user_id: currentUser.id })
+        base44.entities.UserBehaviorData.filter({ user_id: currentUser.id }),
+        base44.entities.ReferralConfig.filter({ config_key: 'default' })
       ]);
 
       setKyc(kycData[0]);
@@ -65,6 +67,7 @@ export default function ApplyLoan() {
       setEmploymentVerification(empData[0]);
       setMlConfig(mlConfigData[0]);
       setBehaviorData(behaviorDataResult[0]);
+      setReferralConfig(refConfigData[0]);
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
@@ -248,47 +251,74 @@ export default function ApplyLoan() {
       }
 
       // Process referral conversion and rewards
-      if (pendingReferral[0]) {
+      if (pendingReferral[0] && referralConfig?.enable_referral_program && loanAmount >= (referralConfig.min_loan_amount_for_conversion || 0)) {
         const referral = pendingReferral[0];
+        const cashReward = referralConfig.referrer_cash_reward || 1000;
+        const discountPercent = referralConfig.referred_interest_discount || 2;
+        const cashBonus = referralConfig.referred_cash_bonus || 0;
+        const expiryDate = new Date();
+        expiryDate.setDate(expiryDate.getDate() + (referralConfig.reward_expiry_days || 90));
         
         // Update referral status
         await base44.entities.UserReferral.update(referral.id, {
           status: 'converted',
           conversion_date: new Date().toISOString(),
           reward_issued: true,
-          reward_amount: 1000
+          reward_amount: cashReward
         });
 
         // Create rewards for both referrer and referred user
-        await Promise.all([
+        const rewardPromises = [
           base44.entities.ReferralReward.create({
             user_id: referral.referrer_id,
             referral_id: referral.id,
             reward_type: 'cash',
-            reward_value: 1000,
-            description: 'Referral bonus - friend took first loan',
-            status: 'active'
-          }),
-          base44.entities.ReferralReward.create({
-            user_id: user.id,
-            referral_id: referral.id,
-            reward_type: 'interest_discount',
-            reward_value: 2,
-            description: 'Welcome bonus - 2% interest discount',
+            reward_value: cashReward,
+            description: `Referral bonus - friend took first loan`,
             status: 'active',
-            applied_to_loan_id: application.id
+            expires_at: expiryDate.toISOString()
           })
-        ]);
+        ];
 
-        // Apply interest discount to this loan
-        const discountedRate = loanDetails.interestRate - 2;
-        const newInterest = (loanAmount * discountedRate * loanDetails.tenureDays) / (365 * 100);
-        const newTotal = loanAmount + newInterest;
-        
-        await base44.entities.LoanApplication.update(application.id, {
-          interest_rate: discountedRate,
-          total_repayment: newTotal
-        });
+        if (discountPercent > 0) {
+          rewardPromises.push(
+            base44.entities.ReferralReward.create({
+              user_id: user.id,
+              referral_id: referral.id,
+              reward_type: 'interest_discount',
+              reward_value: discountPercent,
+              description: `Welcome bonus - ${discountPercent}% interest discount`,
+              status: 'active',
+              applied_to_loan_id: application.id
+            })
+          );
+
+          // Apply interest discount to this loan
+          const discountedRate = Math.max(0, loanDetails.interestRate - discountPercent);
+          const newInterest = (loanAmount * discountedRate * loanDetails.tenureDays) / (365 * 100);
+          const newTotal = loanAmount + newInterest;
+          
+          await base44.entities.LoanApplication.update(application.id, {
+            interest_rate: discountedRate,
+            total_repayment: newTotal
+          });
+        }
+
+        if (cashBonus > 0) {
+          rewardPromises.push(
+            base44.entities.ReferralReward.create({
+              user_id: user.id,
+              referral_id: referral.id,
+              reward_type: 'cash',
+              reward_value: cashBonus,
+              description: `Welcome cash bonus`,
+              status: 'active',
+              expires_at: expiryDate.toISOString()
+            })
+          );
+        }
+
+        await Promise.all(rewardPromises);
       }
 
       // Navigate to direct debit setup

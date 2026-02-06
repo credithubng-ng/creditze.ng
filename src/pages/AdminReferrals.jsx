@@ -11,7 +11,10 @@ import {
   Gift,
   DollarSign,
   Search,
-  Filter
+  Filter,
+  Settings,
+  X,
+  Check
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -39,7 +42,9 @@ export default function AdminReferrals() {
   const [referrals, setReferrals] = useState([]);
   const [rewards, setRewards] = useState([]);
   const [users, setUsers] = useState({});
+  const [referralConfig, setReferralConfig] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [editingConfig, setEditingConfig] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -62,14 +67,25 @@ export default function AdminReferrals() {
 
   const loadData = async () => {
     try {
-      const [referralData, rewardData, userData] = await Promise.all([
+      const [referralData, rewardData, userData, configData] = await Promise.all([
         base44.entities.UserReferral.list('-created_date'),
         base44.entities.ReferralReward.list('-created_date'),
-        base44.entities.User.list()
+        base44.entities.User.list(),
+        base44.entities.ReferralConfig.filter({ config_key: 'default' })
       ]);
 
       setReferrals(referralData);
       setRewards(rewardData);
+      setReferralConfig(configData[0] || {
+        config_key: 'default',
+        referrer_cash_reward: 1000,
+        referred_interest_discount: 2,
+        referred_cash_bonus: 0,
+        min_loan_amount_for_conversion: 5000,
+        enable_referral_program: true,
+        reward_expiry_days: 90,
+        max_referrals_per_user: 50
+      });
 
       const userMap = {};
       userData.forEach(u => { userMap[u.id] = u; });
@@ -78,6 +94,20 @@ export default function AdminReferrals() {
       console.error('Error loading data:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const saveConfig = async () => {
+    try {
+      if (referralConfig.id) {
+        await base44.entities.ReferralConfig.update(referralConfig.id, referralConfig);
+      } else {
+        await base44.entities.ReferralConfig.create(referralConfig);
+      }
+      setEditingConfig(false);
+      await loadData();
+    } catch (error) {
+      console.error('Error saving config:', error);
     }
   };
 
@@ -128,6 +158,134 @@ export default function AdminReferrals() {
       </div>
 
       <div className="max-w-6xl mx-auto px-6 py-6 space-y-6">
+        {/* Config Card */}
+        {editingConfig ? (
+          <Card className="border-0 shadow-md">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-semibold">Referral Program Settings</h3>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={() => {
+                    setEditingConfig(false);
+                    loadData();
+                  }}>
+                    <X className="w-4 h-4 mr-1" /> Cancel
+                  </Button>
+                  <Button size="sm" onClick={saveConfig}>
+                    <Check className="w-4 h-4 mr-1" /> Save
+                  </Button>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-1 block">
+                    Referrer Cash Reward (₦)
+                  </label>
+                  <Input
+                    type="number"
+                    value={referralConfig.referrer_cash_reward}
+                    onChange={(e) => setReferralConfig({...referralConfig, referrer_cash_reward: Number(e.target.value)})}
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-1 block">
+                    Referred Interest Discount (%)
+                  </label>
+                  <Input
+                    type="number"
+                    value={referralConfig.referred_interest_discount}
+                    onChange={(e) => setReferralConfig({...referralConfig, referred_interest_discount: Number(e.target.value)})}
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-1 block">
+                    Referred Cash Bonus (₦)
+                  </label>
+                  <Input
+                    type="number"
+                    value={referralConfig.referred_cash_bonus}
+                    onChange={(e) => setReferralConfig({...referralConfig, referred_cash_bonus: Number(e.target.value)})}
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-1 block">
+                    Min Loan for Conversion (₦)
+                  </label>
+                  <Input
+                    type="number"
+                    value={referralConfig.min_loan_amount_for_conversion}
+                    onChange={(e) => setReferralConfig({...referralConfig, min_loan_amount_for_conversion: Number(e.target.value)})}
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-1 block">
+                    Reward Expiry (days)
+                  </label>
+                  <Input
+                    type="number"
+                    value={referralConfig.reward_expiry_days}
+                    onChange={(e) => setReferralConfig({...referralConfig, reward_expiry_days: Number(e.target.value)})}
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-1 block">
+                    Max Referrals Per User
+                  </label>
+                  <Input
+                    type="number"
+                    value={referralConfig.max_referrals_per_user}
+                    onChange={(e) => setReferralConfig({...referralConfig, max_referrals_per_user: Number(e.target.value)})}
+                  />
+                </div>
+                <div className="col-span-2">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={referralConfig.enable_referral_program}
+                      onChange={(e) => setReferralConfig({...referralConfig, enable_referral_program: e.target.checked})}
+                      className="w-4 h-4"
+                    />
+                    <span className="text-sm font-medium text-gray-700">Enable Referral Program</span>
+                  </label>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ) : referralConfig && (
+          <Card className="border-0 shadow-md bg-gradient-to-br from-indigo-50 to-purple-50">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <Settings className="w-6 h-6 text-indigo-600" />
+                  <div>
+                    <h3 className="font-semibold text-gray-900">Current Rewards</h3>
+                    <p className="text-sm text-gray-600">Click edit to modify settings</p>
+                  </div>
+                </div>
+                <Button variant="outline" size="sm" onClick={() => setEditingConfig(true)}>
+                  <Settings className="w-4 h-4 mr-1" /> Edit
+                </Button>
+              </div>
+              <div className="grid grid-cols-3 gap-4 text-sm">
+                <div>
+                  <p className="text-gray-600">Referrer Reward</p>
+                  <p className="text-lg font-bold text-indigo-600">₦{referralConfig.referrer_cash_reward.toLocaleString()}</p>
+                </div>
+                <div>
+                  <p className="text-gray-600">Interest Discount</p>
+                  <p className="text-lg font-bold text-indigo-600">{referralConfig.referred_interest_discount}%</p>
+                </div>
+                <div>
+                  <p className="text-gray-600">Status</p>
+                  <Badge className={referralConfig.enable_referral_program ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>
+                    {referralConfig.enable_referral_program ? 'Active' : 'Disabled'}
+                  </Badge>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Card className="border-0 shadow-sm">

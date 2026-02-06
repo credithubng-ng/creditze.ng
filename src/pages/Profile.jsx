@@ -42,6 +42,7 @@ export default function Profile() {
   const [creditLimit, setCreditLimit] = useState(null);
   const [referralStats, setReferralStats] = useState(null);
   const [rewards, setRewards] = useState([]);
+  const [referralConfig, setReferralConfig] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -53,16 +54,18 @@ export default function Profile() {
       const currentUser = await base44.auth.me();
       setUser(currentUser);
 
-      const [kycData, limitData, referralData, rewardData] = await Promise.all([
+      const [kycData, limitData, referralData, rewardData, refConfigData] = await Promise.all([
         base44.entities.KYCProfile.filter({ user_id: currentUser.id }),
         base44.entities.UserCreditLimit.filter({ user_id: currentUser.id }),
         base44.entities.UserReferral.filter({ referrer_id: currentUser.id }),
-        base44.entities.ReferralReward.filter({ user_id: currentUser.id })
+        base44.entities.ReferralReward.filter({ user_id: currentUser.id }),
+        base44.entities.ReferralConfig.filter({ config_key: 'default' })
       ]);
 
       setKyc(kycData[0]);
       setCreditLimit(limitData[0]);
       setRewards(rewardData);
+      setReferralConfig(refConfigData[0]);
       
       // Calculate referral stats
       setReferralStats({
@@ -210,7 +213,7 @@ export default function Profile() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
         >
-          <ReferralSection user={user} referralStats={referralStats} rewards={rewards} />
+          <ReferralSection user={user} referralStats={referralStats} rewards={rewards} referralConfig={referralConfig} />
         </motion.div>
 
         {/* Account Details */}

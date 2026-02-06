@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 
-export default function ReferralSection({ user, referralStats, rewards }) {
+export default function ReferralSection({ user, referralStats, rewards, referralConfig }) {
   const [copied, setCopied] = useState(false);
   
   // Generate referral code from user ID
@@ -58,7 +58,9 @@ export default function ReferralSection({ user, referralStats, rewards }) {
             </div>
             <div className="text-white">
               <h3 className="font-semibold text-lg">Refer & Earn</h3>
-              <p className="text-purple-100 text-sm">Get ₦1,000 for each friend who takes a loan</p>
+              <p className="text-purple-100 text-sm">
+                Get ₦{(referralConfig?.referrer_cash_reward || 1000).toLocaleString()} for each friend who takes a loan
+              </p>
             </div>
           </div>
 
@@ -164,7 +166,9 @@ export default function ReferralSection({ user, referralStats, rewards }) {
             </div>
             <div>
               <p className="font-medium text-gray-900">You both earn</p>
-              <p className="text-sm text-gray-500">Get ₦1,000 when they take their first loan</p>
+              <p className="text-sm text-gray-500">
+                Get ₦{(referralConfig?.referrer_cash_reward || 1000).toLocaleString()} when they take their first loan
+              </p>
             </div>
           </div>
         </CardContent>
