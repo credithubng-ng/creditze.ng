@@ -40,6 +40,8 @@ export default function Profile() {
   const [user, setUser] = useState(null);
   const [kyc, setKyc] = useState(null);
   const [creditLimit, setCreditLimit] = useState(null);
+  const [referralStats, setReferralStats] = useState(null);
+  const [rewards, setRewards] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -51,13 +53,23 @@ export default function Profile() {
       const currentUser = await base44.auth.me();
       setUser(currentUser);
 
-      const [kycData, limitData] = await Promise.all([
+      const [kycData, limitData, referralData, rewardData] = await Promise.all([
         base44.entities.KYCProfile.filter({ user_id: currentUser.id }),
-        base44.entities.UserCreditLimit.filter({ user_id: currentUser.id })
+        base44.entities.UserCreditLimit.filter({ user_id: currentUser.id }),
+        base44.entities.UserReferral.filter({ referrer_id: currentUser.id }),
+        base44.entities.ReferralReward.filter({ user_id: currentUser.id })
       ]);
 
       setKyc(kycData[0]);
       setCreditLimit(limitData[0]);
+      setRewards(rewardData);
+      
+      // Calculate referral stats
+      setReferralStats({
+        total: referralData.length,
+        converted: referralData.filter(r => r.status === 'converted' || r.status === 'rewarded').length,
+        pending: referralData.filter(r => r.status === 'pending').length
+      });
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
@@ -192,11 +204,20 @@ export default function Profile() {
           </Card>
         </motion.div>
 
-        {/* Account Details */}
+        {/* Referral Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
+        >
+          <ReferralSection user={user} referralStats={referralStats} rewards={rewards} />
+        </motion.div>
+
+        {/* Account Details */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
         >
           <Card className="border-0 shadow-md">
             <CardContent className="p-4 space-y-3">
@@ -227,7 +248,7 @@ export default function Profile() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
+          transition={{ delay: 0.5 }}
         >
           <AlertDialog>
             <AlertDialogTrigger asChild>

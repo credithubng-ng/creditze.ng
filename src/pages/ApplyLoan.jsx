@@ -196,6 +196,12 @@ export default function ApplyLoan() {
       // Get affiliate code from localStorage
       const affiliateCode = localStorage.getItem('affiliate_code');
 
+      // Check for pending referral and convert it
+      const pendingReferral = await base44.entities.UserReferral.filter({
+        referred_user_id: user.id,
+        status: 'pending'
+      });
+
       const application = await base44.entities.LoanApplication.create({
         user_id: user.id,
         loan_type: selectedProduct,
@@ -238,6 +244,50 @@ export default function ApplyLoan() {
       } else {
         await base44.entities.UserCreditLimit.update(creditLimit.id, {
           total_loans_taken: (creditLimit.total_loans_taken || 0) + 1
+        });
+      }
+
+      // Process referral conversion and rewards
+      if (pendingReferral[0]) {
+        const referral = pendingReferral[0];
+        
+        // Update referral status
+        await base44.entities.UserReferral.update(referral.id, {
+          status: 'converted',
+          conversion_date: new Date().toISOString(),
+          reward_issued: true,
+          reward_amount: 1000
+        });
+
+        // Create rewards for both referrer and referred user
+        await Promise.all([
+          base44.entities.ReferralReward.create({
+            user_id: referral.referrer_id,
+            referral_id: referral.id,
+            reward_type: 'cash',
+            reward_value: 1000,
+            description: 'Referral bonus - friend took first loan',
+            status: 'active'
+          }),
+          base44.entities.ReferralReward.create({
+            user_id: user.id,
+            referral_id: referral.id,
+            reward_type: 'interest_discount',
+            reward_value: 2,
+            description: 'Welcome bonus - 2% interest discount',
+            status: 'active',
+            applied_to_loan_id: application.id
+          })
+        ]);
+
+        // Apply interest discount to this loan
+        const discountedRate = loanDetails.interestRate - 2;
+        const newInterest = (loanAmount * discountedRate * loanDetails.tenureDays) / (365 * 100);
+        const newTotal = loanAmount + newInterest;
+        
+        await base44.entities.LoanApplication.update(application.id, {
+          interest_rate: discountedRate,
+          total_repayment: newTotal
         });
       }
 

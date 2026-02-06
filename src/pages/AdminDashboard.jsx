@@ -240,6 +240,12 @@ export default function AdminDashboard() {
                 desc="Manage affiliate partners"
               />
               <QuickLink 
+                href={createPageUrl('AdminReferrals')} 
+                icon={Users} 
+                label="Referrals" 
+                desc="Monitor referral program"
+              />
+              <QuickLink 
                 href={createPageUrl('AdminEmployers')} 
                 icon={Building2} 
                 label="Tier-1 Employers" 
