@@ -169,7 +169,7 @@ export default function Home() {
               { value: '₦10k', label: 'Starting Amount' },
               { value: '5 mins', label: 'Quick Approval' },
               { value: '20%', label: 'Credit Growth' },
-              { value: '24/7', label: 'Available' }
+              { value: '₦5M', label: 'Borrow Up to' }
             ].map((stat, i) => (
               <motion.div
                 key={i}
