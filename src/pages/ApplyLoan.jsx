@@ -589,7 +589,7 @@ export default function ApplyLoan() {
                         <Badge variant="secondary">Verify employer first</Badge>
                       )}
                     </div>
-                    <p className="text-sm text-gray-500 mb-2">Up to ₦{(loanConfig?.tier1_max_amount || 5000000).toLocaleString()}</p>
+                    <p className="text-sm text-gray-500 mb-2">Up to ₦5,000,000</p>
                     <div className="flex gap-2">
                       <Badge variant="outline">12% interest</Badge>
                       <Badge variant="outline">90 days</Badge>
