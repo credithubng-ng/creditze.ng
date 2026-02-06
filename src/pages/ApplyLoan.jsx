@@ -6,6 +6,7 @@ import { calculateMLScore, calculateCombinedScore } from '../components/scoring/
 import ScoreDisplay from '../components/scoring/ScoreDisplay';
 import { personalizeOffer, assignABTestVariant } from '../components/loan/OfferPersonalizer';
 import { motion } from 'framer-motion';
+import { toast } from 'sonner';
 import { 
   Zap, 
   Building2, 
@@ -77,6 +78,7 @@ export default function ApplyLoan() {
       );
 
       if (hasActiveLoan) {
+        toast.error('You have an active loan. Please repay your current loan before applying for a new one.');
         navigate(createPageUrl('Dashboard'));
         return;
       }
