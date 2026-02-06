@@ -63,6 +63,11 @@ import AdminEmployers from './pages/AdminEmployers';
 import AdminAffiliates from './pages/AdminAffiliates';
 import AdminLoans from './pages/AdminLoans';
 import AdminSettings from './pages/AdminSettings';
+import AdminCollections from './pages/AdminCollections';
+import AdminLoanCollection from './pages/AdminLoanCollection';
+import AdminCollectionConfig from './pages/AdminCollectionConfig';
+import SetupDirectDebit from './pages/SetupDirectDebit';
+import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
@@ -82,9 +87,14 @@ export const PAGES = {
     "AdminAffiliates": AdminAffiliates,
     "AdminLoans": AdminLoans,
     "AdminSettings": AdminSettings,
+    "AdminCollections": AdminCollections,
+    "AdminLoanCollection": AdminLoanCollection,
+    "AdminCollectionConfig": AdminCollectionConfig,
+    "SetupDirectDebit": SetupDirectDebit,
 }
 
 export const pagesConfig = {
     mainPage: "Home",
     Pages: PAGES,
+    Layout: __Layout,
 };

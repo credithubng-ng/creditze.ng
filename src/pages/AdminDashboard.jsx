@@ -252,6 +252,12 @@ export default function AdminDashboard() {
             </CardHeader>
             <CardContent className="space-y-2">
               <QuickLink 
+                href={createPageUrl('AdminCollections')} 
+                icon={AlertTriangle} 
+                label="Collections" 
+                desc="Manage overdue loans"
+              />
+              <QuickLink 
                 href={createPageUrl('AdminCreditSearches')} 
                 icon={FileText} 
                 label="Credit Searches" 

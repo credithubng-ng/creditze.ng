@@ -184,8 +184,8 @@ export default function ApplyLoan() {
         });
       }
 
-      // Navigate to success page
-      navigate(createPageUrl(`LoanDetails?id=${application.id}`));
+      // Navigate to direct debit setup
+      navigate(createPageUrl(`SetupDirectDebit?loan_id=${application.id}`));
 
     } catch (err) {
       setError('Failed to submit application. Please try again.');
