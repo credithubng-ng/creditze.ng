@@ -73,6 +73,7 @@ import MyDisputes from './pages/MyDisputes';
 import DisputeDetail from './pages/DisputeDetail';
 import AdminDisputes from './pages/AdminDisputes';
 import AdminDisputeDetail from './pages/AdminDisputeDetail';
+import AdminReferrals from './pages/AdminReferrals';
 import __Layout from './Layout.jsx';
 
 
@@ -103,6 +104,7 @@ export const PAGES = {
     "DisputeDetail": DisputeDetail,
     "AdminDisputes": AdminDisputes,
     "AdminDisputeDetail": AdminDisputeDetail,
+    "AdminReferrals": AdminReferrals,
 }
 
 export const pagesConfig = {
