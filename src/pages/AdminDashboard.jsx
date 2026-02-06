@@ -16,7 +16,8 @@ import {
   ChevronRight,
   Search,
   ArrowLeft,
-  Brain
+  Brain,
+  MessageSquare
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -281,6 +282,12 @@ export default function AdminDashboard() {
                 icon={Brain} 
                 label="ML Scoring" 
                 desc="AI scoring configuration"
+              />
+              <QuickLink 
+                href={createPageUrl('AdminDisputes')} 
+                icon={MessageSquare} 
+                label="Disputes" 
+                desc="Handle user disputes"
               />
             </CardContent>
           </Card>

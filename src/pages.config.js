@@ -68,6 +68,11 @@ import AdminLoanCollection from './pages/AdminLoanCollection';
 import AdminCollectionConfig from './pages/AdminCollectionConfig';
 import SetupDirectDebit from './pages/SetupDirectDebit';
 import AdminMLScoring from './pages/AdminMLScoring';
+import RaiseDispute from './pages/RaiseDispute';
+import MyDisputes from './pages/MyDisputes';
+import DisputeDetail from './pages/DisputeDetail';
+import AdminDisputes from './pages/AdminDisputes';
+import AdminDisputeDetail from './pages/AdminDisputeDetail';
 import __Layout from './Layout.jsx';
 
 
@@ -93,6 +98,11 @@ export const PAGES = {
     "AdminCollectionConfig": AdminCollectionConfig,
     "SetupDirectDebit": SetupDirectDebit,
     "AdminMLScoring": AdminMLScoring,
+    "RaiseDispute": RaiseDispute,
+    "MyDisputes": MyDisputes,
+    "DisputeDetail": DisputeDetail,
+    "AdminDisputes": AdminDisputes,
+    "AdminDisputeDetail": AdminDisputeDetail,
 }
 
 export const pagesConfig = {
