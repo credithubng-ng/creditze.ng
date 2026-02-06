@@ -8,7 +8,8 @@ import {
   User, 
   Settings,
   LayoutDashboard,
-  MessageSquare
+  MessageSquare,
+  AlertTriangle
 } from 'lucide-react';
 
 const NAV_ITEMS = [
@@ -73,17 +74,30 @@ export default function Layout({ children, currentPageName }) {
               );
             })}
             {user?.role === 'admin' && (
-              <Link
-                to={createPageUrl('AdminDashboard')}
-                className={`flex flex-col items-center py-2 px-4 rounded-xl transition ${
-                  currentPageName === 'AdminDashboard' 
-                    ? 'text-emerald-600' 
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                <LayoutDashboard className="w-6 h-6" />
-                <span className="text-xs mt-1 font-medium">Admin</span>
-              </Link>
+              <>
+                <Link
+                  to={createPageUrl('AdminLoanReview')}
+                  className={`flex flex-col items-center py-2 px-4 rounded-xl transition relative ${
+                    currentPageName === 'AdminLoanReview' 
+                      ? 'text-amber-600' 
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  <AlertTriangle className="w-6 h-6" />
+                  <span className="text-xs mt-1 font-medium">Review</span>
+                </Link>
+                <Link
+                  to={createPageUrl('AdminDashboard')}
+                  className={`flex flex-col items-center py-2 px-4 rounded-xl transition ${
+                    currentPageName === 'AdminDashboard' 
+                      ? 'text-emerald-600' 
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  <LayoutDashboard className="w-6 h-6" />
+                  <span className="text-xs mt-1 font-medium">Admin</span>
+                </Link>
+              </>
             )}
           </div>
         </nav>

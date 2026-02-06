@@ -13,6 +13,7 @@ import {
   AlertTriangle,
   FileText,
   Settings,
+  DollarSign,
   ChevronRight,
   Search,
   ArrowLeft,
@@ -222,6 +223,13 @@ export default function AdminDashboard() {
             </CardHeader>
             <CardContent className="space-y-2">
               <QuickLink 
+                href={createPageUrl('AdminLoanReview')} 
+                icon={AlertTriangle} 
+                label="Loan Review Queue" 
+                desc="Review flagged applications"
+                highlight={true}
+              />
+              <QuickLink 
                 href={createPageUrl('AdminUsers')} 
                 icon={Users} 
                 label="Manage Users" 
@@ -336,13 +344,13 @@ function StatCard({ icon: Icon, label, value, subtext, color }) {
   );
 }
 
-function QuickLink({ href, icon: Icon, label, desc }) {
+function QuickLink({ href, icon: Icon, label, desc, highlight }) {
   return (
     <Link to={href}>
-      <div className="flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 transition">
+      <div className={`flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 transition ${highlight ? 'bg-amber-50 border border-amber-200' : ''}`}>
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center">
-            <Icon className="w-5 h-5 text-gray-600" />
+          <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${highlight ? 'bg-amber-100' : 'bg-gray-100'}`}>
+            <Icon className={`w-5 h-5 ${highlight ? 'text-amber-600' : 'text-gray-600'}`} />
           </div>
           <div>
             <p className="font-medium text-gray-900">{label}</p>
