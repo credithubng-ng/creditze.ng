@@ -16,8 +16,10 @@ import {
   Percent,
   Calculator,
   Copy,
-  ExternalLink
+  ExternalLink,
+  MessageSquare
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -334,6 +336,34 @@ export default function LoanDetails() {
             </CardContent>
           </Card>
         </motion.div>
+
+        {/* Raise Dispute for Rejected Loans */}
+        {loan.status === 'rejected' && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            <Card className="border-0 shadow-md border-l-4 border-l-amber-500">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-gray-900 flex items-center gap-2">
+                      <MessageSquare className="w-5 h-5 text-amber-600" />
+                      Not satisfied with the decision?
+                    </p>
+                    <p className="text-sm text-gray-500 mt-1">You can raise a dispute to review your application</p>
+                  </div>
+                  <Link to={createPageUrl(`RaiseDispute?loan_id=${loan.id}&type=loan_rejection`)}>
+                    <Button variant="outline" className="border-amber-300 text-amber-700 hover:bg-amber-50">
+                      Raise Dispute
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
       </div>
     </div>
   );
