@@ -322,7 +322,7 @@ export default function Dashboard() {
                   </div>
                   <div className="flex-1">
                     <h3 className="font-semibold text-white">Work at a Tier-1 Company?</h3>
-                    <p className="text-sm text-gray-400">Unlock higher loan limits up to ₦500k</p>
+                    <p className="text-sm text-gray-400">Unlock higher loan limits up to ₦5,000,000</p>
                   </div>
                   <Link to={createPageUrl('Tier1Verification')}>
                     <Button size="sm" className="bg-emerald-500 hover:bg-emerald-600">
