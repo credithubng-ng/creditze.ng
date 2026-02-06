@@ -328,15 +328,21 @@ export default function Home() {
           {/* Regulatory Compliance */}
           <div className="mt-8 pt-6 border-t border-gray-800">
             <p className="text-center text-gray-400 text-xs mb-4">Registered and Regulated by</p>
-            <div className="flex flex-wrap items-center justify-center gap-6">
-              <div className="flex items-center gap-2 px-4 py-2 bg-gray-800 rounded-lg">
-                <Shield className="w-5 h-5 text-emerald-400" />
-                <span className="text-sm font-medium text-gray-300">NDPR</span>
-              </div>
-              <div className="flex items-center gap-2 px-4 py-2 bg-gray-800 rounded-lg">
-                <Shield className="w-5 h-5 text-emerald-400" />
-                <span className="text-sm font-medium text-gray-300">FCCPC</span>
-              </div>
+            <div className="flex flex-wrap items-center justify-center gap-8">
+              <a href="https://ndpc.gov.ng/" target="_blank" rel="noopener noreferrer" className="transition hover:opacity-80">
+                <img 
+                  src="https://ndpc.gov.ng/wp-content/uploads/2024/02/cropped-NDPC_logo.png" 
+                  alt="NDPC - Nigeria Data Protection Commission" 
+                  className="h-12 md:h-14"
+                />
+              </a>
+              <a href="https://fccpc.gov.ng/" target="_blank" rel="noopener noreferrer" className="transition hover:opacity-80">
+                <img 
+                  src="https://cdn.brandfetch.io/id6aUp1mV6/w/400/h/400/theme/dark/icon.jpeg" 
+                  alt="FCCPC - Federal Competition and Consumer Protection Commission" 
+                  className="h-12 md:h-14 rounded-lg"
+                />
+              </a>
             </div>
           </div>
 
