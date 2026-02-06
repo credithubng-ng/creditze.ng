@@ -41,6 +41,7 @@ export default function ApplyLoan() {
   const [mlConfig, setMlConfig] = useState(null);
   const [behaviorData, setBehaviorData] = useState(null);
   const [referralConfig, setReferralConfig] = useState(null);
+  const [loanConfig, setLoanConfig] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -51,14 +52,15 @@ export default function ApplyLoan() {
       const currentUser = await base44.auth.me();
       setUser(currentUser);
 
-      const [kycData, searchData, limitData, empData, mlConfigData, behaviorDataResult, refConfigData] = await Promise.all([
+      const [kycData, searchData, limitData, empData, mlConfigData, behaviorDataResult, refConfigData, loanConfigData] = await Promise.all([
         base44.entities.KYCProfile.filter({ user_id: currentUser.id }),
         base44.entities.CreditSearch.filter({ user_id: currentUser.id }, '-created_date', 1),
         base44.entities.UserCreditLimit.filter({ user_id: currentUser.id }),
         base44.entities.EmploymentVerification.filter({ user_id: currentUser.id, status: 'verified' }),
         base44.entities.MLScoringConfig.filter({ config_key: 'default' }),
         base44.entities.UserBehaviorData.filter({ user_id: currentUser.id }),
-        base44.entities.ReferralConfig.filter({ config_key: 'default' })
+        base44.entities.ReferralConfig.filter({ config_key: 'default' }),
+        base44.entities.LoanConfig.filter({ config_key: 'default' })
       ]);
 
       setKyc(kycData[0]);
@@ -68,6 +70,7 @@ export default function ApplyLoan() {
       setMlConfig(mlConfigData[0]);
       setBehaviorData(behaviorDataResult[0]);
       setReferralConfig(refConfigData[0]);
+      setLoanConfig(loanConfigData[0]);
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
@@ -158,23 +161,25 @@ export default function ApplyLoan() {
     const score = await calculateFullScore();
     
     if (product === 'urgent_10k') {
-      const maxAmount = creditLimit?.current_limit || 10000;
-      setLoanAmount(Math.min(10000, maxAmount));
+      const maxAmount = creditLimit?.current_limit || (loanConfig?.urgent_10k_base_amount || 10000);
+      setLoanAmount(Math.min(loanConfig?.urgent_10k_base_amount || 10000, maxAmount));
       setLoanDetails({
-        interestRate: 15,
-        tenureDays: 30,
+        interestRate: loanConfig?.urgent_10k_interest_rate || 15,
+        tenureDays: loanConfig?.urgent_10k_tenure_days || 30,
         score,
-        minScore: 60,
+        minScore: loanConfig?.urgent_10k_min_score || 60,
         maxAmount
       });
     } else {
-      const maxAmount = Math.min(500000, score >= 90 ? 500000 : score >= 80 ? 300000 : 100000);
-      setLoanAmount(50000);
+      const configMax = loanConfig?.tier1_max_amount || 5000000;
+      const scoreBasedMax = score >= 90 ? configMax : score >= 80 ? configMax * 0.6 : configMax * 0.2;
+      const maxAmount = Math.min(configMax, scoreBasedMax);
+      setLoanAmount(loanConfig?.tier1_min_amount || 50000);
       setLoanDetails({
-        interestRate: 12,
-        tenureDays: 90,
+        interestRate: loanConfig?.tier1_interest_rate || 12,
+        tenureDays: loanConfig?.tier1_tenure_days || 90,
         score,
-        minScore: 75,
+        minScore: loanConfig?.tier1_min_score || 75,
         maxAmount
       });
     }
@@ -430,7 +435,7 @@ export default function ApplyLoan() {
                         <Badge variant="secondary">Verify employer first</Badge>
                       )}
                     </div>
-                    <p className="text-sm text-gray-500 mb-2">Up to ₦500,000</p>
+                    <p className="text-sm text-gray-500 mb-2">Up to ₦{(loanConfig?.tier1_max_amount || 5000000).toLocaleString()}</p>
                     <div className="flex gap-2">
                       <Badge variant="outline">12% interest</Badge>
                       <Badge variant="outline">90 days</Badge>
