@@ -324,6 +324,22 @@ export default function Home() {
               <Link to={createPageUrl('Contact')} className="hover:text-white transition">Contact</Link>
             </div>
           </div>
+          
+          {/* Regulatory Compliance */}
+          <div className="mt-8 pt-6 border-t border-gray-800">
+            <p className="text-center text-gray-400 text-xs mb-4">Registered and Regulated by</p>
+            <div className="flex flex-wrap items-center justify-center gap-6">
+              <div className="flex items-center gap-2 px-4 py-2 bg-gray-800 rounded-lg">
+                <Shield className="w-5 h-5 text-emerald-400" />
+                <span className="text-sm font-medium text-gray-300">NDPR</span>
+              </div>
+              <div className="flex items-center gap-2 px-4 py-2 bg-gray-800 rounded-lg">
+                <Shield className="w-5 h-5 text-emerald-400" />
+                <span className="text-sm font-medium text-gray-300">FCCPC</span>
+              </div>
+            </div>
+          </div>
+
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-500 text-sm">
             © 2026 Creditze. All rights reserved.
           </div>
