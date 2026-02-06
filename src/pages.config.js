@@ -54,6 +54,15 @@ import CreditSearch from './pages/CreditSearch';
 import ApplyLoan from './pages/ApplyLoan';
 import Tier1Verification from './pages/Tier1Verification';
 import VerifyEmployment from './pages/VerifyEmployment';
+import LoanDetails from './pages/LoanDetails';
+import LoanHistory from './pages/LoanHistory';
+import Profile from './pages/Profile';
+import AdminDashboard from './pages/AdminDashboard';
+import AdminUsers from './pages/AdminUsers';
+import AdminEmployers from './pages/AdminEmployers';
+import AdminAffiliates from './pages/AdminAffiliates';
+import AdminLoans from './pages/AdminLoans';
+import AdminSettings from './pages/AdminSettings';
 
 
 export const PAGES = {
@@ -64,6 +73,15 @@ export const PAGES = {
     "ApplyLoan": ApplyLoan,
     "Tier1Verification": Tier1Verification,
     "VerifyEmployment": VerifyEmployment,
+    "LoanDetails": LoanDetails,
+    "LoanHistory": LoanHistory,
+    "Profile": Profile,
+    "AdminDashboard": AdminDashboard,
+    "AdminUsers": AdminUsers,
+    "AdminEmployers": AdminEmployers,
+    "AdminAffiliates": AdminAffiliates,
+    "AdminLoans": AdminLoans,
+    "AdminSettings": AdminSettings,
 }
 
 export const pagesConfig = {
