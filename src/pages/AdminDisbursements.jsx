@@ -44,6 +44,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from 'sonner';
+import { playCelebrationChime } from '../components/utils/celebrationSound';
 
 export default function AdminDisbursements() {
   const navigate = useNavigate();
@@ -142,6 +143,7 @@ export default function AdminDisbursements() {
           disbursement_date: new Date().toISOString()
         });
 
+        playCelebrationChime();
         toast.success('Disbursement successful!');
       } else {
         await base44.entities.DisbursementLog.update(disbursement.id, {
