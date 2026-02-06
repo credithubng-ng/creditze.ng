@@ -27,6 +27,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from 'sonner';
+import { playCelebrationChime } from '../components/utils/celebrationSound';
 
 const BANKS = [
   'Access Bank', 'Citibank', 'Ecobank', 'Fidelity Bank', 'First Bank', 'First City Monument Bank',
@@ -211,6 +212,7 @@ export default function SetupDirectDebit() {
           }
         });
 
+        playCelebrationChime();
         toast.success('Loan disbursed successfully!');
       } else {
         // Schedule retry
