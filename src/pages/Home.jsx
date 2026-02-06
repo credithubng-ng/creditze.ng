@@ -19,22 +19,74 @@ export default function Home() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [affiliateCode, setAffiliateCode] = useState(null);
 
+  const [user, setUser] = useState(null);
+
   useEffect(() => {
     checkAuth();
-    captureAffiliateCode();
+    captureAffiliate();
+    captureReferral();
   }, []);
 
   const checkAuth = async () => {
     const auth = await base44.auth.isAuthenticated();
     setIsAuthenticated(auth);
+    
+    if (auth) {
+      try {
+        const currentUser = await base44.auth.me();
+        setUser(currentUser);
+      } catch (error) {
+        console.error('Error loading user:', error);
+      }
+    }
   };
 
-  const captureAffiliateCode = () => {
+  const captureAffiliate = () => {
     const urlParams = new URLSearchParams(window.location.search);
-    const ref = urlParams.get('ref');
-    if (ref && ref.match(/^TB00[A-Z0-9]{4}$/)) {
-      localStorage.setItem('affiliate_code', ref);
-      setAffiliateCode(ref);
+    const affiliateCode = urlParams.get('aff');
+    if (affiliateCode) {
+      localStorage.setItem('affiliate_code', affiliateCode);
+    }
+  };
+
+  const captureReferral = async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const referralCode = urlParams.get('ref');
+    if (referralCode) {
+      localStorage.setItem('referral_code', referralCode);
+      
+      // If user is authenticated, process referral immediately
+      if (isAuthenticated && user) {
+        await processReferral(referralCode, user);
+      }
+    }
+  };
+
+  const processReferral = async (referralCode, currentUser) => {
+    try {
+      // Check if already processed
+      const existing = await base44.entities.UserReferral.filter({ 
+        referred_user_id: currentUser.id 
+      });
+      if (existing.length > 0) return;
+
+      // Find referrer by code pattern (GAWINXXXXXX)
+      const referrerId = referralCode.replace('GAWIN', '').toLowerCase();
+      const referrer = await base44.entities.User.filter({ id: { $regex: referrerId } });
+      
+      if (referrer[0] && referrer[0].id !== currentUser.id) {
+        await base44.entities.UserReferral.create({
+          referrer_id: referrer[0].id,
+          referrer_email: referrer[0].email,
+          referred_user_id: currentUser.id,
+          referred_email: currentUser.email,
+          referral_code: referralCode,
+          status: 'pending'
+        });
+        localStorage.removeItem('referral_code');
+      }
+    } catch (error) {
+      console.error('Error processing referral:', error);
     }
   };
 
@@ -193,7 +245,7 @@ export default function Home() {
                 <p className="text-gray-400 mb-6">For employees of approved companies</p>
                 <ul className="space-y-3 mb-8">
                   {[
-                    'Up to ₦500,000',
+                    'Up to ₦5,000,000',
                     'Employer verification',
                     'Competitive rates',
                     'Flexible tenure'
