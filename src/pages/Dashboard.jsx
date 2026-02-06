@@ -104,7 +104,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24">
+    <div className="min-h-screen bg-gray-50 pb-32">
       {/* Header */}
       <div className="bg-gradient-to-br from-emerald-600 to-emerald-700 px-4 pt-6 pb-12">
         <div className="max-w-2xl mx-auto">

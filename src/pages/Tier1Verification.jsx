@@ -159,7 +159,7 @@ The getawin.ng Team
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-8">
+    <div className="min-h-screen bg-gray-50 pb-24">
       {/* Header */}
       <div className="bg-white border-b px-4 py-4">
         <div className="max-w-lg mx-auto flex items-center gap-4">
