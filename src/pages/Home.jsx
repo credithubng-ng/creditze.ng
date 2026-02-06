@@ -1,0 +1,280 @@
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
+import { base44 } from '@/api/base44Client';
+import { motion } from 'framer-motion';
+import { 
+  ArrowRight, 
+  Shield, 
+  Clock, 
+  TrendingUp, 
+  CheckCircle2,
+  Zap,
+  Building2,
+  Users
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+
+export default function Home() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [affiliateCode, setAffiliateCode] = useState(null);
+
+  useEffect(() => {
+    checkAuth();
+    captureAffiliateCode();
+  }, []);
+
+  const checkAuth = async () => {
+    const auth = await base44.auth.isAuthenticated();
+    setIsAuthenticated(auth);
+  };
+
+  const captureAffiliateCode = () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const ref = urlParams.get('ref');
+    if (ref && ref.match(/^TB00[A-Z0-9]{4}$/)) {
+      localStorage.setItem('affiliate_code', ref);
+      setAffiliateCode(ref);
+    }
+  };
+
+  const handleGetStarted = () => {
+    if (isAuthenticated) {
+      window.location.href = createPageUrl('Dashboard');
+    } else {
+      base44.auth.redirectToLogin(createPageUrl('Dashboard'));
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-emerald-50 via-white to-white">
+      {/* Header */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-lg border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center">
+              <span className="text-white font-bold text-lg">G</span>
+            </div>
+            <span className="font-bold text-xl text-gray-900">getawin<span className="text-emerald-600">.ng</span></span>
+          </div>
+          <Button 
+            onClick={handleGetStarted}
+            className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-full px-6"
+          >
+            {isAuthenticated ? 'Dashboard' : 'Get Started'}
+          </Button>
+        </div>
+      </header>
+
+      {/* Hero Section */}
+      <section className="pt-32 pb-20 px-4">
+        <div className="max-w-4xl mx-auto text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <span className="inline-block px-4 py-2 bg-emerald-100 text-emerald-700 rounded-full text-sm font-medium mb-6">
+              Fast • Secure • Trusted
+            </span>
+            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+              Get instant loans,
+              <br />
+              <span className="text-emerald-600">build your credit</span>
+            </h1>
+            <p className="text-lg md:text-xl text-gray-600 mb-10 max-w-2xl mx-auto">
+              Access quick loans starting from ₦10,000. Build your credit limit with every successful repayment.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button 
+                onClick={handleGetStarted}
+                size="lg"
+                className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-full px-8 py-6 text-lg"
+              >
+                Apply Now <ArrowRight className="ml-2 w-5 h-5" />
+              </Button>
+              <Button 
+                variant="outline"
+                size="lg"
+                className="rounded-full px-8 py-6 text-lg border-2"
+                asChild
+              >
+                <Link to={createPageUrl('HowItWorks')}>
+                  Learn More
+                </Link>
+              </Button>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Stats */}
+      <section className="py-12 px-4">
+        <div className="max-w-5xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {[
+              { value: '₦10k', label: 'Starting Amount' },
+              { value: '5 mins', label: 'Quick Approval' },
+              { value: '20%', label: 'Credit Growth' },
+              { value: '24/7', label: 'Available' }
+            ].map((stat, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: i * 0.1 }}
+                className="text-center p-6 bg-white rounded-2xl shadow-sm border border-gray-100"
+              >
+                <div className="text-2xl md:text-3xl font-bold text-emerald-600">{stat.value}</div>
+                <div className="text-gray-500 text-sm mt-1">{stat.label}</div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Products */}
+      <section className="py-20 px-4 bg-gray-50">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Our Loan Products</h2>
+            <p className="text-gray-600">Choose the option that works best for you</p>
+          </div>
+          <div className="grid md:grid-cols-2 gap-8">
+            {/* Urgent 10k */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="bg-white rounded-3xl p-8 shadow-lg border border-gray-100 relative overflow-hidden"
+            >
+              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50 rounded-full -translate-y-16 translate-x-16" />
+              <div className="relative">
+                <div className="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center mb-6">
+                  <Zap className="w-7 h-7 text-emerald-600" />
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">Urgent ₦10,000</h3>
+                <p className="text-gray-500 mb-6">Credit limit builder for new users</p>
+                <ul className="space-y-3 mb-8">
+                  {[
+                    'Start with ₦10,000',
+                    'Instant approval if eligible',
+                    '20% limit increase per repayment',
+                    'Build your credit history'
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-center gap-3 text-gray-700">
+                      <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+                <Button 
+                  onClick={handleGetStarted}
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 rounded-xl py-6"
+                >
+                  Apply Now
+                </Button>
+              </div>
+            </motion.div>
+
+            {/* Tier 1 */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl p-8 shadow-lg relative overflow-hidden"
+            >
+              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/20 rounded-full -translate-y-16 translate-x-16" />
+              <div className="relative">
+                <div className="w-14 h-14 bg-emerald-500/20 rounded-2xl flex items-center justify-center mb-6">
+                  <Building2 className="w-7 h-7 text-emerald-400" />
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-2">Tier-1 Personal Loan</h3>
+                <p className="text-gray-400 mb-6">For employees of approved companies</p>
+                <ul className="space-y-3 mb-8">
+                  {[
+                    'Up to ₦500,000',
+                    'Employer verification',
+                    'Competitive rates',
+                    'Flexible tenure'
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-center gap-3 text-gray-300">
+                      <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+                <Button 
+                  onClick={handleGetStarted}
+                  className="w-full bg-emerald-500 hover:bg-emerald-600 rounded-xl py-6"
+                >
+                  Check Eligibility
+                </Button>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section className="py-20 px-4">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">How It Works</h2>
+            <p className="text-gray-600">Simple steps to get your loan</p>
+          </div>
+          <div className="grid md:grid-cols-4 gap-8">
+            {[
+              { icon: Users, title: 'Complete KYC', desc: 'Verify your identity with BVN & NIN' },
+              { icon: Shield, title: 'Credit Check', desc: 'Pay for credit search (₦500)' },
+              { icon: Clock, title: 'Get Scored', desc: 'Automated scoring in minutes' },
+              { icon: TrendingUp, title: 'Receive Funds', desc: 'Instant disbursement to your bank' }
+            ].map((step, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="text-center"
+              >
+                <div className="relative inline-block mb-4">
+                  <div className="w-16 h-16 bg-emerald-100 rounded-2xl flex items-center justify-center">
+                    <step.icon className="w-8 h-8 text-emerald-600" />
+                  </div>
+                  <span className="absolute -top-2 -right-2 w-7 h-7 bg-emerald-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                    {i + 1}
+                  </span>
+                </div>
+                <h3 className="font-semibold text-gray-900 mb-2">{step.title}</h3>
+                <p className="text-gray-500 text-sm">{step.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-gray-900 text-white py-12 px-4">
+        <div className="max-w-5xl mx-auto">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex items-center gap-2">
+              <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center">
+                <span className="text-white font-bold text-lg">G</span>
+              </div>
+              <span className="font-bold text-xl">getawin<span className="text-emerald-500">.ng</span></span>
+            </div>
+            <div className="flex gap-6 text-gray-400 text-sm">
+              <Link to={createPageUrl('Terms')} className="hover:text-white transition">Terms</Link>
+              <Link to={createPageUrl('Privacy')} className="hover:text-white transition">Privacy</Link>
+              <Link to={createPageUrl('Contact')} className="hover:text-white transition">Contact</Link>
+            </div>
+          </div>
+          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-500 text-sm">
+            © 2026 getawin.ng. All rights reserved.
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}

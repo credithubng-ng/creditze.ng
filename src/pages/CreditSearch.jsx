@@ -1,0 +1,372 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
+import { base44 } from '@/api/base44Client';
+import { motion } from 'framer-motion';
+import { 
+  FileText, 
+  ArrowLeft, 
+  CheckCircle2, 
+  XCircle,
+  Loader2,
+  AlertCircle,
+  CreditCard,
+  Clock,
+  Mail
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+
+const CREDIT_SEARCH_FEE = 500;
+
+export default function CreditSearch() {
+  const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+  const [kyc, setKyc] = useState(null);
+  const [existingSearch, setExistingSearch] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [processing, setProcessing] = useState(false);
+  const [searchResult, setSearchResult] = useState(null);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    try {
+      const currentUser = await base44.auth.me();
+      setUser(currentUser);
+
+      const [kycData, searchData] = await Promise.all([
+        base44.entities.KYCProfile.filter({ user_id: currentUser.id }),
+        base44.entities.CreditSearch.filter({ user_id: currentUser.id }, '-created_date', 1)
+      ]);
+
+      setKyc(kycData[0]);
+      
+      if (searchData[0]) {
+        const expiry = new Date(searchData[0].expiry_date);
+        if (expiry > new Date() && searchData[0].search_status === 'successful') {
+          setExistingSearch(searchData[0]);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const initiatePayment = async () => {
+    setProcessing(true);
+    setError(null);
+    
+    try {
+      // Create credit search record
+      const search = await base44.entities.CreditSearch.create({
+        user_id: user.id,
+        fee_paid: CREDIT_SEARCH_FEE,
+        payment_status: 'pending',
+        search_status: 'pending'
+      });
+
+      // Simulate payment processing
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      // Update payment status
+      await base44.entities.CreditSearch.update(search.id, {
+        payment_status: 'paid',
+        payment_reference: `PAY${Date.now()}`
+      });
+
+      // Perform credit search (simulated)
+      await performCreditSearch(search.id);
+
+    } catch (err) {
+      setError('Payment failed. Please try again.');
+      setProcessing(false);
+    }
+  };
+
+  const performCreditSearch = async (searchId) => {
+    try {
+      // Simulate credit bureau API call
+      await new Promise(resolve => setTimeout(resolve, 3000));
+
+      // Generate mock result (70% successful for MVP)
+      const isSuccessful = Math.random() > 0.3;
+      const bureauScore = isSuccessful ? Math.floor(Math.random() * 300) + 500 : 0;
+      
+      const expiryDate = new Date();
+      expiryDate.setDate(expiryDate.getDate() + 90);
+
+      const result = {
+        search_date: new Date().toISOString(),
+        expiry_date: expiryDate.toISOString(),
+        search_status: isSuccessful ? 'successful' : 'unsuccessful',
+        bureau_score: bureauScore,
+        report_emailed: true,
+        failure_reason: isSuccessful ? null : 'No credit history found'
+      };
+
+      await base44.entities.CreditSearch.update(searchId, result);
+
+      // Send email with credit report
+      await base44.integrations.Core.SendEmail({
+        to: user.email,
+        subject: 'Your Credit Report from getawin.ng',
+        body: `
+Dear ${user.full_name},
+
+Your credit search has been completed.
+
+Result: ${isSuccessful ? 'Successful' : 'Unsuccessful'}
+${isSuccessful ? `Credit Score: ${bureauScore}` : `Reason: ${result.failure_reason}`}
+
+This report is valid for 90 days until ${expiryDate.toLocaleDateString()}.
+
+${isSuccessful ? 'You can now proceed to apply for loans on getawin.ng.' : 'Unfortunately, you are not eligible for loans at this time.'}
+
+Thank you for using getawin.ng.
+
+Best regards,
+The getawin.ng Team
+        `
+      });
+
+      setSearchResult(result);
+
+    } catch (err) {
+      setError('Credit search failed. Your payment will be refunded.');
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-emerald-600" />
+      </div>
+    );
+  }
+
+  // Check if KYC is complete
+  if (!kyc || kyc.kyc_status !== 'verified') {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="bg-white border-b px-4 py-4">
+          <div className="max-w-lg mx-auto flex items-center gap-4">
+            <Button variant="ghost" size="icon" onClick={() => navigate(createPageUrl('Dashboard'))}>
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+            <h1 className="font-semibold text-gray-900">Credit Search</h1>
+          </div>
+        </div>
+        <div className="max-w-lg mx-auto px-4 py-6">
+          <Alert>
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Please complete your KYC verification first before proceeding with credit search.
+            </AlertDescription>
+          </Alert>
+          <Button 
+            className="w-full mt-4 bg-emerald-600 hover:bg-emerald-700"
+            onClick={() => navigate(createPageUrl('KYC'))}
+          >
+            Complete KYC
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white border-b px-4 py-4">
+        <div className="max-w-lg mx-auto flex items-center gap-4">
+          <Button variant="ghost" size="icon" onClick={() => navigate(createPageUrl('Dashboard'))}>
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
+          <h1 className="font-semibold text-gray-900">Credit Search</h1>
+        </div>
+      </div>
+
+      <div className="max-w-lg mx-auto px-4 py-6">
+        {/* Existing valid search */}
+        {existingSearch && !searchResult && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <Card className="border-0 shadow-md border-l-4 border-l-emerald-500">
+              <CardContent className="p-6">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
+                    <CheckCircle2 className="w-6 h-6 text-emerald-600" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-gray-900 mb-1">Valid Credit Report</h3>
+                    <p className="text-sm text-gray-500 mb-2">
+                      Your credit search is valid until {new Date(existingSearch.expiry_date).toLocaleDateString()}
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <Badge className="bg-emerald-100 text-emerald-700">
+                        Score: {existingSearch.bureau_score}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+                <Button 
+                  className="w-full mt-4 bg-emerald-600 hover:bg-emerald-700"
+                  onClick={() => navigate(createPageUrl('ApplyLoan'))}
+                >
+                  Apply for Loan
+                </Button>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+
+        {/* Search result */}
+        {searchResult && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+          >
+            <Card className={`border-0 shadow-md ${
+              searchResult.search_status === 'successful' 
+                ? 'border-l-4 border-l-emerald-500' 
+                : 'border-l-4 border-l-red-500'
+            }`}>
+              <CardContent className="p-6 text-center">
+                {searchResult.search_status === 'successful' ? (
+                  <>
+                    <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <CheckCircle2 className="w-10 h-10 text-emerald-600" />
+                    </div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">Search Successful!</h3>
+                    <p className="text-gray-500 mb-4">Your credit score: <span className="font-bold text-emerald-600">{searchResult.bureau_score}</span></p>
+                    <div className="flex items-center justify-center gap-2 text-sm text-gray-500 mb-6">
+                      <Clock className="w-4 h-4" />
+                      Valid until {new Date(searchResult.expiry_date).toLocaleDateString()}
+                    </div>
+                    <div className="flex items-center justify-center gap-2 text-sm text-emerald-600 mb-6">
+                      <Mail className="w-4 h-4" />
+                      Report sent to {user.email}
+                    </div>
+                    <Button 
+                      className="w-full bg-emerald-600 hover:bg-emerald-700"
+                      onClick={() => navigate(createPageUrl('ApplyLoan'))}
+                    >
+                      Apply for Loan
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <XCircle className="w-10 h-10 text-red-600" />
+                    </div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">Search Unsuccessful</h3>
+                    <p className="text-gray-500 mb-4">{searchResult.failure_reason}</p>
+                    <div className="flex items-center justify-center gap-2 text-sm text-gray-500 mb-6">
+                      <Mail className="w-4 h-4" />
+                      Report sent to {user.email}
+                    </div>
+                    <Button 
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => navigate(createPageUrl('Dashboard'))}
+                    >
+                      Back to Dashboard
+                    </Button>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+
+        {/* Payment prompt */}
+        {!existingSearch && !searchResult && !processing && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <Card className="border-0 shadow-md">
+              <CardHeader className="text-center">
+                <div className="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <FileText className="w-10 h-10 text-amber-600" />
+                </div>
+                <CardTitle>Credit Bureau Search</CardTitle>
+                <CardDescription>
+                  A credit search is required to verify your eligibility for loans
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="bg-gray-50 rounded-xl p-4 space-y-3">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500">Search Fee</span>
+                    <span className="font-semibold">₦{CREDIT_SEARCH_FEE.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500">Validity Period</span>
+                    <span className="font-semibold">90 Days</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500">Report Delivery</span>
+                    <span className="font-semibold">Email</span>
+                  </div>
+                </div>
+
+                <Alert>
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription className="text-xs">
+                    The search fee is non-refundable. A copy of your credit report will be emailed to you regardless of the outcome.
+                  </AlertDescription>
+                </Alert>
+
+                <Button 
+                  className="w-full bg-amber-500 hover:bg-amber-600 py-6"
+                  onClick={initiatePayment}
+                >
+                  <CreditCard className="w-5 h-5 mr-2" />
+                  Pay ₦{CREDIT_SEARCH_FEE.toLocaleString()} & Search
+                </Button>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+
+        {/* Processing */}
+        {processing && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+          >
+            <Card className="border-0 shadow-md">
+              <CardContent className="p-8 text-center">
+                <Loader2 className="w-16 h-16 animate-spin text-emerald-600 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Processing...</h3>
+                <p className="text-gray-500 text-sm">
+                  Please wait while we search your credit history
+                </p>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+
+        {error && (
+          <Alert variant="destructive" className="mt-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+      </div>
+    </div>
+  );
+}

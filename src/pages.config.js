@@ -47,8 +47,26 @@
  *
  * The mainPage value must match a key in the PAGES object exactly.
  */
+import Home from './pages/Home';
+import Dashboard from './pages/Dashboard';
+import KYC from './pages/KYC';
+import CreditSearch from './pages/CreditSearch';
+import ApplyLoan from './pages/ApplyLoan';
+import Tier1Verification from './pages/Tier1Verification';
+import VerifyEmployment from './pages/VerifyEmployment';
 
-export const pagesConfig = {
-	Pages: {}
+
+export const PAGES = {
+    "Home": Home,
+    "Dashboard": Dashboard,
+    "KYC": KYC,
+    "CreditSearch": CreditSearch,
+    "ApplyLoan": ApplyLoan,
+    "Tier1Verification": Tier1Verification,
+    "VerifyEmployment": VerifyEmployment,
 }
 
+export const pagesConfig = {
+    mainPage: "Home",
+    Pages: PAGES,
+};
