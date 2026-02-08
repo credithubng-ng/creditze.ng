@@ -310,16 +310,14 @@ export default function ApplyLoan() {
         status: 'pending'
       });
 
-      // Determine if manual review is needed
-      const needsReview = loanDetails.score < 70 || 
-                          (mlScoreResult?.risk_flags_detected?.length > 0) ||
-                          (mlScoreResult?.confidence_level === 'low');
+      // All loans require manual admin approval
+      const needsReview = true;
 
-      let reviewReason = '';
+      let reviewReason = 'Pending admin approval';
       if (loanDetails.score < 70) {
-        reviewReason = 'Low credit score (below 70)';
+        reviewReason = 'Low credit score (below 70) - requires review';
       } else if (mlScoreResult?.confidence_level === 'low') {
-        reviewReason = 'Low ML confidence level';
+        reviewReason = 'Low ML confidence level - requires review';
       } else if (mlScoreResult?.risk_flags_detected?.length > 0) {
         reviewReason = `Risk flags detected: ${mlScoreResult.risk_flags_detected.join(', ')}`;
       }
@@ -334,7 +332,7 @@ export default function ApplyLoan() {
         interest_rate: loanDetails.interestRate,
         tenure_days: tenure,
         total_repayment: calculateRepayment(),
-        status: needsReview ? 'pending' : 'approved',
+        status: 'pending',
         score: loanDetails.score,
         score_breakdown: {
           bureau: creditSearch?.bureau_score,
@@ -487,14 +485,10 @@ export default function ApplyLoan() {
         await Promise.all(rewardPromises);
       }
 
-      // Navigate based on review status
-      if (needsReview) {
-        setSuccessMessage('Application submitted for review. You will be notified via email once reviewed.');
-        setProcessing(false);
-        setTimeout(() => navigate(createPageUrl('Dashboard')), 3000);
-      } else {
-        navigate(createPageUrl(`SetupDirectDebit?loan_id=${application.id}`));
-      }
+      // All loans require admin approval before disbursement
+      setSuccessMessage('Application submitted successfully! Our team will review and notify you via email within 24-48 hours.');
+      setProcessing(false);
+      setTimeout(() => navigate(createPageUrl('Dashboard')), 3000);
 
     } catch (err) {
       setError('Failed to submit application. Please try again.');
