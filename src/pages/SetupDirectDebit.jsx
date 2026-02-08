@@ -95,12 +95,12 @@ export default function SetupDirectDebit() {
             await handleDisbursement(mandate.loan_id);
           }
         } else {
-          setError('Authorization failed. Please try again.');
+          toast.error('Authorization failed. Please try again.');
           setProcessing(false);
         }
       } catch (err) {
         console.error('Mandate verification error:', err);
-        setError(err.message || 'Authorization failed');
+        toast.error(err.message || 'Authorization failed');
         setProcessing(false);
       }
       
