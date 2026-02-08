@@ -310,16 +310,28 @@ export default function ApplyLoan() {
         status: 'pending'
       });
 
-      // All loans require manual admin approval
-      const needsReview = true;
+      // Auto-approve urgent_10k if score meets criteria, manual review for tier1 or low scores
+      const isUrgent10k = selectedProduct === 'urgent_10k';
+      const meetsScoreCriteria = loanDetails.score >= loanDetails.minScore;
+      const hasHighRiskFlags = mlScoreResult?.risk_flags_detected?.length > 2;
+      const hasLowConfidence = mlScoreResult?.confidence_level === 'low';
 
-      let reviewReason = 'Pending admin approval';
-      if (loanDetails.score < 70) {
-        reviewReason = 'Low credit score (below 70) - requires review';
-      } else if (mlScoreResult?.confidence_level === 'low') {
-        reviewReason = 'Low ML confidence level - requires review';
-      } else if (mlScoreResult?.risk_flags_detected?.length > 0) {
-        reviewReason = `Risk flags detected: ${mlScoreResult.risk_flags_detected.join(', ')}`;
+      const needsReview = !isUrgent10k || !meetsScoreCriteria || hasHighRiskFlags || hasLowConfidence;
+
+      let reviewReason = '';
+      let applicationStatus = 'approved';
+
+      if (needsReview) {
+        applicationStatus = 'pending';
+        if (!isUrgent10k) {
+          reviewReason = 'Tier-1 loan requires manual review';
+        } else if (!meetsScoreCriteria) {
+          reviewReason = `Score ${loanDetails.score} below minimum ${loanDetails.minScore}`;
+        } else if (hasLowConfidence) {
+          reviewReason = 'Low ML confidence level - requires review';
+        } else if (hasHighRiskFlags) {
+          reviewReason = `Multiple risk flags: ${mlScoreResult.risk_flags_detected.join(', ')}`;
+        }
       }
 
       const tenure = selectedTenure || loanDetails.tenureDays;
@@ -332,7 +344,7 @@ export default function ApplyLoan() {
         interest_rate: loanDetails.interestRate,
         tenure_days: tenure,
         total_repayment: calculateRepayment(),
-        status: 'pending',
+        status: applicationStatus,
         score: loanDetails.score,
         score_breakdown: {
           bureau: creditSearch?.bureau_score,
@@ -485,10 +497,15 @@ export default function ApplyLoan() {
         await Promise.all(rewardPromises);
       }
 
-      // All loans require admin approval before disbursement
-      setSuccessMessage('Application submitted successfully! Our team will review and notify you via email within 24-48 hours.');
-      setProcessing(false);
-      setTimeout(() => navigate(createPageUrl('Dashboard')), 3000);
+      // Navigate based on approval status
+      if (needsReview) {
+        setSuccessMessage('Application submitted for review. You will be notified via email once reviewed.');
+        setProcessing(false);
+        setTimeout(() => navigate(createPageUrl('Dashboard')), 3000);
+      } else {
+        // Auto-approved - proceed to direct debit setup
+        navigate(createPageUrl(`SetupDirectDebit?loan_id=${application.id}`));
+      }
 
     } catch (err) {
       setError('Failed to submit application. Please try again.');
