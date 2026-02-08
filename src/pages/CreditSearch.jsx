@@ -93,23 +93,29 @@ export default function CreditSearch() {
 
   const performCreditSearch = async (searchId) => {
     try {
-      // Simulate credit bureau API call
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      // Call CRC Credit Bureau API
+      const response = await base44.functions.invoke('performCreditSearch', {
+        bvn: kyc.bvn_number,
+        searchId: searchId
+      });
 
-      // Generate mock result (70% successful for MVP)
-      const isSuccessful = Math.random() > 0.3;
-      const bureauScore = isSuccessful ? Math.floor(Math.random() * 300) + 500 : 0;
-      
+      if (!response.data.success) {
+        throw new Error(response.data.error || 'Credit search failed');
+      }
+
+      const crcResult = response.data;
       const expiryDate = new Date();
       expiryDate.setDate(expiryDate.getDate() + 90);
 
       const result = {
         search_date: new Date().toISOString(),
         expiry_date: expiryDate.toISOString(),
-        search_status: isSuccessful ? 'successful' : 'unsuccessful',
-        bureau_score: bureauScore,
+        search_status: crcResult.success ? 'successful' : 'unsuccessful',
+        bureau_score: crcResult.score || 0,
         report_emailed: true,
-        failure_reason: isSuccessful ? null : 'No credit history found'
+        failure_reason: crcResult.success ? null : crcResult.message || 'No credit history found',
+        crc_reference: crcResult.responseType || null,
+        full_report: JSON.stringify(crcResult.fullReport || {})
       };
 
       await base44.entities.CreditSearch.update(searchId, result);
@@ -121,14 +127,14 @@ export default function CreditSearch() {
         body: `
 Dear ${user.full_name},
 
-Your credit search has been completed.
+Your credit search has been completed via CRC Credit Bureau.
 
-Result: ${isSuccessful ? 'Successful' : 'Unsuccessful'}
-${isSuccessful ? `Credit Score: ${bureauScore}` : `Reason: ${result.failure_reason}`}
+Result: ${result.search_status === 'successful' ? 'Successful' : 'Unsuccessful'}
+${result.search_status === 'successful' ? `Credit Score: ${result.bureau_score}` : `Reason: ${result.failure_reason}`}
 
 This report is valid for 90 days until ${expiryDate.toLocaleDateString()}.
 
-${isSuccessful ? 'You can now proceed to apply for loans on Creditze.ng.' : 'Unfortunately, you are not eligible for loans at this time.'}
+${result.search_status === 'successful' ? 'You can now proceed to apply for loans on Creditze.ng.' : 'Unfortunately, you are not eligible for loans at this time.'}
 
 Thank you for using Creditze.ng.
 
@@ -140,7 +146,8 @@ The Creditze.ng Team
       setSearchResult(result);
 
     } catch (err) {
-      setError('Credit search failed. Your payment will be refunded.');
+      console.error('Credit search error:', err);
+      setError(err.message || 'Credit search failed. Your payment will be refunded.');
     } finally {
       setProcessing(false);
     }
