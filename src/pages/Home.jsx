@@ -70,8 +70,8 @@ export default function Home() {
       });
       if (existing.length > 0) return;
 
-      // Find referrer by code pattern (GAWINXXXXXX)
-      const referrerId = referralCode.replace('GAWIN', '').toLowerCase();
+      // Find referrer by code pattern (CRDTZXXXXXX)
+      const referrerId = referralCode.replace('CRDTZ', '').toLowerCase();
       const referrer = await base44.entities.User.filter({ id: { $regex: referrerId } });
       
       if (referrer[0] && referrer[0].id !== currentUser.id) {
