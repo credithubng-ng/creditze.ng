@@ -120,11 +120,19 @@ export default function KYC() {
     }
     setSaving(true);
     try {
-      // In production, this would call an SMS API
-      // For MVP, we'll simulate OTP
+      const response = await base44.functions.invoke('sendOTP', {
+        phone_number: formData.phone_number,
+        type: 'phone'
+      });
+
+      if (!response.data.success) {
+        throw new Error(response.data.error || 'Failed to send OTP');
+      }
+
       setOtpSent(true);
+      setError(null);
     } catch (err) {
-      setError('Failed to send OTP. Please try again.');
+      setError(err.message || 'Failed to send OTP. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -137,7 +145,15 @@ export default function KYC() {
     }
     setSaving(true);
     try {
-      // For MVP, accept any 6-digit OTP
+      const response = await base44.functions.invoke('verifyOTP', {
+        otp: otp,
+        type: 'phone'
+      });
+
+      if (!response.data.success) {
+        throw new Error(response.data.error || 'Invalid OTP');
+      }
+
       const kycUpdate = {
         user_id: user.id,
         phone_number: formData.phone_number,
@@ -151,8 +167,9 @@ export default function KYC() {
         setKyc(newKyc);
       }
       setCurrentStep(1);
+      setError(null);
     } catch (err) {
-      setError('Verification failed. Please try again.');
+      setError(err.message || 'Verification failed. Please try again.');
     } finally {
       setSaving(false);
     }
