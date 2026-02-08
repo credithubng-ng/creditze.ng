@@ -112,6 +112,19 @@ export default function SetupDirectDebit() {
   const handleDisbursement = async (loanId) => {
     try {
       const loanToDisburse = await base44.entities.LoanApplication.get(loanId);
+      
+      if (loanToDisburse.status === 'approved') {
+        await disburseLoan(loanToDisburse);
+      }
+      
+      toast.success('Direct debit mandate set up successfully!');
+      navigate(createPageUrl(`LoanDetails?id=${loanId}`));
+    } catch (err) {
+      console.error('Disbursement error:', err);
+      toast.error('Mandate setup successful, but disbursement pending');
+      navigate(createPageUrl('Dashboard'));
+    }
+  };
 
   const loadData = async () => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -169,55 +182,45 @@ export default function SetupDirectDebit() {
 
     setProcessing(true);
     try {
-      // Generate mandate reference
-      const mandateRef = `GAWIN-${Date.now()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
-      
-      // Set expiry 6 months from now
-      const expiryDate = new Date();
-      expiryDate.setMonth(expiryDate.getMonth() + 6);
-
-      await base44.entities.DirectDebitMandate.create({
+      // Create mandate record first
+      const mandate = await base44.entities.DirectDebitMandate.create({
         user_id: user.id,
         loan_id: loan?.id,
         bank_name: formData.bank_name,
         account_number: formData.account_number,
         account_name: formData.account_name,
-        mandate_reference: mandateRef,
-        max_amount: loan ? loan.total_repayment * 1.1 : 100000, // 10% buffer
-        status: 'active',
-        authorization_date: new Date().toISOString(),
-        expiry_date: expiryDate.toISOString()
+        max_amount: loan ? loan.total_repayment * 1.1 : 100000,
+        status: 'pending'
       });
 
-      // Log audit
-      await base44.entities.AuditLog.create({
-        action: 'direct_debit_setup',
-        entity_type: 'DirectDebitMandate',
-        user_id: user.id,
-        details: {
+      // Initialize Paystack authorization
+      const response = await base44.functions.invoke('paystackCreateMandate', {
+        amount: 50, // ₦50 authorization fee
+        email: user.email,
+        metadata: {
+          payment_type: 'mandate_authorization',
+          mandate_id: mandate.id,
           loan_id: loan?.id,
-          bank: formData.bank_name,
-          account: formData.account_number.slice(-4)
-        }
+          user_id: user.id
+        },
+        callback_url: window.location.href
       });
 
-      // Trigger automatic loan disbursement if loan is approved
-      if (loan && loan.status === 'approved') {
-        await disburseLoan(loan);
+      if (!response.data.success) {
+        throw new Error(response.data.error || 'Mandate creation failed');
       }
 
-      toast.success('Direct debit mandate set up successfully!');
-      
-      if (loan) {
-        navigate(createPageUrl(`LoanDetails?id=${loan.id}`));
-      } else {
-        navigate(createPageUrl('Dashboard'));
-      }
+      // Store reference
+      await base44.entities.DirectDebitMandate.update(mandate.id, {
+        mandate_reference: response.data.reference
+      });
+
+      // Redirect to Paystack for authorization
+      window.location.href = response.data.authorization_url;
 
     } catch (error) {
       console.error('Error setting up mandate:', error);
-      toast.error('Failed to set up direct debit');
-    } finally {
+      toast.error(error.message || 'Failed to set up direct debit');
       setProcessing(false);
     }
   };
@@ -493,7 +496,7 @@ export default function SetupDirectDebit() {
                   className="mt-1"
                 />
                 <label htmlFor="terms" className="text-sm text-gray-600 cursor-pointer">
-                  I authorize getawin.ng to debit my account for the loan repayment amount on the due date. 
+                  I authorize Creditze.ng to debit my account for the loan repayment amount on the due date. 
                   I understand that failed debits may result in late fees and impact my credit score.
                 </label>
               </div>
