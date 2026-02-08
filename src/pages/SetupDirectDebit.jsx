@@ -54,7 +54,64 @@ export default function SetupDirectDebit() {
 
   useEffect(() => {
     loadData();
+    checkMandateCallback();
   }, []);
+
+  const checkMandateCallback = async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const reference = urlParams.get('reference');
+    
+    if (reference) {
+      setProcessing(true);
+      try {
+        // Verify authorization
+        const verifyResponse = await base44.functions.invoke('paystackVerifyPayment', {
+          reference: reference
+        });
+
+        if (verifyResponse.data.success && verifyResponse.data.status === 'success') {
+          // Find mandate by reference
+          const mandates = await base44.entities.DirectDebitMandate.filter({ 
+            mandate_reference: reference 
+          });
+
+          if (mandates.length > 0) {
+            const mandate = mandates[0];
+            const authCode = verifyResponse.data.authorization?.authorization_code;
+            
+            if (!authCode) {
+              throw new Error('No authorization code received');
+            }
+
+            // Update mandate with authorization
+            await base44.entities.DirectDebitMandate.update(mandate.id, {
+              status: 'active',
+              mandate_reference: authCode,
+              authorization_date: new Date().toISOString(),
+              expiry_date: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString()
+            });
+
+            // Proceed with loan disbursement
+            await handleDisbursement(mandate.loan_id);
+          }
+        } else {
+          setError('Authorization failed. Please try again.');
+          setProcessing(false);
+        }
+      } catch (err) {
+        console.error('Mandate verification error:', err);
+        setError(err.message || 'Authorization failed');
+        setProcessing(false);
+      }
+      
+      // Clean URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  };
+
+  const handleDisbursement = async (loanId) => {
+    try {
+      const loanToDisburse = await base44.entities.LoanApplication.get(loanId);
 
   const loadData = async () => {
     const urlParams = new URLSearchParams(window.location.search);

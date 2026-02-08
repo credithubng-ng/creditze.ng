@@ -33,7 +33,52 @@ export default function CreditSearch() {
 
   useEffect(() => {
     loadData();
+    checkPaymentCallback();
   }, []);
+
+  const checkPaymentCallback = async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const reference = urlParams.get('reference');
+    
+    if (reference) {
+      setProcessing(true);
+      try {
+        // Verify payment
+        const verifyResponse = await base44.functions.invoke('paystackVerifyPayment', {
+          reference: reference
+        });
+
+        if (verifyResponse.data.success && verifyResponse.data.status === 'success') {
+          // Find the search record by reference
+          const searches = await base44.entities.CreditSearch.filter({ 
+            payment_reference: reference 
+          });
+
+          if (searches.length > 0) {
+            const search = searches[0];
+            
+            // Update payment status
+            await base44.entities.CreditSearch.update(search.id, {
+              payment_status: 'paid'
+            });
+
+            // Perform credit search
+            await performCreditSearch(search.id);
+          }
+        } else {
+          setError('Payment verification failed');
+          setProcessing(false);
+        }
+      } catch (err) {
+        console.error('Payment verification error:', err);
+        setError('Payment verification failed');
+        setProcessing(false);
+      }
+      
+      // Clean URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  };
 
   const loadData = async () => {
     try {
@@ -73,20 +118,33 @@ export default function CreditSearch() {
         search_status: 'pending'
       });
 
-      // Simulate payment processing
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      // Update payment status
-      await base44.entities.CreditSearch.update(search.id, {
-        payment_status: 'paid',
-        payment_reference: `PAY${Date.now()}`
+      // Initialize Paystack payment
+      const response = await base44.functions.invoke('paystackInitializePayment', {
+        amount: CREDIT_SEARCH_FEE,
+        email: user.email,
+        metadata: {
+          payment_type: 'credit_search',
+          search_id: search.id,
+          user_id: user.id
+        },
+        callback_url: window.location.href
       });
 
-      // Perform credit search (simulated)
-      await performCreditSearch(search.id);
+      if (!response.data.success) {
+        throw new Error(response.data.error || 'Payment initialization failed');
+      }
+
+      // Store reference for verification
+      await base44.entities.CreditSearch.update(search.id, {
+        payment_reference: response.data.reference
+      });
+
+      // Redirect to Paystack payment page
+      window.location.href = response.data.authorization_url;
 
     } catch (err) {
-      setError('Payment failed. Please try again.');
+      console.error('Payment error:', err);
+      setError(err.message || 'Payment failed. Please try again.');
       setProcessing(false);
     }
   };
