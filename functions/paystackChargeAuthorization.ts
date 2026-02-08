@@ -9,16 +9,32 @@ Deno.serve(async (req) => {
             return Response.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const { authorization_code, email, amount, metadata } = await req.json();
+        const body = await req.json();
+        const { authorization_code, email, amount, metadata } = body;
 
+        // Validate required fields
         if (!authorization_code || !email || !amount) {
-            return Response.json({ error: 'Authorization code, email and amount are required' }, { status: 400 });
+            return Response.json({ 
+                success: false,
+                error: 'Authorization code, email and amount are required' 
+            }, { status: 400 });
+        }
+
+        // Validate amount is positive
+        if (amount <= 0) {
+            return Response.json({ 
+                success: false,
+                error: 'Amount must be greater than zero' 
+            }, { status: 400 });
         }
 
         const PAYSTACK_SECRET_KEY = Deno.env.get('PAYSTACK_SECRET_KEY');
 
         if (!PAYSTACK_SECRET_KEY) {
-            return Response.json({ error: 'Paystack not configured' }, { status: 500 });
+            return Response.json({ 
+                success: false,
+                error: 'Payment service not configured' 
+            }, { status: 500 });
         }
 
         // Charge authorization
@@ -29,9 +45,9 @@ Deno.serve(async (req) => {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                authorization_code: authorization_code,
-                email: email,
-                amount: amount * 100, // Convert to kobo
+                authorization_code,
+                email,
+                amount: Math.round(amount * 100), // Convert to kobo, ensure integer
                 metadata: metadata || {}
             })
         });

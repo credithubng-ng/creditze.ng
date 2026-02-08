@@ -9,7 +9,8 @@ Deno.serve(async (req) => {
             return Response.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
         }
 
-        const { loan_id } = await req.json();
+        const body = await req.json();
+        const { loan_id } = body;
 
         if (!loan_id) {
             return Response.json({ 
@@ -52,13 +53,14 @@ Deno.serve(async (req) => {
         // Check if disbursement already exists
         const existingDisbursements = await base44.asServiceRole.entities.DisbursementLog.filter({ 
             loan_id: loan_id,
-            status: ['successful', 'processing']
+            status: { $in: ['successful', 'processing'] }
         });
 
         if (existingDisbursements.length > 0) {
             return Response.json({ 
                 success: false, 
-                error: 'Loan already disbursed or in progress' 
+                error: 'Loan already disbursed or in progress',
+                disbursement_id: existingDisbursements[0].id
             }, { status: 400 });
         }
 

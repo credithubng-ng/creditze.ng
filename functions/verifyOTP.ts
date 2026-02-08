@@ -9,7 +9,8 @@ Deno.serve(async (req) => {
             return Response.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const { otp, type } = await req.json();
+        const body = await req.json();
+        const { otp, type } = body;
 
         if (!type || !['phone', 'email'].includes(type)) {
             return Response.json({ 

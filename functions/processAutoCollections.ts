@@ -4,10 +4,14 @@ Deno.serve(async (req) => {
     try {
         const base44 = createClientFromRequest(req);
 
-        // Verify admin access (scheduled task runs as service role)
+        // Verify admin access (scheduled automations should run as service role)
+        // Allow service role or admin users only
         const user = await base44.auth.me().catch(() => null);
         if (user && user.role !== 'admin') {
-            return Response.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
+            return Response.json({ 
+                success: false,
+                error: 'Forbidden: Admin access required' 
+            }, { status: 403 });
         }
 
         const today = new Date();
@@ -94,11 +98,25 @@ Deno.serve(async (req) => {
 
                 results.attempted++;
 
+                // Get user email for charge
+                const loanUser = await base44.asServiceRole.entities.User.filter({ id: loan.user_id });
+                const userEmail = loanUser[0]?.email;
+
+                if (!userEmail) {
+                    results.skipped++;
+                    results.details.push({
+                        loan_id: loan.id,
+                        status: 'skipped',
+                        reason: 'User email not found'
+                    });
+                    continue;
+                }
+
                 // Attempt charge
                 const chargeResponse = await base44.asServiceRole.functions.invoke('paystackChargeAuthorization', {
                     authorization_code: mandate.mandate_reference,
-                    amount: Math.round(loan.total_repayment * 100), // Convert to kobo
-                    email: loan.user_id, // Will be user email
+                    amount: loan.total_repayment,
+                    email: userEmail,
                     metadata: {
                         loan_id: loan.id,
                         collection_type: 'auto_direct_debit'

@@ -9,10 +9,30 @@ Deno.serve(async (req) => {
             return Response.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const { phone_number, email, type } = await req.json();
+        const body = await req.json();
+        const { phone_number, email, type } = body;
 
+        // Validate type
         if (!type || !['phone', 'email'].includes(type)) {
-            return Response.json({ error: 'Invalid type. Must be phone or email' }, { status: 400 });
+            return Response.json({ 
+                success: false,
+                error: 'Invalid type. Must be phone or email' 
+            }, { status: 400 });
+        }
+
+        // Validate contact info based on type
+        if (type === 'phone' && !phone_number) {
+            return Response.json({ 
+                success: false,
+                error: 'Phone number is required for phone verification' 
+            }, { status: 400 });
+        }
+
+        if (type === 'email' && !email) {
+            return Response.json({ 
+                success: false,
+                error: 'Email is required for email verification' 
+            }, { status: 400 });
         }
 
         // Generate 6-digit OTP
@@ -33,7 +53,10 @@ Deno.serve(async (req) => {
             const termiiApiKey = Deno.env.get('TERMII_API_KEY');
             
             if (!termiiApiKey) {
-                return Response.json({ error: 'SMS service not configured' }, { status: 500 });
+                return Response.json({ 
+                    success: false,
+                    error: 'SMS service not configured' 
+                }, { status: 500 });
             }
 
             const termiiResponse = await fetch('https://api.ng.termii.com/api/sms/send', {
@@ -42,7 +65,7 @@ Deno.serve(async (req) => {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    to: `234${phone_number}`,
+                    to: phone_number.startsWith('234') ? phone_number : `234${phone_number}`,
                     from: 'Creditze',
                     sms: `Your Creditze verification code is: ${otp}. Valid for 10 minutes.`,
                     type: 'plain',

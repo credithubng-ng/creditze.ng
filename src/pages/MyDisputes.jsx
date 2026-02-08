@@ -17,6 +17,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import EmptyState from '../components/shared/EmptyState';
 
 export default function MyDisputes() {
   const navigate = useNavigate();
@@ -93,18 +94,13 @@ export default function MyDisputes() {
             ))}
           </>
         ) : disputes.length === 0 ? (
-          <Card className="border-0 shadow-sm">
-            <CardContent className="p-12 text-center">
-              <AlertCircle className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">No disputes yet</h3>
-              <p className="text-gray-500 mb-4">If you have any issues, you can raise a dispute</p>
-              <Link to={createPageUrl('RaiseDispute')}>
-                <Button className="bg-emerald-600 hover:bg-emerald-700">
-                  <Plus className="w-4 h-4 mr-2" /> Raise Dispute
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
+          <EmptyState
+            icon={MessageSquare}
+            title="No disputes yet"
+            description="If you have any issues with your loans or account, you can raise a dispute"
+            actionLabel="Raise Dispute"
+            onAction={() => navigate(createPageUrl('RaiseDispute'))}
+          />
         ) : (
           disputes.map(dispute => {
             const StatusIcon = getStatusIcon(dispute.status);
