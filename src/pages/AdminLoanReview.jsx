@@ -269,7 +269,6 @@ getawin.ng Team`;
     }
 
     try {
-      const user = users[app.user_id];
       const kyc = kycProfiles[app.user_id];
 
       if (!kyc?.bank_name || !kyc?.account_number) {
@@ -277,33 +276,22 @@ getawin.ng Team`;
         return;
       }
 
-      const admin = await base44.auth.me();
+      toast.loading('Processing disbursement...', { id: 'disburse' });
 
-      // Create disbursement log
-      await base44.entities.DisbursementLog.create({
-        loan_id: app.id,
-        user_id: app.user_id,
-        amount: app.amount_approved,
-        bank_name: kyc.bank_name,
-        account_number: kyc.account_number,
-        account_name: kyc.account_name || user.full_name,
-        status: 'pending',
-        initiated_by: 'admin',
-        admin_id: admin.id
+      const response = await base44.functions.invoke('disburseLoan', {
+        loan_id: app.id
       });
 
-      // Update loan status
-      await base44.entities.LoanApplication.update(app.id, {
-        status: 'disbursed',
-        disbursement_date: new Date().toISOString().split('T')[0]
-      });
+      if (!response.data.success) {
+        throw new Error(response.data.error || 'Disbursement failed');
+      }
 
-      toast.success('Manual disbursement initiated');
+      toast.success('Loan disbursed successfully! 🎉', { id: 'disburse' });
       await loadApplications();
 
     } catch (error) {
       console.error('Error initiating disbursement:', error);
-      toast.error('Failed to initiate disbursement');
+      toast.error(error.message || 'Failed to initiate disbursement', { id: 'disburse' });
     }
   };
 
