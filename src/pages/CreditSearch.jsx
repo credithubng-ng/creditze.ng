@@ -117,7 +117,7 @@ export default function CreditSearch() {
       // Send email with credit report
       await base44.integrations.Core.SendEmail({
         to: user.email,
-        subject: 'Your Credit Report from getawin.ng',
+        subject: 'Your Credit Report from Creditze.ng',
         body: `
 Dear ${user.full_name},
 
@@ -128,12 +128,12 @@ ${isSuccessful ? `Credit Score: ${bureauScore}` : `Reason: ${result.failure_reas
 
 This report is valid for 90 days until ${expiryDate.toLocaleDateString()}.
 
-${isSuccessful ? 'You can now proceed to apply for loans on getawin.ng.' : 'Unfortunately, you are not eligible for loans at this time.'}
+${isSuccessful ? 'You can now proceed to apply for loans on Creditze.ng.' : 'Unfortunately, you are not eligible for loans at this time.'}
 
-Thank you for using getawin.ng.
+Thank you for using Creditze.ng.
 
 Best regards,
-The getawin.ng Team
+The Creditze.ng Team
         `
       });
 

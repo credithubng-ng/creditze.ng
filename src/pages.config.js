@@ -64,6 +64,7 @@ import AdminReferrals from './pages/AdminReferrals';
 import AdminSettings from './pages/AdminSettings';
 import AdminUsers from './pages/AdminUsers';
 import ApplyLoan from './pages/ApplyLoan';
+import CreditHistory from './pages/CreditHistory';
 import CreditSearch from './pages/CreditSearch';
 import Dashboard from './pages/Dashboard';
 import DisputeDetail from './pages/DisputeDetail';
@@ -78,7 +79,6 @@ import RaiseDispute from './pages/RaiseDispute';
 import SetupDirectDebit from './pages/SetupDirectDebit';
 import Tier1Verification from './pages/Tier1Verification';
 import VerifyEmployment from './pages/VerifyEmployment';
-import CreditHistory from './pages/CreditHistory';
 import __Layout from './Layout.jsx';
 
 
@@ -100,6 +100,7 @@ export const PAGES = {
     "AdminSettings": AdminSettings,
     "AdminUsers": AdminUsers,
     "ApplyLoan": ApplyLoan,
+    "CreditHistory": CreditHistory,
     "CreditSearch": CreditSearch,
     "Dashboard": Dashboard,
     "DisputeDetail": DisputeDetail,
@@ -114,7 +115,6 @@ export const PAGES = {
     "SetupDirectDebit": SetupDirectDebit,
     "Tier1Verification": Tier1Verification,
     "VerifyEmployment": VerifyEmployment,
-    "CreditHistory": CreditHistory,
 }
 
 export const pagesConfig = {
