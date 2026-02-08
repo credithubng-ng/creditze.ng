@@ -17,7 +17,7 @@ export default function ReferralSection({ user, referralStats, rewards, referral
   const [copied, setCopied] = useState(false);
   
   // Generate referral code from user ID
-  const referralCode = `GAWIN${user.id.slice(0, 6).toUpperCase()}`;
+  const referralCode = `CRDTZ${user.id.slice(0, 6).toUpperCase()}`;
   const referralLink = `${window.location.origin}/?ref=${referralCode}`;
 
   const copyToClipboard = (text) => {
@@ -31,8 +31,8 @@ export default function ReferralSection({ user, referralStats, rewards, referral
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'Join getawin.ng',
-          text: `Get quick loans with getawin.ng! Use my referral code ${referralCode} to sign up.`,
+          title: 'Join Creditze.ng',
+          text: `Get quick loans with Creditze.ng! Use my referral code ${referralCode} to sign up.`,
           url: referralLink
         });
       } catch (err) {

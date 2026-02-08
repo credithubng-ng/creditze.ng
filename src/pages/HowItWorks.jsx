@@ -125,7 +125,7 @@ export default function HowItWorks() {
                   <div>
                     <h3 className="text-2xl font-bold text-gray-900 mb-3">Complete Credit Search</h3>
                     <p className="text-gray-600 mb-4">
-                      Pay a one-time fee of ₦500 to check your credit bureau score. This report is valid for 90 days and helps us determine your loan eligibility.
+                      Pay a one-time fee of ₦850 to check your credit bureau score. This report is valid for 90 days and helps us determine your loan eligibility.
                     </p>
                     <div className="bg-amber-50 rounded-lg p-4 border border-amber-200">
                       <p className="text-sm text-amber-800">
