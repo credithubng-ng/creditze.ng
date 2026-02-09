@@ -75,7 +75,7 @@ Deno.serve(async (req) => {
                 },
                 body: JSON.stringify({
                     to: phone_number.startsWith('234') ? phone_number : `234${phone_number}`,
-                    from: 'Creditze',
+                    from: 'N-Alert',
                     sms: `Your Creditze verification code is: ${otp}. Valid for 10 minutes.`,
                     type: 'plain',
                     channel: 'generic',
