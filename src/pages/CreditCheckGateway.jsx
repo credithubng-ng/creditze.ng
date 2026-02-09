@@ -14,6 +14,7 @@ export default function CreditCheckGateway() {
   const [paying, setPaying] = useState(false);
   const [destinationUrl, setDestinationUrl] = useState('');
   const [loanType, setLoanType] = useState('');
+  const [processingSearch, setProcessingSearch] = useState(false);
 
   useEffect(() => {
     checkStatus();
@@ -37,6 +38,13 @@ export default function CreditCheckGateway() {
       setLoanType(type);
       setDestinationUrl(decodeURIComponent(url));
 
+      // Check if returning from payment
+      const reference = params.get('reference');
+      if (reference) {
+        await handlePaymentCallback(reference, currentUser.id);
+        return;
+      }
+
       // Check for valid credit search
       const searches = await base44.entities.CreditSearch.filter({ 
         user_id: currentUser.id 
@@ -53,6 +61,47 @@ export default function CreditCheckGateway() {
       navigate(createPageUrl('Home'));
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePaymentCallback = async (reference, userId) => {
+    setProcessingSearch(true);
+    try {
+      // Verify payment
+      const verifyResponse = await base44.functions.invoke('paystackVerifyPayment', { reference });
+      
+      if (!verifyResponse.data.status) {
+        alert('Payment verification failed. Please contact support.');
+        setProcessingSearch(false);
+        return;
+      }
+
+      // Get KYC to retrieve BVN
+      const kycData = await base44.entities.KYCProfile.filter({ user_id: userId });
+      if (!kycData[0] || !kycData[0].bvn) {
+        alert('BVN not found. Please complete KYC first.');
+        navigate(createPageUrl('KYC'));
+        return;
+      }
+
+      // Perform credit search
+      const searchResponse = await base44.functions.invoke('performCreditSearch', {
+        user_id: userId,
+        bvn: kycData[0].bvn,
+        payment_reference: reference
+      });
+
+      if (searchResponse.data.success) {
+        // Reload to show completed status
+        window.location.reload();
+      } else {
+        alert('Credit search failed: ' + (searchResponse.data.error || 'Unknown error'));
+        setProcessingSearch(false);
+      }
+    } catch (error) {
+      console.error('Error processing credit search:', error);
+      alert('Failed to process credit search. Please contact support.');
+      setProcessingSearch(false);
     }
   };
 
@@ -86,10 +135,15 @@ export default function CreditCheckGateway() {
     }, 500);
   };
 
-  if (loading) {
+  if (loading || processingSearch) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-emerald-600 animate-spin" />
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 text-emerald-600 animate-spin mx-auto mb-4" />
+          <p className="text-gray-600">
+            {processingSearch ? 'Processing your credit search...' : 'Loading...'}
+          </p>
+        </div>
       </div>
     );
   }
