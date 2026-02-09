@@ -68,6 +68,7 @@ import CreditHistory from './pages/CreditHistory';
 import CreditSearch from './pages/CreditSearch';
 import Dashboard from './pages/Dashboard';
 import DisputeDetail from './pages/DisputeDetail';
+import Home from './pages/Home';
 import HowItWorks from './pages/HowItWorks';
 import KYC from './pages/KYC';
 import LoanDetails from './pages/LoanDetails';
@@ -78,7 +79,7 @@ import RaiseDispute from './pages/RaiseDispute';
 import SetupDirectDebit from './pages/SetupDirectDebit';
 import Tier1Verification from './pages/Tier1Verification';
 import VerifyEmployment from './pages/VerifyEmployment';
-import Home from './pages/Home';
+import CreditCheckGateway from './pages/CreditCheckGateway';
 import __Layout from './Layout.jsx';
 
 
@@ -104,6 +105,7 @@ export const PAGES = {
     "CreditSearch": CreditSearch,
     "Dashboard": Dashboard,
     "DisputeDetail": DisputeDetail,
+    "Home": Home,
     "HowItWorks": HowItWorks,
     "KYC": KYC,
     "LoanDetails": LoanDetails,
@@ -114,7 +116,7 @@ export const PAGES = {
     "SetupDirectDebit": SetupDirectDebit,
     "Tier1Verification": Tier1Verification,
     "VerifyEmployment": VerifyEmployment,
-    "Home": Home,
+    "CreditCheckGateway": CreditCheckGateway,
 }
 
 export const pagesConfig = {

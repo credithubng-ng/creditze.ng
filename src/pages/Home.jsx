@@ -112,18 +112,14 @@ export default function Home() {
     }
   };
 
-  const handleExternalLoan = (url) => {
+  const handleExternalLoan = (url, type) => {
     if (!isAuthenticated) {
       base44.auth.redirectToLogin(createPageUrl('Home'));
       return;
     }
     
-    if (!creditSearch) {
-      window.location.href = createPageUrl('CreditSearch');
-      return;
-    }
-    
-    window.open(url, '_blank');
+    // Navigate to credit check gateway
+    window.location.href = createPageUrl(`CreditCheckGateway?type=${type}&url=${encodeURIComponent(url)}`);
   };
 
   return (
@@ -323,10 +319,10 @@ export default function Home() {
                   ))}
                 </ul>
                 <Button 
-                  onClick={() => handleExternalLoan('https://creditze.ng/products/proof-of-funds-and-relocation-solutions/')}
+                  onClick={() => handleExternalLoan('https://creditze.ng/products/proof-of-funds-and-relocation-solutions/', 'pof')}
                   className="w-full bg-blue-600 hover:bg-blue-700 rounded-xl py-6"
                 >
-                  {!isAuthenticated ? 'Login to Apply' : !creditSearch ? 'Complete Credit Check' : 'Apply Now'} <ArrowRight className="ml-2 w-5 h-5" />
+                  {!isAuthenticated ? 'Login to Apply' : 'Apply Now'} <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
               </div>
             </motion.div>
@@ -360,10 +356,10 @@ export default function Home() {
                   ))}
                 </ul>
                 <Button 
-                  onClick={() => handleExternalLoan('https://creditze.ng/products/credit-brokerage-for-uk-based-nigerians/')}
+                  onClick={() => handleExternalLoan('https://creditze.ng/products/credit-brokerage-for-uk-based-nigerians/', 'uk')}
                   className="w-full bg-blue-500 hover:bg-blue-600 rounded-xl py-6"
                 >
-                  {!isAuthenticated ? 'Login to Apply' : !creditSearch ? 'Complete Credit Check' : 'Apply Now'} <ArrowRight className="ml-2 w-5 h-5" />
+                  {!isAuthenticated ? 'Login to Apply' : 'Apply Now'} <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
               </div>
             </motion.div>
