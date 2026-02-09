@@ -86,9 +86,12 @@ Deno.serve(async (req) => {
             });
 
             const smsData = await smsResponse.json();
+            
+            console.log('SmartSMS response:', smsData);
 
-            if (!smsResponse.ok || (smsData.code !== 1000 && smsData.code !== "1000")) {
-                console.error('SmartSMS error:', smsData);
+            // SmartSMS returns code "1000" for success, including scheduled messages
+            if (!smsResponse.ok) {
+                console.error('SmartSMS HTTP error:', smsData);
                 return Response.json({ 
                     success: false, 
                     error: 'Failed to send SMS' 
@@ -98,7 +101,7 @@ Deno.serve(async (req) => {
             return Response.json({ 
                 success: true, 
                 message: 'OTP sent to phone',
-                message_id: smsData.message_id
+                data: smsData
             });
 
         } else {
