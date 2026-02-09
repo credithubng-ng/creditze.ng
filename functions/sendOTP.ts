@@ -58,35 +58,35 @@ Deno.serve(async (req) => {
         }
 
         if (type === 'phone') {
-            // Send SMS via Termii
-            const termiiApiKey = Deno.env.get('TERMII_API_KEY');
+            // Send SMS via SmartSMS Solutions
+            const smartSmsToken = Deno.env.get('SMARTSMS_TOKEN');
             
-            if (!termiiApiKey) {
+            if (!smartSmsToken) {
                 return Response.json({ 
                     success: false,
                     error: 'SMS service not configured' 
                 }, { status: 500 });
             }
 
-            const termiiResponse = await fetch('https://api.ng.termii.com/api/sms/send', {
+            const formattedPhone = phone_number.startsWith('234') ? phone_number : `234${phone_number}`;
+            
+            const formData = new FormData();
+            formData.append('token', smartSmsToken);
+            formData.append('sender', 'Creditze');
+            formData.append('to', formattedPhone);
+            formData.append('message', `Your Creditze verification code is: ${otp}. Valid for 10 minutes.`);
+            formData.append('type', '0'); // Plain text
+            formData.append('routing', '3'); // Basic route with DND via corporate
+
+            const smsResponse = await fetch('https://app.smartsmssolutions.com/io/api/client/v1/sms/', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    to: phone_number.startsWith('234') ? phone_number : `234${phone_number}`,
-                    from: 'N-Alert',
-                    sms: `Your Creditze verification code is: ${otp}. Valid for 10 minutes.`,
-                    type: 'plain',
-                    channel: 'generic',
-                    api_key: termiiApiKey
-                })
+                body: formData
             });
 
-            const termiiData = await termiiResponse.json();
+            const smsData = await smsResponse.json();
 
-            if (!termiiResponse.ok) {
-                console.error('Termii error:', termiiData);
+            if (!smsResponse.ok || smsData.code !== 1000) {
+                console.error('SmartSMS error:', smsData);
                 return Response.json({ 
                     success: false, 
                     error: 'Failed to send SMS' 
@@ -96,7 +96,7 @@ Deno.serve(async (req) => {
             return Response.json({ 
                 success: true, 
                 message: 'OTP sent to phone',
-                message_id: termiiData.message_id
+                message_id: smsData.message_id
             });
 
         } else {
