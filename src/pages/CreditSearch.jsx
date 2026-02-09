@@ -203,6 +203,13 @@ The Creditze.ng Team
 
       setSearchResult(result);
 
+      // Redirect to KYC after successful search
+      if (result.search_status === 'successful') {
+        setTimeout(() => {
+          navigate(createPageUrl('KYC'));
+        }, 3000);
+      }
+
     } catch (err) {
       console.error('Credit search error:', err);
       setError(err.message || 'Credit search failed. Your payment will be refunded.');
