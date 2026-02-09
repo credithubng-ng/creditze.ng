@@ -141,6 +141,17 @@ Deno.serve(async (req) => {
             });
         }
 
+        // Create virtual account for repayment
+        try {
+            await base44.asServiceRole.functions.invoke('createVirtualAccount', {
+                loan_id: loan_id,
+                user_id: loan.user_id
+            });
+        } catch (vaError) {
+            console.error('Virtual account creation error:', vaError);
+            // Don't fail disbursement if virtual account creation fails
+        }
+
         // Create audit log
         await base44.asServiceRole.entities.AuditLog.create({
             action: 'loan_disbursed',
