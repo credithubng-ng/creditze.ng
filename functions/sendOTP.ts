@@ -68,11 +68,15 @@ Deno.serve(async (req) => {
                 }, { status: 500 });
             }
 
-            // Format phone: remove leading 0 if present, ensure 234 prefix
+            // Format phone: SmartSMS expects format like +2348012345678
             let formattedPhone = phone_number.replace(/^0+/, '');
-            if (!formattedPhone.startsWith('234')) {
-                formattedPhone = '234' + formattedPhone;
+            if (!formattedPhone.startsWith('+234') && !formattedPhone.startsWith('234')) {
+                formattedPhone = '+234' + formattedPhone;
+            } else if (formattedPhone.startsWith('234')) {
+                formattedPhone = '+' + formattedPhone;
             }
+            
+            console.log('Sending SMS to:', formattedPhone);
             
             const formData = new URLSearchParams();
             formData.append('token', smartSmsToken);
