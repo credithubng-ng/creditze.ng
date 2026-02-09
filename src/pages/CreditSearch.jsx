@@ -215,10 +215,9 @@ The Creditze.ng Team
         `
       });
 
+      // Show result immediately
       setSearchResult(result);
-
-      // Reload data to show the result
-      await loadData();
+      setProcessing(false);
 
       // Redirect to KYC after showing result briefly
       if (result.search_status === 'successful') {
@@ -229,8 +228,7 @@ The Creditze.ng Team
 
     } catch (err) {
       console.error('Credit search error:', err);
-      setError(err.message || 'Credit search failed. Your payment will be refunded.');
-    } finally {
+      setError('Credit search failed: ' + (err.message || 'Unknown error'));
       setProcessing(false);
     }
   };
