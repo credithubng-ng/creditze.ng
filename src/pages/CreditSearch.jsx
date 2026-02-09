@@ -326,9 +326,9 @@ The Creditze.ng Team
                     </div>
                     <Button 
                       className="w-full bg-emerald-600 hover:bg-emerald-700"
-                      onClick={() => navigate(createPageUrl('ApplyLoan'))}
+                      onClick={() => navigate(createPageUrl('KYC'))}
                     >
-                      Apply for Loan
+                      Back to KYC
                     </Button>
                   </>
                 ) : (

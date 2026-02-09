@@ -64,6 +64,7 @@ import AdminReferrals from './pages/AdminReferrals';
 import AdminSettings from './pages/AdminSettings';
 import AdminUsers from './pages/AdminUsers';
 import ApplyLoan from './pages/ApplyLoan';
+import CreditCheckGateway from './pages/CreditCheckGateway';
 import CreditHistory from './pages/CreditHistory';
 import CreditSearch from './pages/CreditSearch';
 import Dashboard from './pages/Dashboard';
@@ -74,13 +75,12 @@ import KYC from './pages/KYC';
 import LoanDetails from './pages/LoanDetails';
 import LoanHistory from './pages/LoanHistory';
 import MyDisputes from './pages/MyDisputes';
+import MyDocuments from './pages/MyDocuments';
 import Profile from './pages/Profile';
 import RaiseDispute from './pages/RaiseDispute';
 import SetupDirectDebit from './pages/SetupDirectDebit';
 import Tier1Verification from './pages/Tier1Verification';
 import VerifyEmployment from './pages/VerifyEmployment';
-import CreditCheckGateway from './pages/CreditCheckGateway';
-import MyDocuments from './pages/MyDocuments';
 import __Layout from './Layout.jsx';
 
 
@@ -102,6 +102,7 @@ export const PAGES = {
     "AdminSettings": AdminSettings,
     "AdminUsers": AdminUsers,
     "ApplyLoan": ApplyLoan,
+    "CreditCheckGateway": CreditCheckGateway,
     "CreditHistory": CreditHistory,
     "CreditSearch": CreditSearch,
     "Dashboard": Dashboard,
@@ -112,13 +113,12 @@ export const PAGES = {
     "LoanDetails": LoanDetails,
     "LoanHistory": LoanHistory,
     "MyDisputes": MyDisputes,
+    "MyDocuments": MyDocuments,
     "Profile": Profile,
     "RaiseDispute": RaiseDispute,
     "SetupDirectDebit": SetupDirectDebit,
     "Tier1Verification": Tier1Verification,
     "VerifyEmployment": VerifyEmployment,
-    "CreditCheckGateway": CreditCheckGateway,
-    "MyDocuments": MyDocuments,
 }
 
 export const pagesConfig = {
