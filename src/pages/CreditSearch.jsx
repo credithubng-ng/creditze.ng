@@ -212,11 +212,14 @@ The Creditze.ng Team
 
       setSearchResult(result);
 
-      // Redirect to KYC after successful search
+      // Reload data to show the result
+      await loadData();
+
+      // Redirect to KYC after showing result briefly
       if (result.search_status === 'successful') {
         setTimeout(() => {
           navigate(createPageUrl('KYC'));
-        }, 3000);
+        }, 4000);
       }
 
     } catch (err) {
