@@ -93,9 +93,18 @@ export default function CreditSearch() {
       setKyc(kycData[0]);
       
       if (searchData[0]) {
-        const expiry = new Date(searchData[0].expiry_date);
-        if (expiry > new Date() && searchData[0].search_status === 'successful') {
-          setExistingSearch(searchData[0]);
+        // Show any recent search result (successful or failed)
+        if (searchData[0].payment_status === 'paid') {
+          const expiry = new Date(searchData[0].expiry_date);
+          if (searchData[0].search_status === 'successful' && expiry > new Date()) {
+            setExistingSearch(searchData[0]);
+          } else if (searchData[0].search_status === 'unsuccessful') {
+            // Show failed search result
+            setSearchResult(searchData[0]);
+          } else if (searchData[0].search_status === 'successful') {
+            // Expired but show it
+            setExistingSearch(searchData[0]);
+          }
         }
       }
     } catch (error) {
