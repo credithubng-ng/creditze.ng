@@ -80,6 +80,7 @@ import SetupDirectDebit from './pages/SetupDirectDebit';
 import Tier1Verification from './pages/Tier1Verification';
 import VerifyEmployment from './pages/VerifyEmployment';
 import CreditCheckGateway from './pages/CreditCheckGateway';
+import MyDocuments from './pages/MyDocuments';
 import __Layout from './Layout.jsx';
 
 
@@ -117,6 +118,7 @@ export const PAGES = {
     "Tier1Verification": Tier1Verification,
     "VerifyEmployment": VerifyEmployment,
     "CreditCheckGateway": CreditCheckGateway,
+    "MyDocuments": MyDocuments,
 }
 
 export const pagesConfig = {
