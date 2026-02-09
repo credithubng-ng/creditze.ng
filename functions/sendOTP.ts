@@ -39,14 +39,23 @@ Deno.serve(async (req) => {
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
         const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
-        // Store OTP temporarily (using user entity for simplicity)
+        // Get or create KYC profile to store OTP
+        let kycProfile = await base44.entities.KYCProfile.filter({ user_id: user.id });
+        
         const otpData = {
             [`otp_${type}`]: otp,
             [`otp_${type}_expires`]: expiresAt.toISOString(),
             [`otp_${type}_target`]: type === 'phone' ? phone_number : email
         };
 
-        await base44.auth.updateMe(otpData);
+        if (kycProfile.length > 0) {
+            await base44.asServiceRole.entities.KYCProfile.update(kycProfile[0].id, otpData);
+        } else {
+            await base44.asServiceRole.entities.KYCProfile.create({
+                user_id: user.id,
+                ...otpData
+            });
+        }
 
         if (type === 'phone') {
             // Send SMS via Termii
