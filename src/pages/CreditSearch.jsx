@@ -153,7 +153,7 @@ export default function CreditSearch() {
     try {
       // Call CRC Credit Bureau API
       const response = await base44.functions.invoke('performCreditSearch', {
-        bvn: kyc.bvn_number,
+        bvn: kyc.bvn,
         searchId: searchId
       });
 
