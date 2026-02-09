@@ -20,8 +20,8 @@ import { Button } from '@/components/ui/button';
 export default function Home() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [affiliateCode, setAffiliateCode] = useState(null);
-
   const [user, setUser] = useState(null);
+  const [creditSearch, setCreditSearch] = useState(null);
 
   useEffect(() => {
     checkAuth();
@@ -37,6 +37,18 @@ export default function Home() {
       try {
         const currentUser = await base44.auth.me();
         setUser(currentUser);
+        
+        // Load credit search status
+        const searches = await base44.entities.CreditSearch.filter({ 
+          user_id: currentUser.id 
+        }, '-created_date', 1);
+        
+        if (searches[0]) {
+          const expiry = new Date(searches[0].expiry_date);
+          if (expiry > new Date() && searches[0].search_status === 'successful') {
+            setCreditSearch(searches[0]);
+          }
+        }
       } catch (error) {
         console.error('Error loading user:', error);
       }
@@ -98,6 +110,20 @@ export default function Home() {
     } else {
       base44.auth.redirectToLogin(createPageUrl('Dashboard'));
     }
+  };
+
+  const handleExternalLoan = (url) => {
+    if (!isAuthenticated) {
+      base44.auth.redirectToLogin(createPageUrl('Home'));
+      return;
+    }
+    
+    if (!creditSearch) {
+      window.location.href = createPageUrl('CreditSearch');
+      return;
+    }
+    
+    window.open(url, '_blank');
   };
 
   return (
@@ -297,10 +323,10 @@ export default function Home() {
                   ))}
                 </ul>
                 <Button 
-                  onClick={() => window.open('https://creditze.ng', '_blank')}
+                  onClick={() => handleExternalLoan('https://creditze.ng/products/proof-of-funds-and-relocation-solutions/')}
                   className="w-full bg-blue-600 hover:bg-blue-700 rounded-xl py-6"
                 >
-                  Learn More <ArrowRight className="ml-2 w-5 h-5" />
+                  {!isAuthenticated ? 'Login to Apply' : !creditSearch ? 'Complete Credit Check' : 'Apply Now'} <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
               </div>
             </motion.div>
@@ -334,10 +360,10 @@ export default function Home() {
                   ))}
                 </ul>
                 <Button 
-                  onClick={() => window.open('https://creditze.ng', '_blank')}
+                  onClick={() => handleExternalLoan('https://creditze.ng/products/credit-brokerage-for-uk-based-nigerians/')}
                   className="w-full bg-blue-500 hover:bg-blue-600 rounded-xl py-6"
                 >
-                  Apply Now <ArrowRight className="ml-2 w-5 h-5" />
+                  {!isAuthenticated ? 'Login to Apply' : !creditSearch ? 'Complete Credit Check' : 'Apply Now'} <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
               </div>
             </motion.div>
