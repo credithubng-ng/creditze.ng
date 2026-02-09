@@ -68,7 +68,11 @@ Deno.serve(async (req) => {
                 }, { status: 500 });
             }
 
-            const formattedPhone = phone_number.startsWith('234') ? phone_number : `234${phone_number}`;
+            // Format phone: remove leading 0 if present, ensure 234 prefix
+            let formattedPhone = phone_number.replace(/^0+/, '');
+            if (!formattedPhone.startsWith('234')) {
+                formattedPhone = '234' + formattedPhone;
+            }
             
             const smsResponse = await fetch('https://app.smartsmssolutions.com/io/api/client/v1/sms/', {
                 method: 'POST',
