@@ -70,17 +70,19 @@ Deno.serve(async (req) => {
 
             const formattedPhone = phone_number.startsWith('234') ? phone_number : `234${phone_number}`;
             
-            const formData = new FormData();
-            formData.append('token', smartSmsToken);
-            formData.append('sender', 'Creditze');
-            formData.append('to', formattedPhone);
-            formData.append('message', `Your Creditze verification code is: ${otp}. Valid for 10 minutes.`);
-            formData.append('type', '0'); // Plain text
-            formData.append('routing', '3'); // Basic route with DND via corporate
-
             const smsResponse = await fetch('https://app.smartsmssolutions.com/io/api/client/v1/sms/', {
                 method: 'POST',
-                body: formData
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({
+                    token: smartSmsToken,
+                    sender: 'Creditze',
+                    to: formattedPhone,
+                    message: `Your Creditze verification code is: ${otp}. Valid for 10 minutes.`,
+                    type: '0',
+                    routing: '3'
+                }).toString()
             });
 
             const smsData = await smsResponse.json();
