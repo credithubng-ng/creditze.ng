@@ -42,6 +42,8 @@ export default function CreditSearch() {
     
     if (reference) {
       setProcessing(true);
+      setError(null);
+      
       try {
         // Verify payment
         const verifyResponse = await base44.functions.invoke('paystackVerifyPayment', {
@@ -62,8 +64,11 @@ export default function CreditSearch() {
               payment_status: 'paid'
             });
 
-            // Perform credit search
+            // Perform credit search and get result
             await performCreditSearch(search.id);
+          } else {
+            setError('Payment record not found');
+            setProcessing(false);
           }
         } else {
           setError('Payment verification failed');
@@ -71,7 +76,7 @@ export default function CreditSearch() {
         }
       } catch (err) {
         console.error('Payment verification error:', err);
-        setError('Payment verification failed');
+        setError('Payment verification failed: ' + (err.message || 'Unknown error'));
         setProcessing(false);
       }
       
