@@ -17,7 +17,8 @@ import {
   ChevronRight,
   CheckCircle2,
   AlertCircle,
-  Loader2
+  Loader2,
+  FileText
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -185,6 +186,12 @@ export default function Profile() {
                 status={kyc?.kyc_status === 'verified' ? 'Verified' : 'Incomplete'}
                 statusColor={kyc?.kyc_status === 'verified' ? 'text-emerald-600' : 'text-yellow-600'}
                 onClick={() => navigate(createPageUrl('KYC'))}
+              />
+              <Separator />
+              <MenuItem 
+                icon={FileText} 
+                label="My Documents" 
+                onClick={() => navigate(createPageUrl('MyDocuments'))}
               />
               <Separator />
               <MenuItem 
