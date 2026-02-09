@@ -11,7 +11,9 @@ import {
   CheckCircle2,
   Zap,
   Building2,
-  Users
+  Users,
+  FileText,
+  Globe
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -262,6 +264,80 @@ export default function Home() {
                   className="w-full bg-emerald-500 hover:bg-emerald-600 rounded-xl py-6"
                 >
                   Check Eligibility
+                </Button>
+              </div>
+            </motion.div>
+
+            {/* POF Loans */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              className="bg-white rounded-3xl p-8 shadow-lg border border-gray-100 relative overflow-hidden"
+            >
+              <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-full -translate-y-16 translate-x-16" />
+              <div className="relative">
+                <div className="w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center mb-6">
+                  <FileText className="w-7 h-7 text-blue-600" />
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">POF Loans</h3>
+                <p className="text-gray-500 mb-6">Proof of funds for visa applications</p>
+                <ul className="space-y-3 mb-8">
+                  {[
+                    'Fast visa support',
+                    'Flexible terms',
+                    'Competitive rates',
+                    'Expert guidance'
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-center gap-3 text-gray-700">
+                      <CheckCircle2 className="w-5 h-5 text-blue-500" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+                <Button 
+                  onClick={() => window.open('https://creditze.ng', '_blank')}
+                  className="w-full bg-blue-600 hover:bg-blue-700 rounded-xl py-6"
+                >
+                  Learn More <ArrowRight className="ml-2 w-5 h-5" />
+                </Button>
+              </div>
+            </motion.div>
+
+            {/* UK Loan */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              className="bg-gradient-to-br from-blue-900 to-blue-800 rounded-3xl p-8 shadow-lg relative overflow-hidden"
+            >
+              <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/20 rounded-full -translate-y-16 translate-x-16" />
+              <div className="relative">
+                <div className="w-14 h-14 bg-blue-500/20 rounded-2xl flex items-center justify-center mb-6">
+                  <Globe className="w-7 h-7 text-blue-400" />
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-2">£10,000 UK Loan</h3>
+                <p className="text-blue-200 mb-6">For Nigerians living in UK</p>
+                <ul className="space-y-3 mb-8">
+                  {[
+                    'Up to £10,000',
+                    'Quick approval',
+                    'We act as loan broker',
+                    'UK residents only'
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-center gap-3 text-blue-100">
+                      <CheckCircle2 className="w-5 h-5 text-blue-400" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+                <Button 
+                  onClick={() => window.open('https://creditze.ng', '_blank')}
+                  className="w-full bg-blue-500 hover:bg-blue-600 rounded-xl py-6"
+                >
+                  Apply Now <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
               </div>
             </motion.div>
