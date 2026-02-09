@@ -9,7 +9,8 @@ import {
   Settings,
   LayoutDashboard,
   MessageSquare,
-  AlertTriangle
+  AlertTriangle,
+  LogOut
 } from 'lucide-react';
 
 const NAV_ITEMS = [
@@ -47,8 +48,23 @@ export default function Layout({ children, currentPageName }) {
   // Admin pages - show admin nav instead
   const isAdminPage = currentPageName?.startsWith('Admin');
 
+  const handleLogout = async () => {
+    await base44.auth.logout();
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Logout Button - Fixed Top Right */}
+      {isAuthenticated && (
+        <button
+          onClick={handleLogout}
+          className="fixed top-4 right-4 z-50 p-2 bg-white rounded-full shadow-md hover:shadow-lg transition-all hover:bg-red-50 group"
+          title="Logout"
+        >
+          <LogOut className="w-5 h-5 text-gray-600 group-hover:text-red-600" />
+        </button>
+      )}
+      
       {children}
       
       {/* Bottom Navigation */}
