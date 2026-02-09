@@ -282,13 +282,13 @@ export default function Home() {
                   <FileText className="w-7 h-7 text-blue-600" />
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-2">POF Loans</h3>
-                <p className="text-gray-500 mb-6">Proof of funds for visa applications</p>
+                <p className="text-gray-500 mb-6">Show financial capacity with confidence</p>
                 <ul className="space-y-3 mb-8">
                   {[
-                    'Fast visa support',
-                    'Flexible terms',
-                    'Competitive rates',
-                    'Expert guidance'
+                    'Same day disbursement',
+                    'Demonstrate financial capacity',
+                    'Flexible loan amounts',
+                    'Competitive rates'
                   ].map((item, i) => (
                     <li key={i} className="flex items-center gap-3 text-gray-700">
                       <CheckCircle2 className="w-5 h-5 text-blue-500" />
