@@ -63,6 +63,9 @@ Deno.serve(async (req) => {
             }, { status: 400 });
         }
 
+        // Store verified value before clearing
+        const verifiedValue = kyc[`otp_${type}_target`];
+        
         // Clear OTP after successful verification
         await base44.asServiceRole.entities.KYCProfile.update(kyc.id, {
             [`otp_${type}`]: null,
@@ -73,7 +76,7 @@ Deno.serve(async (req) => {
         return Response.json({ 
             success: true, 
             message: 'OTP verified successfully',
-            verified_value: kyc[`otp_${type}_target`]
+            verified_value: verifiedValue
         });
 
     } catch (error) {
