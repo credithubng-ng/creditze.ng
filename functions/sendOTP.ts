@@ -58,59 +58,62 @@ Deno.serve(async (req) => {
         }
 
         if (type === 'phone') {
-            // Send SMS via SmartSMS Solutions
-            const smartSmsToken = Deno.env.get('SMARTSMS_TOKEN');
+            // Send SMS via Termii (bypasses DND)
+            const termiiApiKey = Deno.env.get('TERMII_API_KEY');
             
-            if (!smartSmsToken) {
+            if (!termiiApiKey) {
                 return Response.json({ 
                     success: false,
                     error: 'SMS service not configured' 
                 }, { status: 500 });
             }
 
-            // Format phone: SmartSMS expects format like +2348012345678
+            // Format phone: Termii expects format like 2348012345678 (no +)
             let formattedPhone = phone_number.replace(/^0+/, '');
-            if (!formattedPhone.startsWith('+234') && !formattedPhone.startsWith('234')) {
-                formattedPhone = '+234' + formattedPhone;
-            } else if (formattedPhone.startsWith('234')) {
-                formattedPhone = '+' + formattedPhone;
+            if (formattedPhone.startsWith('+234')) {
+                formattedPhone = formattedPhone.substring(1);
+            } else if (!formattedPhone.startsWith('234')) {
+                formattedPhone = '234' + formattedPhone;
             }
             
-            console.log('Sending SMS to:', formattedPhone);
-            
-            const formData = new URLSearchParams();
-            formData.append('token', smartSmsToken);
-            formData.append('sender', 'Creditze');
-            formData.append('to', formattedPhone);
-            formData.append('message', `Your Creditze verification code is: ${otp}. Valid for 10 minutes.`);
-            formData.append('type', '0');
-            formData.append('routing', '3');
+            console.log('Sending OTP SMS to:', formattedPhone);
 
-            const smsResponse = await fetch('https://app.smartsmssolutions.com/io/api/client/v1/sms/', {
+            const smsResponse = await fetch('https://api.ng.termii.com/api/sms/otp/send', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
+                    'Content-Type': 'application/json'
                 },
-                body: formData.toString()
+                body: JSON.stringify({
+                    api_key: termiiApiKey,
+                    message_type: 'NUMERIC',
+                    to: formattedPhone,
+                    from: 'Creditze',
+                    channel: 'dnd',
+                    pin_attempts: 3,
+                    pin_time_to_live: 10,
+                    pin_length: 6,
+                    pin_placeholder: '< 1234 >',
+                    message_text: 'Your Creditze verification code is < 1234 >. Valid for 10 minutes.',
+                    pin_type: 'NUMERIC'
+                })
             });
 
             const smsData = await smsResponse.json();
             
-            console.log('SmartSMS response:', smsData);
+            console.log('Termii response:', smsData);
 
-            // SmartSMS returns code "1000" for success, including scheduled messages
-            if (!smsResponse.ok) {
-                console.error('SmartSMS HTTP error:', smsData);
+            if (!smsResponse.ok || !smsData.pinId) {
+                console.error('Termii error:', smsData);
                 return Response.json({ 
                     success: false, 
-                    error: 'Failed to send SMS' 
+                    error: smsData.message || 'Failed to send SMS' 
                 }, { status: 500 });
             }
 
             return Response.json({ 
                 success: true, 
                 message: 'OTP sent to phone',
-                data: smsData
+                pinId: smsData.pinId
             });
 
         } else {
