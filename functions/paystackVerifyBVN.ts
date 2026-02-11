@@ -30,6 +30,11 @@ Deno.serve(async (req) => {
         // Test Mode: Return mock data
         if (paystackKey.startsWith('sk_test_')) {
             console.log('Test mode detected - returning mock BVN data');
+            
+            // Get phone number from KYC profile
+            const kycData = await base44.entities.KYCProfile.filter({ user_id: user.id });
+            const phoneNumber = kycData[0]?.phone_number || '08012345678';
+            
             return Response.json({ 
                 success: true,
                 data: {
@@ -37,7 +42,7 @@ Deno.serve(async (req) => {
                     last_name: user.full_name?.split(' ').slice(-1)[0] || 'Doe',
                     middle_name: user.full_name?.split(' ')[1] || 'Middle',
                     full_name: user.full_name || 'John Middle Doe',
-                    phone_number: '08012345678',
+                    phone_number: phoneNumber,
                     date_of_birth: '1990-01-01',
                     gender: 'male'
                 }
