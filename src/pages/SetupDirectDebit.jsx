@@ -29,12 +29,7 @@ import {
 import { toast } from 'sonner';
 import { playCelebrationChime } from '../components/utils/celebrationSound';
 
-const BANKS = [
-  'Access Bank', 'Citibank', 'Ecobank', 'Fidelity Bank', 'First Bank', 'First City Monument Bank',
-  'Guaranty Trust Bank', 'Heritage Bank', 'Keystone Bank', 'Polaris Bank', 'Providus Bank',
-  'Stanbic IBTC Bank', 'Standard Chartered Bank', 'Sterling Bank', 'Union Bank', 'United Bank for Africa',
-  'Unity Bank', 'Wema Bank', 'Zenith Bank', 'Opay', 'Kuda', 'Moniepoint', 'Palmpay'
-];
+
 
 export default function SetupDirectDebit() {
   const navigate = useNavigate();
@@ -45,6 +40,8 @@ export default function SetupDirectDebit() {
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [agreed, setAgreed] = useState(false);
+  const [banks, setBanks] = useState([]);
+  const [verifyingAccount, setVerifyingAccount] = useState(false);
 
   const [formData, setFormData] = useState({
     bank_name: '',
@@ -54,6 +51,7 @@ export default function SetupDirectDebit() {
 
   useEffect(() => {
     loadData();
+    loadBanks();
     checkMandateCallback();
   }, []);
 
@@ -168,6 +166,57 @@ export default function SetupDirectDebit() {
       setLoading(false);
     }
   };
+
+  const loadBanks = async () => {
+    try {
+      const response = await base44.functions.invoke('paystackGetBanks');
+      if (response.data.success) {
+        setBanks(response.data.banks);
+      }
+    } catch (error) {
+      console.error('Error loading banks:', error);
+    }
+  };
+
+  const verifyAccount = async () => {
+    if (!formData.account_number || formData.account_number.length !== 10) {
+      return;
+    }
+    if (!formData.bank_name) {
+      return;
+    }
+
+    const selectedBank = banks.find(b => b.name === formData.bank_name);
+    if (!selectedBank) {
+      return;
+    }
+
+    setVerifyingAccount(true);
+
+    try {
+      const response = await base44.functions.invoke('paystackVerifyAccount', {
+        account_number: formData.account_number,
+        bank_code: selectedBank.code
+      });
+
+      if (response.data.success) {
+        setFormData({ ...formData, account_name: response.data.account_name });
+      } else {
+        toast.error(response.data.error || 'Could not verify account');
+      }
+    } catch (err) {
+      toast.error('Account verification failed');
+    } finally {
+      setVerifyingAccount(false);
+    }
+  };
+
+  // Auto-verify account when both bank and account number are set
+  useEffect(() => {
+    if (formData.bank_name && formData.account_number && formData.account_number.length === 10) {
+      verifyAccount();
+    }
+  }, [formData.bank_name, formData.account_number]);
 
   const setupMandate = async () => {
     if (!agreed) {
@@ -452,8 +501,8 @@ export default function SetupDirectDebit() {
                     <SelectValue placeholder="Select bank" />
                   </SelectTrigger>
                   <SelectContent>
-                    {BANKS.map(bank => (
-                      <SelectItem key={bank} value={bank}>{bank}</SelectItem>
+                    {banks.map(bank => (
+                      <SelectItem key={bank.code} value={bank.name}>{bank.name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -469,12 +518,23 @@ export default function SetupDirectDebit() {
               </div>
               <div>
                 <Label>Account Name</Label>
-                <Input
-                  value={formData.account_name}
-                  onChange={(e) => setFormData({ ...formData, account_name: e.target.value })}
-                  placeholder="John Doe"
-                  className="mt-1"
-                />
+                <div className="relative">
+                  <Input
+                    value={formData.account_name}
+                    onChange={(e) => setFormData({ ...formData, account_name: e.target.value })}
+                    placeholder="Account name will appear here"
+                    className="mt-1"
+                    disabled={verifyingAccount}
+                  />
+                  {verifyingAccount && (
+                    <Loader2 className="w-4 h-4 animate-spin absolute right-3 top-1/2 -translate-y-1/2 text-emerald-600" />
+                  )}
+                </div>
+                {formData.account_name && !verifyingAccount && (
+                  <p className="text-xs text-emerald-600 mt-1 flex items-center gap-1">
+                    <CheckCircle2 className="w-3 h-3" /> Account verified
+                  </p>
+                )}
               </div>
             </CardContent>
           </Card>
