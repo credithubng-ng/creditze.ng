@@ -75,7 +75,7 @@ Deno.serve(async (req) => {
                 },
                 body: JSON.stringify({
                     token: smartSmsToken,
-                    sender: 'Creditze',
+                    sender: 'Transbill',
                     to: phone_number,
                     message: `Your Creditze verification code is: ${otp}. Valid for 10 minutes.`,
                     type: 0,
