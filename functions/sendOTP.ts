@@ -68,10 +68,16 @@ Deno.serve(async (req) => {
                 }, { status: 500 });
             }
 
+            // Format phone: SmartSMS expects 234XXXXXXXXX format
+            let formattedPhone = phone_number.replace(/^0+/, '');
+            if (!formattedPhone.startsWith('234')) {
+                formattedPhone = '234' + formattedPhone;
+            }
+
             const formData = new FormData();
             formData.append('token', smartSmsToken);
             formData.append('sender', 'Transbill');
-            formData.append('to', phone_number);
+            formData.append('to', formattedPhone);
             formData.append('message', `Your Creditze verification code is: ${otp}. Valid for 10 minutes.`);
             formData.append('type', '0');
             formData.append('routing', '3');
