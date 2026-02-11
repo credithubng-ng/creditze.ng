@@ -312,14 +312,22 @@ export default function KYC() {
     }
     setSaving(true);
     try {
-      // In production, this would call a NIN verification API
+      const response = await base44.functions.invoke('paystackVerifyNIN', {
+        nin: formData.nin
+      });
+
+      if (!response.data.success) {
+        throw new Error(response.data.error || 'NIN verification failed');
+      }
+
       await base44.entities.KYCProfile.update(kyc.id, {
         nin: formData.nin,
         nin_verified: true
       });
       setCurrentStep(3);
+      setError(null);
     } catch (err) {
-      setError('NIN verification failed. Please check and try again.');
+      setError(err.message || 'NIN verification failed. Please check and try again.');
     } finally {
       setSaving(false);
     }
