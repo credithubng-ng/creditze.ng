@@ -48,15 +48,27 @@ Deno.serve(async (req) => {
         // Extract BVN data
         const bvnData = data.data;
         
+        // Handle different BVN data formats
+        let fullName = bvnData.full_name || 
+                       `${bvnData.first_name || ''} ${bvnData.middle_name || ''} ${bvnData.last_name || ''}`.trim();
+        
+        // If still no full name, try combining available names
+        if (!fullName) {
+            fullName = [bvnData.first_name, bvnData.middle_name, bvnData.last_name]
+                .filter(Boolean)
+                .join(' ');
+        }
+        
         return Response.json({ 
             success: true,
             data: {
-                first_name: bvnData.first_name,
-                last_name: bvnData.last_name,
-                full_name: `${bvnData.first_name} ${bvnData.last_name}`,
-                phone_number: bvnData.phone_number,
-                date_of_birth: bvnData.date_of_birth,
-                gender: bvnData.gender
+                first_name: bvnData.first_name || '',
+                last_name: bvnData.last_name || '',
+                middle_name: bvnData.middle_name || '',
+                full_name: fullName,
+                phone_number: bvnData.phone_number || bvnData.mobile || '',
+                date_of_birth: bvnData.date_of_birth || bvnData.dob || '',
+                gender: bvnData.gender?.toLowerCase() || ''
             }
         });
 
