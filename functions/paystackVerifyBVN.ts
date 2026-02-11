@@ -55,7 +55,8 @@ Deno.serve(async (req) => {
                 last_name: bvnData.last_name,
                 full_name: `${bvnData.first_name} ${bvnData.last_name}`,
                 phone_number: bvnData.phone_number,
-                date_of_birth: bvnData.date_of_birth
+                date_of_birth: bvnData.date_of_birth,
+                gender: bvnData.gender
             }
         });
 

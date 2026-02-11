@@ -273,7 +273,11 @@ export default function KYC() {
 
       await base44.entities.KYCProfile.update(kyc.id, {
         bvn: formData.bvn,
-        bvn_verified: true
+        bvn_verified: true,
+        bvn_full_name: bvnData.full_name,
+        bvn_phone_number: bvnData.phone_number,
+        bvn_date_of_birth: bvnData.date_of_birth,
+        bvn_gender: bvnData.gender
       });
       setCurrentStep(2);
       setError(null);
