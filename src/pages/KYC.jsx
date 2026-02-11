@@ -243,7 +243,7 @@ export default function KYC() {
 
       const bvnData = response.data.data;
 
-      // Match names
+      // Match names - require at least 2 out of 3 names to match
       const userFullName = user.full_name?.toLowerCase().trim();
       const bvnFullName = bvnData.full_name?.toLowerCase().trim();
       
@@ -251,16 +251,23 @@ export default function KYC() {
         throw new Error('Unable to verify names. Please contact support.');
       }
 
-      // Simple name matching (handle middle names, reversals, etc)
-      const userNames = userFullName.split(/\s+/).sort();
-      const bvnNames = bvnFullName.split(/\s+/).sort();
+      const userNames = userFullName.split(/\s+/).filter(n => n.length > 0);
+      const bvnNames = bvnFullName.split(/\s+/).filter(n => n.length > 0);
       
-      const nameMatch = userNames.some(un => 
-        bvnNames.some(bn => bn.includes(un) || un.includes(bn))
-      );
+      // Count matching names
+      let matchCount = 0;
+      for (const userName of userNames) {
+        for (const bvnName of bvnNames) {
+          if (userName === bvnName || userName.includes(bvnName) || bvnName.includes(userName)) {
+            matchCount++;
+            break;
+          }
+        }
+      }
 
-      if (!nameMatch) {
-        throw new Error(`Name mismatch: Your registered name "${user.full_name}" doesn't match BVN name "${bvnData.full_name}". Please contact support.`);
+      // Require at least 2 matching names
+      if (matchCount < 2) {
+        throw new Error(`Name verification failed: Only ${matchCount} name(s) matched. Your registered name "${user.full_name}" must have at least 2 matching names with BVN name "${bvnData.full_name}". Please contact support.`);
       }
 
       // Match phone numbers (last 10 digits)
