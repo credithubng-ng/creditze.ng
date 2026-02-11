@@ -28,7 +28,7 @@ Deno.serve(async (req) => {
         }
 
         // Call Paystack BVN verification API
-        const response = await fetch(`https://api.paystack.co/bvn/resolve/${bvn}`, {
+        const response = await fetch(`https://api.paystack.co/bank/resolve_bvn/${bvn}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${paystackKey}`,
