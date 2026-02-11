@@ -160,7 +160,7 @@ export default function Home() {
               <span className="text-emerald-600">build your credit</span>
             </h1>
             <p className="text-lg md:text-xl text-gray-600 mb-10 max-w-2xl mx-auto">
-              Access quick loans starting from ₦10,000. Build your credit limit with every successful repayment.
+              Access quick loans up to ₦5,000,000. Build your credit limit with every successful repayment.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
