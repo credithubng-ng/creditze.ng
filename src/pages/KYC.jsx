@@ -40,12 +40,7 @@ const NIGERIAN_STATES = [
   'Yobe', 'Zamfara'
 ];
 
-const BANKS = [
-  'Access Bank', 'Citibank', 'Ecobank', 'Fidelity Bank', 'First Bank', 'First City Monument Bank',
-  'Guaranty Trust Bank', 'Heritage Bank', 'Keystone Bank', 'Polaris Bank', 'Providus Bank',
-  'Stanbic IBTC Bank', 'Standard Chartered Bank', 'Sterling Bank', 'Union Bank', 'United Bank for Africa',
-  'Unity Bank', 'Wema Bank', 'Zenith Bank', 'Opay', 'Kuda', 'Moniepoint', 'Palmpay'
-];
+
 
 export default function KYC() {
   const navigate = useNavigate();
@@ -57,6 +52,8 @@ export default function KYC() {
   const [error, setError] = useState(null);
   const [otpSent, setOtpSent] = useState(false);
   const [otp, setOtp] = useState('');
+  const [banks, setBanks] = useState([]);
+  const [verifyingAccount, setVerifyingAccount] = useState(false);
 
   const [formData, setFormData] = useState({
     phone_number: '',
@@ -75,6 +72,7 @@ export default function KYC() {
 
   useEffect(() => {
     loadData();
+    loadBanks();
   }, []);
 
   const loadData = async () => {
@@ -108,10 +106,62 @@ export default function KYC() {
     }
   };
 
+  const loadBanks = async () => {
+    try {
+      const response = await base44.functions.invoke('paystackGetBanks');
+      if (response.data.success) {
+        setBanks(response.data.banks);
+      }
+    } catch (error) {
+      console.error('Error loading banks:', error);
+    }
+  };
+
+  const verifyAccount = async () => {
+    if (!formData.account_number || formData.account_number.length !== 10) {
+      return;
+    }
+    if (!formData.bank_name) {
+      return;
+    }
+
+    const selectedBank = banks.find(b => b.name === formData.bank_name);
+    if (!selectedBank) {
+      return;
+    }
+
+    setVerifyingAccount(true);
+    setError(null);
+
+    try {
+      const response = await base44.functions.invoke('paystackVerifyAccount', {
+        account_number: formData.account_number,
+        bank_code: selectedBank.code
+      });
+
+      if (response.data.success) {
+        handleChange('account_name', response.data.account_name);
+      } else {
+        setError(response.data.error || 'Could not verify account');
+      }
+    } catch (err) {
+      setError('Account verification failed');
+    } finally {
+      setVerifyingAccount(false);
+    }
+  };
+
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     setError(null);
   };
+
+  // Auto-verify account when both bank and account number are set
+  useEffect(() => {
+    if (formData.bank_name && formData.account_number && formData.account_number.length === 10) {
+      verifyAccount();
+    }
+  }, [formData.bank_name, formData.account_number]);
 
   const sendOTP = async () => {
     if (!formData.phone_number || formData.phone_number.length < 10) {
@@ -595,8 +645,8 @@ export default function KYC() {
                         <SelectValue placeholder="Select bank" />
                       </SelectTrigger>
                       <SelectContent>
-                        {BANKS.map(bank => (
-                          <SelectItem key={bank} value={bank}>{bank}</SelectItem>
+                        {banks.map(bank => (
+                          <SelectItem key={bank.code} value={bank.name}>{bank.name}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -613,17 +663,28 @@ export default function KYC() {
                   </div>
                   <div>
                     <Label>Account Name</Label>
-                    <Input
-                      placeholder="John Doe"
-                      value={formData.account_name}
-                      onChange={(e) => handleChange('account_name', e.target.value)}
-                      className="mt-1"
-                    />
+                    <div className="relative">
+                      <Input
+                        placeholder="Account name will appear here"
+                        value={formData.account_name}
+                        onChange={(e) => handleChange('account_name', e.target.value)}
+                        className="mt-1"
+                        disabled={verifyingAccount}
+                      />
+                      {verifyingAccount && (
+                        <Loader2 className="w-4 h-4 animate-spin absolute right-3 top-1/2 -translate-y-1/2 text-emerald-600" />
+                      )}
+                    </div>
+                    {formData.account_name && !verifyingAccount && (
+                      <p className="text-xs text-emerald-600 mt-1 flex items-center gap-1">
+                        <CheckCircle2 className="w-3 h-3" /> Account verified
+                      </p>
+                    )}
                   </div>
                   <Button 
                     className="w-full bg-emerald-600 hover:bg-emerald-700"
                     onClick={saveBank}
-                    disabled={saving}
+                    disabled={saving || verifyingAccount || !formData.account_name}
                   >
                     {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
                     Complete Verification <CheckCircle2 className="ml-2 w-4 h-4" />
