@@ -78,23 +78,18 @@ Deno.serve(async (req) => {
             
             console.log('Sending OTP SMS to:', formattedPhone);
 
-            const smsResponse = await fetch('https://api.ng.termii.com/api/sms/otp/send', {
+            const smsResponse = await fetch('https://api.ng.termii.com/api/sms/send', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    api_key: termiiApiKey,
-                    message_type: 'NUMERIC',
                     to: formattedPhone,
                     from: 'Creditze',
+                    sms: `Your Creditze verification code is: ${otp}. Valid for 10 minutes.`,
+                    type: 'plain',
                     channel: 'dnd',
-                    pin_attempts: 3,
-                    pin_time_to_live: 10,
-                    pin_length: 6,
-                    pin_placeholder: '< 1234 >',
-                    message_text: 'Your Creditze verification code is < 1234 >. Valid for 10 minutes.',
-                    pin_type: 'NUMERIC'
+                    api_key: termiiApiKey
                 })
             });
 
@@ -102,7 +97,7 @@ Deno.serve(async (req) => {
             
             console.log('Termii response:', smsData);
 
-            if (!smsResponse.ok || !smsData.pinId) {
+            if (!smsResponse.ok) {
                 console.error('Termii error:', smsData);
                 return Response.json({ 
                     success: false, 
@@ -113,7 +108,7 @@ Deno.serve(async (req) => {
             return Response.json({ 
                 success: true, 
                 message: 'OTP sent to phone',
-                pinId: smsData.pinId
+                data: smsData
             });
 
         } else {
