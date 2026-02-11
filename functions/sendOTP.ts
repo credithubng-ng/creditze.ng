@@ -68,16 +68,29 @@ Deno.serve(async (req) => {
                 }, { status: 500 });
             }
 
-            // Format phone: SmartSMS expects 234XXXXXXXXX format (no leading zeros)
-            let formattedPhone = phone_number.trim().replace(/\s+/g, '');
+            // Format phone: SmartSMS expects 234XXXXXXXXX format
+            let formattedPhone = phone_number.toString().trim().replace(/\s+/g, '').replace(/[^0-9]/g, '');
+            
+            // Remove +234 or 234 prefix if present
+            if (formattedPhone.startsWith('234')) {
+                formattedPhone = formattedPhone.substring(3);
+            }
             
             // Remove leading zeros
-            formattedPhone = formattedPhone.replace(/^0+/, '');
-            
-            // Add country code if not present
-            if (!formattedPhone.startsWith('234')) {
-                formattedPhone = '234' + formattedPhone;
+            while (formattedPhone.startsWith('0')) {
+                formattedPhone = formattedPhone.substring(1);
             }
+            
+            // Validate 10 digits
+            if (formattedPhone.length !== 10) {
+                return Response.json({ 
+                    success: false,
+                    error: 'Invalid phone number. Must be 10 digits after country code (e.g., 8012345678)' 
+                }, { status: 400 });
+            }
+            
+            // Add country code
+            formattedPhone = '234' + formattedPhone;
 
             const formData = new FormData();
             formData.append('token', smartSmsToken);
