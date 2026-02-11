@@ -27,6 +27,23 @@ Deno.serve(async (req) => {
             }, { status: 500 });
         }
 
+        // Test Mode: Return mock data
+        if (paystackKey.startsWith('sk_test_')) {
+            console.log('Test mode detected - returning mock BVN data');
+            return Response.json({ 
+                success: true,
+                data: {
+                    first_name: user.full_name?.split(' ')[0] || 'John',
+                    last_name: user.full_name?.split(' ').slice(-1)[0] || 'Doe',
+                    middle_name: user.full_name?.split(' ')[1] || 'Middle',
+                    full_name: user.full_name || 'John Middle Doe',
+                    phone_number: '08012345678',
+                    date_of_birth: '1990-01-01',
+                    gender: 'male'
+                }
+            });
+        }
+
         // Call Paystack BVN verification API
         const response = await fetch(`https://api.paystack.co/bank/resolve_bvn/${bvn}`, {
             method: 'GET',
