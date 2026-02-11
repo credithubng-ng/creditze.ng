@@ -36,7 +36,19 @@ Deno.serve(async (req) => {
             }
         });
 
-        const data = await response.json();
+        const responseText = await response.text();
+        console.log('Paystack BVN API Response:', responseText);
+        
+        let data;
+        try {
+            data = JSON.parse(responseText);
+        } catch (parseError) {
+            console.error('Failed to parse Paystack response:', responseText);
+            return Response.json({ 
+                success: false, 
+                error: 'Invalid response from verification service' 
+            }, { status: 500 });
+        }
 
         if (!response.ok || !data.status) {
             return Response.json({ 
