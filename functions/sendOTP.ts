@@ -85,10 +85,13 @@ Deno.serve(async (req) => {
 
             const smsData = await smsResponse.json();
             
+            console.log('SmartSMS response:', smsData);
+            
             if (!smsResponse.ok || smsData.code !== 'ok') {
+                console.error('SmartSMS error:', smsData);
                 return Response.json({ 
                     success: false, 
-                    error: 'Failed to send SMS' 
+                    error: smsData.message || 'Failed to send SMS' 
                 }, { status: 500 });
             }
 
