@@ -58,57 +58,43 @@ Deno.serve(async (req) => {
         }
 
         if (type === 'phone') {
-            // Send SMS via Termii (bypasses DND)
-            const termiiApiKey = Deno.env.get('TERMII_API_KEY');
+            // Send SMS via SmartSMS
+            const smartSmsToken = Deno.env.get('SMARTSMS_TOKEN');
             
-            if (!termiiApiKey) {
+            if (!smartSmsToken) {
                 return Response.json({ 
                     success: false,
                     error: 'SMS service not configured' 
                 }, { status: 500 });
             }
 
-            // Format phone: Termii expects format like 2348012345678 (no +)
-            let formattedPhone = phone_number.replace(/^0+/, '');
-            if (formattedPhone.startsWith('+234')) {
-                formattedPhone = formattedPhone.substring(1);
-            } else if (!formattedPhone.startsWith('234')) {
-                formattedPhone = '234' + formattedPhone;
-            }
-            
-            console.log('Sending OTP SMS to:', formattedPhone);
-
-            const smsResponse = await fetch('https://api.ng.termii.com/api/sms/send', {
+            const smsResponse = await fetch('https://smartsmssolutions.com/api/json.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    to: formattedPhone,
-                    from: 'N-Alert',
-                    sms: `Your Creditze verification code is: ${otp}. Valid for 10 minutes.`,
-                    type: 'plain',
-                    channel: 'generic',
-                    api_key: termiiApiKey
+                    token: smartSmsToken,
+                    sender: 'Creditze',
+                    to: phone_number,
+                    message: `Your Creditze verification code is: ${otp}. Valid for 10 minutes.`,
+                    type: 0,
+                    routing: 3
                 })
             });
 
             const smsData = await smsResponse.json();
             
-            console.log('Termii response:', smsData);
-
-            if (!smsResponse.ok) {
-                console.error('Termii error:', smsData);
+            if (!smsResponse.ok || smsData.code !== 'ok') {
                 return Response.json({ 
                     success: false, 
-                    error: smsData.message || 'Failed to send SMS' 
+                    error: 'Failed to send SMS' 
                 }, { status: 500 });
             }
 
             return Response.json({ 
                 success: true, 
-                message: 'OTP sent to phone',
-                data: smsData
+                message: 'OTP sent to phone' 
             });
 
         } else {
