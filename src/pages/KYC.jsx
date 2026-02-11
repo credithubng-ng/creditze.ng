@@ -204,6 +204,16 @@ export default function KYC() {
         throw new Error(response.data.error || 'Invalid OTP');
       }
 
+      // Check if phone number is already used by another user
+      const existingKyc = await base44.entities.KYCProfile.filter({ 
+        phone_number: formData.phone_number,
+        phone_verified: true
+      });
+
+      if (existingKyc.length > 0 && existingKyc[0].user_id !== user.id) {
+        throw new Error('This phone number is already registered to another account. Please use a different number.');
+      }
+
       const kycUpdate = {
         user_id: user.id,
         phone_number: formData.phone_number,
