@@ -91,11 +91,11 @@ Deno.serve(async (req) => {
             
             console.log('SmartSMS response:', smsData);
             
-            if (!smsResponse.ok || smsData.code !== 'ok') {
+            if (!smsResponse.ok || smsData.code !== 1000) {
                 console.error('SmartSMS error:', smsData);
                 return Response.json({ 
                     success: false, 
-                    error: smsData.message || 'Failed to send SMS' 
+                    error: smsData.comment || 'Failed to send SMS' 
                 }, { status: 500 });
             }
 
