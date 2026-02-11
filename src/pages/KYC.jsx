@@ -232,14 +232,53 @@ export default function KYC() {
     }
     setSaving(true);
     try {
-      // In production, this would call a BVN verification API
+      // Verify BVN with Paystack
+      const response = await base44.functions.invoke('paystackVerifyBVN', {
+        bvn: formData.bvn
+      });
+
+      if (!response.data.success) {
+        throw new Error(response.data.error || 'BVN verification failed');
+      }
+
+      const bvnData = response.data.data;
+
+      // Match names
+      const userFullName = user.full_name?.toLowerCase().trim();
+      const bvnFullName = bvnData.full_name?.toLowerCase().trim();
+      
+      if (!userFullName || !bvnFullName) {
+        throw new Error('Unable to verify names. Please contact support.');
+      }
+
+      // Simple name matching (handle middle names, reversals, etc)
+      const userNames = userFullName.split(/\s+/).sort();
+      const bvnNames = bvnFullName.split(/\s+/).sort();
+      
+      const nameMatch = userNames.some(un => 
+        bvnNames.some(bn => bn.includes(un) || un.includes(bn))
+      );
+
+      if (!nameMatch) {
+        throw new Error(`Name mismatch: Your registered name "${user.full_name}" doesn't match BVN name "${bvnData.full_name}". Please contact support.`);
+      }
+
+      // Match phone numbers (last 10 digits)
+      const userPhone = kyc.phone_number?.replace(/\D/g, '').slice(-10);
+      const bvnPhone = bvnData.phone_number?.replace(/\D/g, '').slice(-10);
+
+      if (userPhone && bvnPhone && userPhone !== bvnPhone) {
+        throw new Error(`Phone number mismatch: Your verified phone ${userPhone} doesn't match BVN phone ${bvnPhone}. Please contact support.`);
+      }
+
       await base44.entities.KYCProfile.update(kyc.id, {
         bvn: formData.bvn,
         bvn_verified: true
       });
       setCurrentStep(2);
+      setError(null);
     } catch (err) {
-      setError('BVN verification failed. Please check and try again.');
+      setError(err.message || 'BVN verification failed. Please check and try again.');
     } finally {
       setSaving(false);
     }
