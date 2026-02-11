@@ -182,10 +182,25 @@ Deno.serve(async (req) => {
 // Helper function to extract credit score from CRC response
 function extractCreditScore(crcData) {
     try {
-        // CRC Basic Premium Report contains the score
-        const creditScore = crcData.ConsumerSearchResultResponse?.BODY?.SCORE?.['@SCORE'];
+        // Try multiple possible paths for the credit score
+        let creditScore = null;
+        
+        // Path 1: ConsumerSearchResultResponse (single hit)
+        creditScore = crcData.ConsumerSearchResultResponse?.BODY?.SCORE?.['@SCORE'];
+        
+        // Path 2: ConsumerHitResponse (merged)
+        if (!creditScore) {
+            creditScore = crcData.ConsumerHitResponse?.BODY?.CREDIT_SCORE_DETAILS?.CREDIT_SCORE_SUMMARY?.CREDIT_SCORE;
+        }
+        
+        // Path 3: Direct CREDIT_SCORE
+        if (!creditScore) {
+            creditScore = crcData.CREDIT_SCORE_DETAILS?.CREDIT_SCORE_SUMMARY?.CREDIT_SCORE;
+        }
+        
         return creditScore ? parseInt(creditScore) : null;
     } catch (e) {
+        console.error('Error extracting credit score:', e);
         return null;
     }
 }
