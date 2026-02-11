@@ -88,7 +88,7 @@ Deno.serve(async (req) => {
                     from: 'N-Alert',
                     sms: `Your Creditze verification code is: ${otp}. Valid for 10 minutes.`,
                     type: 'plain',
-                    channel: 'dnd',
+                    channel: 'generic',
                     api_key: termiiApiKey
                 })
             });
