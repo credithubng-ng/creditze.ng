@@ -68,8 +68,13 @@ Deno.serve(async (req) => {
                 }, { status: 500 });
             }
 
-            // Format phone: SmartSMS expects 234XXXXXXXXX format
-            let formattedPhone = phone_number.replace(/^0+/, '');
+            // Format phone: SmartSMS expects 234XXXXXXXXX format (no leading zeros)
+            let formattedPhone = phone_number.trim().replace(/\s+/g, '');
+            
+            // Remove leading zeros
+            formattedPhone = formattedPhone.replace(/^0+/, '');
+            
+            // Add country code if not present
             if (!formattedPhone.startsWith('234')) {
                 formattedPhone = '234' + formattedPhone;
             }
