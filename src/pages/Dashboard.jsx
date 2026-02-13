@@ -14,7 +14,8 @@ import {
   FileText,
   Shield,
   Building2,
-  ChevronRight
+  ChevronRight,
+  CreditCard
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -28,6 +29,7 @@ export default function Dashboard() {
   const [creditSearch, setCreditSearch] = useState(null);
   const [creditLimit, setCreditLimit] = useState(null);
   const [loans, setLoans] = useState([]);
+  const [approvedLoansWithoutMandate, setApprovedLoansWithoutMandate] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -50,6 +52,22 @@ export default function Dashboard() {
       setCreditSearch(creditData[0] || null);
       setCreditLimit(limitData[0] || null);
       setLoans(loanData);
+
+      // Check for approved loans without mandates
+      const approvedLoans = loanData.filter(loan => loan.status === 'approved');
+      if (approvedLoans.length > 0) {
+        const loansWithoutMandates = [];
+        for (const loan of approvedLoans) {
+          const mandates = await base44.entities.DirectDebitMandate.filter({ 
+            loan_id: loan.id,
+            status: { $in: ['active', 'pending'] }
+          });
+          if (mandates.length === 0) {
+            loansWithoutMandates.push(loan);
+          }
+        }
+        setApprovedLoansWithoutMandate(loansWithoutMandates);
+      }
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
@@ -148,6 +166,36 @@ export default function Dashboard() {
       </div>
 
       <div className="max-w-2xl mx-auto px-4 -mt-4 space-y-4">
+        {/* Direct Debit Setup Required */}
+        {approvedLoansWithoutMandate.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+          >
+            <Card className="border-0 shadow-lg border-l-4 border-l-blue-500">
+              <CardContent className="p-4">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <CreditCard className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-gray-900 mb-1">Complete Direct Debit Setup</h3>
+                    <p className="text-sm text-gray-500 mb-3">
+                      Your loan is approved! Set up direct debit to receive your funds.
+                    </p>
+                    <Button asChild className="bg-blue-600 hover:bg-blue-700">
+                      <Link to={createPageUrl(`SetupDirectDebit?loan_id=${approvedLoansWithoutMandate[0].id}`)}>
+                        Set Up Now <ArrowRight className="ml-2 w-4 h-4" />
+                      </Link>
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+
         {/* Quick Actions */}
         {canApplyForLoan() && (
           <motion.div
