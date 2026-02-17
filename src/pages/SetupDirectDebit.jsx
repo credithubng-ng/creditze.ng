@@ -40,18 +40,9 @@ export default function SetupDirectDebit() {
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [agreed, setAgreed] = useState(false);
-  const [banks, setBanks] = useState([]);
-  const [verifyingAccount, setVerifyingAccount] = useState(false);
-
-  const [formData, setFormData] = useState({
-    bank_name: '',
-    account_number: '',
-    account_name: ''
-  });
 
   useEffect(() => {
     loadData();
-    loadBanks();
     checkMandateCallback();
   }, []);
 
@@ -151,15 +142,6 @@ export default function SetupDirectDebit() {
         }
       }
 
-      // Pre-fill from KYC
-      if (kycData[0]) {
-        setFormData({
-          bank_name: kycData[0].bank_name || '',
-          account_number: kycData[0].account_number || '',
-          account_name: kycData[0].account_name || ''
-        });
-      }
-
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
@@ -167,56 +149,7 @@ export default function SetupDirectDebit() {
     }
   };
 
-  const loadBanks = async () => {
-    try {
-      const response = await base44.functions.invoke('paystackGetBanks');
-      if (response.data.success) {
-        setBanks(response.data.banks);
-      }
-    } catch (error) {
-      console.error('Error loading banks:', error);
-    }
-  };
 
-  const verifyAccount = async () => {
-    if (!formData.account_number || formData.account_number.length !== 10) {
-      return;
-    }
-    if (!formData.bank_name) {
-      return;
-    }
-
-    const selectedBank = banks.find(b => b.name === formData.bank_name);
-    if (!selectedBank) {
-      return;
-    }
-
-    setVerifyingAccount(true);
-
-    try {
-      const response = await base44.functions.invoke('paystackVerifyAccount', {
-        account_number: formData.account_number,
-        bank_code: selectedBank.code
-      });
-
-      if (response.data.success) {
-        setFormData({ ...formData, account_name: response.data.account_name });
-      } else {
-        toast.error(response.data.error || 'Could not verify account');
-      }
-    } catch (err) {
-      toast.error('Account verification failed');
-    } finally {
-      setVerifyingAccount(false);
-    }
-  };
-
-  // Auto-verify account when both bank and account number are set
-  useEffect(() => {
-    if (formData.bank_name && formData.account_number && formData.account_number.length === 10) {
-      verifyAccount();
-    }
-  }, [formData.bank_name, formData.account_number]);
 
   const setupMandate = async () => {
     if (!agreed) {
@@ -224,20 +157,20 @@ export default function SetupDirectDebit() {
       return;
     }
 
-    if (!formData.bank_name || !formData.account_number || !formData.account_name) {
-      toast.error('Please fill in all bank details');
+    if (!kyc?.bank_name || !kyc?.account_number || !kyc?.account_name) {
+      toast.error('Bank details not found in your KYC profile');
       return;
     }
 
     setProcessing(true);
     try {
-      // Create mandate record first
+      // Create mandate record first using KYC details
       const mandate = await base44.entities.DirectDebitMandate.create({
         user_id: user.id,
         loan_id: loan?.id,
-        bank_name: formData.bank_name,
-        account_number: formData.account_number,
-        account_name: formData.account_name,
+        bank_name: kyc.bank_name,
+        account_number: kyc.account_number,
+        account_name: kyc.account_name,
         max_amount: loan ? loan.total_repayment * 1.1 : 100000,
         status: 'pending'
       });
@@ -291,14 +224,14 @@ export default function SetupDirectDebit() {
 
   const disburseLoan = async (loanData) => {
     try {
-      // Create initial disbursement log
+      // Create initial disbursement log using KYC details
       const disbursementLog = await base44.entities.DisbursementLog.create({
         loan_id: loanData.id,
         user_id: user.id,
         amount: loanData.amount_approved,
-        bank_name: formData.bank_name,
-        account_number: formData.account_number,
-        account_name: formData.account_name,
+        bank_name: kyc.bank_name,
+        account_number: kyc.account_number,
+        account_name: kyc.account_name,
         status: 'processing',
         attempt_number: 1,
         max_retries: 3,
@@ -331,7 +264,7 @@ export default function SetupDirectDebit() {
           user_id: user.id,
           details: {
             amount: loanData.amount_approved,
-            bank: formData.bank_name,
+            bank: kyc.bank_name,
             disbursement_ref: disbursementLog.payment_reference
           }
         });
@@ -493,7 +426,7 @@ export default function SetupDirectDebit() {
           </Card>
         )}
 
-        {/* Bank Details Form */}
+        {/* Bank Details - Read Only */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -505,52 +438,33 @@ export default function SetupDirectDebit() {
                 <Building2 className="w-5 h-5" /> Bank Account Details
               </CardTitle>
               <CardDescription>
-                This account will be debited on the loan due date
+                This account will be debited on the loan due date and receive disbursement
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div>
-                <Label>Bank</Label>
-                <Select value={formData.bank_name} onValueChange={(v) => setFormData({ ...formData, bank_name: v })}>
-                  <SelectTrigger className="mt-1">
-                    <SelectValue placeholder="Select bank" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {banks.map(bank => (
-                      <SelectItem key={bank.code} value={bank.name}>{bank.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>Account Number</Label>
-                <Input
-                  value={formData.account_number}
-                  onChange={(e) => setFormData({ ...formData, account_number: e.target.value.replace(/\D/g, '').slice(0, 10) })}
-                  placeholder="0123456789"
-                  className="mt-1"
-                />
-              </div>
-              <div>
-                <Label>Account Name</Label>
-                <div className="relative">
-                  <Input
-                    value={formData.account_name}
-                    onChange={(e) => setFormData({ ...formData, account_name: e.target.value })}
-                    placeholder="Account name will appear here"
-                    className="mt-1"
-                    disabled={verifyingAccount}
-                  />
-                  {verifyingAccount && (
-                    <Loader2 className="w-4 h-4 animate-spin absolute right-3 top-1/2 -translate-y-1/2 text-emerald-600" />
-                  )}
+              <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+                <div>
+                  <p className="text-xs text-gray-500 mb-1">Bank</p>
+                  <p className="font-semibold text-gray-900">{kyc?.bank_name || 'N/A'}</p>
                 </div>
-                {formData.account_name && !verifyingAccount && (
-                  <p className="text-xs text-emerald-600 mt-1 flex items-center gap-1">
-                    <CheckCircle2 className="w-3 h-3" /> Account verified
-                  </p>
-                )}
+                <div>
+                  <p className="text-xs text-gray-500 mb-1">Account Number</p>
+                  <p className="font-semibold text-gray-900">{kyc?.account_number || 'N/A'}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 mb-1">Account Name</p>
+                  <div className="flex items-center gap-2">
+                    <p className="font-semibold text-gray-900">{kyc?.account_name || 'N/A'}</p>
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                  </div>
+                </div>
               </div>
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription className="text-xs">
+                  These are your verified KYC bank details. To change them, please update your profile.
+                </AlertDescription>
+              </Alert>
             </CardContent>
           </Card>
         </motion.div>
