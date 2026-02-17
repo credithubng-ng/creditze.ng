@@ -242,6 +242,9 @@ export default function SetupDirectDebit() {
         status: 'pending'
       });
 
+      // Calculate due date (30 days from now for urgent loans, or use loan due date)
+      const dueDate = loan.due_date || new Date(new Date().setDate(new Date().getDate() + 30));
+      
       // Initialize Paystack authorization
       const response = await base44.functions.invoke('paystackCreateMandate', {
         amount: 50, // ₦50 authorization fee
@@ -250,7 +253,19 @@ export default function SetupDirectDebit() {
           payment_type: 'mandate_authorization',
           mandate_id: mandate.id,
           loan_id: loan?.id,
-          user_id: user.id
+          user_id: user.id,
+          custom_fields: [
+            {
+              display_name: "Loan Amount",
+              variable_name: "loan_amount",
+              value: `₦${Math.round(loan.total_repayment).toLocaleString()}`
+            },
+            {
+              display_name: "Due Date",
+              variable_name: "due_date",
+              value: new Date(dueDate).toLocaleDateString('en-GB')
+            }
+          ]
         },
         callback_url: window.location.href
       });
