@@ -175,6 +175,12 @@ export default function AdminLoanReview() {
         const principal = parseFloat(reviewForm.amountAdjustment);
         const rate = parseFloat(reviewForm.interestAdjustment) / 100;
         updateData.total_repayment = principal + (principal * rate);
+
+        // Set due date based on loan tenure
+        const tenureDays = selectedApp.tenure_days || (selectedApp.loan_type === 'urgent_10k' ? 30 : 90);
+        const dueDate = new Date();
+        dueDate.setDate(dueDate.getDate() + tenureDays);
+        updateData.due_date = dueDate.toISOString().split('T')[0];
       } else {
         updateData.rejection_reason = reviewForm.reason;
       }
