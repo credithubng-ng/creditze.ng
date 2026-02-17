@@ -240,8 +240,8 @@ export default function AdminLoanReview() {
               </div>
               
               <div style="text-align: center; margin-top: 32px;">
-                <a href="https://creditze.ng" style="display: inline-block; background: linear-gradient(135deg, #059669 0%, #047857 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px; box-shadow: 0 2px 8px rgba(5, 150, 105, 0.3);">
-                  Go to Dashboard
+                <a href="${window.location.origin}/#/SetupDirectDebit?loan_id=${selectedApp.id}" style="display: inline-block; background: linear-gradient(135deg, #059669 0%, #047857 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px; box-shadow: 0 2px 8px rgba(5, 150, 105, 0.3);">
+                  Set Up Direct Debit
                 </a>
               </div>
               
