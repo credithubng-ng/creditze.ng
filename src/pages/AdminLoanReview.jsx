@@ -188,32 +188,129 @@ export default function AdminLoanReview() {
         : '❌ Loan Application Update';
 
       const emailBody = reviewForm.action === 'approve'
-        ? `Dear ${user.full_name},
-
-Great news! Your loan application has been reviewed and approved by our team.
-
-Loan Details:
-• Amount Approved: ₦${updateData.amount_approved.toLocaleString()}
-• Interest Rate: ${updateData.interest_rate}%
-• Total Repayment: ₦${updateData.total_repayment.toLocaleString()}
-
-Reason: ${reviewForm.reason}
-
-Next Steps:
-Please log in to your dashboard and set up direct debit to receive your funds.
-
-Best regards,
-getawin.ng Team`
-        : `Dear ${user.full_name},
-
-We regret to inform you that your loan application has been reviewed and could not be approved at this time.
-
-Reason: ${reviewForm.reason}
-
-You can reapply after addressing the concerns mentioned above. If you believe this decision was made in error, you can raise a dispute through your dashboard.
-
-Best regards,
-getawin.ng Team`;
+        ? `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;">
+            <div style="background-color: #ffffff; border-radius: 12px; padding: 32px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+              <div style="text-align: center; margin-bottom: 24px;">
+                <div style="background: linear-gradient(135deg, #059669 0%, #047857 100%); width: 64px; height: 64px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+                  <span style="font-size: 32px;">✅</span>
+                </div>
+                <h1 style="color: #059669; margin: 0; font-size: 24px; font-weight: bold;">Congratulations!</h1>
+              </div>
+              
+              <p style="color: #374151; font-size: 16px; line-height: 1.6; margin-bottom: 24px;">
+                Dear <strong>${user.full_name}</strong>,
+              </p>
+              
+              <p style="color: #374151; font-size: 16px; line-height: 1.6; margin-bottom: 24px;">
+                Great news! Your loan application has been reviewed and <strong style="color: #059669;">approved</strong> by our team.
+              </p>
+              
+              <div style="background-color: #f3f4f6; border-radius: 8px; padding: 20px; margin-bottom: 24px;">
+                <h2 style="color: #1f2937; font-size: 18px; margin-top: 0; margin-bottom: 16px; font-weight: 600;">📋 Loan Details</h2>
+                <table style="width: 100%; border-collapse: collapse;">
+                  <tr>
+                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Amount Approved:</td>
+                    <td style="padding: 8px 0; color: #1f2937; font-weight: 600; text-align: right; font-size: 16px;">₦${updateData.amount_approved.toLocaleString()}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Interest Rate:</td>
+                    <td style="padding: 8px 0; color: #1f2937; font-weight: 600; text-align: right; font-size: 16px;">${updateData.interest_rate}%</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Total Repayment:</td>
+                    <td style="padding: 8px 0; color: #059669; font-weight: 700; text-align: right; font-size: 16px;">₦${updateData.total_repayment.toLocaleString()}</td>
+                  </tr>
+                </table>
+              </div>
+              
+              <div style="background-color: #ecfdf5; border-left: 4px solid #059669; padding: 16px; margin-bottom: 24px; border-radius: 4px;">
+                <p style="color: #065f46; margin: 0; font-size: 14px; line-height: 1.5;">
+                  <strong>Approval Reason:</strong> ${reviewForm.reason}
+                </p>
+              </div>
+              
+              <div style="background-color: #eff6ff; border-radius: 8px; padding: 20px; margin-bottom: 24px;">
+                <h2 style="color: #1e40af; font-size: 16px; margin-top: 0; margin-bottom: 12px; font-weight: 600;">🎯 Next Steps</h2>
+                <ol style="color: #374151; font-size: 14px; line-height: 1.6; margin: 0; padding-left: 20px;">
+                  <li style="margin-bottom: 8px;">Log in to your dashboard</li>
+                  <li style="margin-bottom: 8px;">Complete the direct debit setup (one-time ₦50 authorization)</li>
+                  <li>Receive your funds within 24 hours</li>
+                </ol>
+              </div>
+              
+              <div style="text-align: center; margin-top: 32px;">
+                <a href="https://creditze.ng" style="display: inline-block; background: linear-gradient(135deg, #059669 0%, #047857 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px; box-shadow: 0 2px 8px rgba(5, 150, 105, 0.3);">
+                  Go to Dashboard
+                </a>
+              </div>
+              
+              <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 32px 0;" />
+              
+              <p style="color: #6b7280; font-size: 13px; line-height: 1.5; margin-bottom: 8px;">
+                Best regards,<br>
+                <strong style="color: #374151;">Creditze Team</strong>
+              </p>
+              
+              <p style="color: #9ca3af; font-size: 12px; line-height: 1.5; margin: 0;">
+                Need help? Contact us at <a href="mailto:support@creditze.ng" style="color: #059669; text-decoration: none;">support@creditze.ng</a>
+              </p>
+            </div>
+          </div>
+        `
+        : `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;">
+            <div style="background-color: #ffffff; border-radius: 12px; padding: 32px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+              <div style="text-align: center; margin-bottom: 24px;">
+                <div style="background-color: #fee2e2; width: 64px; height: 64px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+                  <span style="font-size: 32px;">📋</span>
+                </div>
+                <h1 style="color: #dc2626; margin: 0; font-size: 24px; font-weight: bold;">Application Update</h1>
+              </div>
+              
+              <p style="color: #374151; font-size: 16px; line-height: 1.6; margin-bottom: 24px;">
+                Dear <strong>${user.full_name}</strong>,
+              </p>
+              
+              <p style="color: #374151; font-size: 16px; line-height: 1.6; margin-bottom: 24px;">
+                We regret to inform you that your loan application has been reviewed and could not be approved at this time.
+              </p>
+              
+              <div style="background-color: #fef2f2; border-left: 4px solid #dc2626; padding: 16px; margin-bottom: 24px; border-radius: 4px;">
+                <p style="color: #7f1d1d; margin: 0; font-size: 14px; line-height: 1.5;">
+                  <strong>Reason:</strong> ${reviewForm.reason}
+                </p>
+              </div>
+              
+              <div style="background-color: #f3f4f6; border-radius: 8px; padding: 20px; margin-bottom: 24px;">
+                <h2 style="color: #1f2937; font-size: 16px; margin-top: 0; margin-bottom: 12px; font-weight: 600;">💡 What You Can Do</h2>
+                <ul style="color: #374151; font-size: 14px; line-height: 1.6; margin: 0; padding-left: 20px;">
+                  <li style="margin-bottom: 8px;">Review and address the concerns mentioned above</li>
+                  <li style="margin-bottom: 8px;">Improve your credit profile</li>
+                  <li>Reapply after making necessary improvements</li>
+                </ul>
+              </div>
+              
+              <div style="background-color: #eff6ff; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+                <p style="color: #1e40af; margin: 0; font-size: 13px; line-height: 1.5;">
+                  <strong>Believe this decision was made in error?</strong><br>
+                  You can raise a dispute through your dashboard for further review.
+                </p>
+              </div>
+              
+              <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 32px 0;" />
+              
+              <p style="color: #6b7280; font-size: 13px; line-height: 1.5; margin-bottom: 8px;">
+                Best regards,<br>
+                <strong style="color: #374151;">Creditze Team</strong>
+              </p>
+              
+              <p style="color: #9ca3af; font-size: 12px; line-height: 1.5; margin: 0;">
+                Need help? Contact us at <a href="mailto:support@creditze.ng" style="color: #059669; text-decoration: none;">support@creditze.ng</a>
+              </p>
+            </div>
+          </div>
+        `;
 
       await base44.integrations.Core.SendEmail({
         to: user.email,
