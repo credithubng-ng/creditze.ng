@@ -545,6 +545,15 @@ export default function KYC() {
                       >
                         Change Number
                       </Button>
+                      <Button 
+                        variant="outline"
+                        className="w-full mt-2 border-amber-300 text-amber-700 hover:bg-amber-50"
+                        onClick={skipPhoneVerification}
+                        disabled={saving}
+                      >
+                        {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                        Didn't Receive OTP? Continue Without Verification
+                      </Button>
                     </>
                   )}
 
