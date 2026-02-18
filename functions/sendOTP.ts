@@ -92,15 +92,6 @@ Deno.serve(async (req) => {
             // Add country code
             formattedPhone = '234' + formattedPhone;
 
-            // Warn about time restrictions
-            if (!isWithinAllowedTime) {
-                return Response.json({ 
-                    success: false,
-                    error: 'OTP can only be sent between 9:00 AM and 9:00 PM (WAT) due to network restrictions on DND numbers. Please try again during allowed hours.',
-                    time_restricted: true
-                }, { status: 400 });
-            }
-
             const formData = new FormData();
             formData.append('token', smartSmsToken);
             formData.append('sender', 'Transbill');
