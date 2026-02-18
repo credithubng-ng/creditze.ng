@@ -74,9 +74,13 @@ Deno.serve(async (req) => {
         }
 
         const crcData = await crcResponse.json();
+        
+        // Log the full response for debugging
+        console.log('CRC API Response:', JSON.stringify(crcData, null, 2));
 
         // Check response type
         const responseCode = crcData.ConsumerSearchResultResponse?.HEADER?.RESPONSETYPE?.CODE;
+        console.log('Response Code:', responseCode);
 
         // SCENARIO 1: Single Hit (CODE=1) - Direct credit report
         if (responseCode === '1') {
@@ -207,8 +211,24 @@ Deno.serve(async (req) => {
             });
         }
 
-        // Unknown response type
-        throw new Error(`Unknown CRC response type: ${responseCode}`);
+        // Unknown response type or error in response
+        const errorMessage = crcData.ConsumerSearchResultResponse?.HEADER?.ERROR?.MESSAGE || 
+                           crcData.ERROR?.MESSAGE || 
+                           crcData.error || 
+                           'Unknown error';
+        
+        await base44.asServiceRole.entities.CreditSearch.update(searchId, {
+            search_date: new Date().toISOString(),
+            search_status: 'unsuccessful',
+            failure_reason: `CRC API Error: ${errorMessage} (Response Type: ${responseCode})`
+        });
+        
+        return Response.json({
+            success: false,
+            error: `CRC API returned unexpected response: ${errorMessage}`,
+            responseCode: responseCode,
+            fullResponse: crcData
+        });
 
     } catch (error) {
         console.error('Credit search error:', error);
