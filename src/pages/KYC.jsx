@@ -538,11 +538,31 @@ export default function KYC() {
                       <Button 
                         variant="ghost" 
                         className="w-full"
-                        onClick={() => setOtpSent(false)}
+                        onClick={() => {
+                          setOtpSent(false);
+                          setIsDndBlocked(false);
+                        }}
                       >
                         Change Number
                       </Button>
                     </>
+                  )}
+
+                  {isDndBlocked && !otpSent && (
+                    <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                      <p className="text-sm text-amber-800 mb-3">
+                        Your number is on DND. You can continue without verification now and verify later.
+                      </p>
+                      <Button 
+                        variant="outline"
+                        className="w-full border-amber-300 text-amber-700 hover:bg-amber-100"
+                        onClick={skipPhoneVerification}
+                        disabled={saving}
+                      >
+                        {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                        Continue Without Verification
+                      </Button>
+                    </div>
                   )}
                 </CardContent>
               </Card>
