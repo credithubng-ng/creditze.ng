@@ -98,7 +98,7 @@ Deno.serve(async (req) => {
             formData.append('to', formattedPhone);
             formData.append('message', `Your Creditze verification code is: ${otp}. Valid for 10 minutes.`);
             formData.append('type', '0');
-            formData.append('routing', '2');
+            formData.append('routing', '4');
 
             const smsResponse = await fetch('https://smartsmssolutions.com/api/json.php', {
                 method: 'POST',
