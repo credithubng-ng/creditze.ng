@@ -194,6 +194,30 @@ export default function KYC() {
     }
   };
 
+  const skipPhoneVerification = async () => {
+    setSaving(true);
+    try {
+      const kycUpdate = {
+        user_id: user.id,
+        phone_number: formData.phone_number,
+        phone_verified: false
+      };
+
+      if (kyc) {
+        await base44.entities.KYCProfile.update(kyc.id, kycUpdate);
+      } else {
+        const newKyc = await base44.entities.KYCProfile.create(kycUpdate);
+        setKyc(newKyc);
+      }
+      setCurrentStep(1);
+      setError(null);
+    } catch (err) {
+      setError('Failed to save phone number. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const verifyOTP = async () => {
     if (otp.length !== 6) {
       setError('Please enter the 6-digit OTP');
