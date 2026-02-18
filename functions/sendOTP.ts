@@ -58,67 +58,82 @@ Deno.serve(async (req) => {
         }
 
         if (type === 'phone') {
-            // Send SMS via Termii using default sender ID
-            const termiiApiKey = Deno.env.get('TERMII_API_KEY');
+            // Send SMS via SmartSMS (temporary - MTN DND restrictions apply)
+            const smartSmsToken = Deno.env.get('SMARTSMS_TOKEN');
             
-            if (!termiiApiKey) {
+            if (!smartSmsToken) {
                 return Response.json({ 
                     success: false,
                     error: 'SMS service not configured' 
                 }, { status: 500 });
             }
 
-            // Format phone for Termii
+            // Check time restrictions (MTN DND: 9am-9pm WAT)
+            const now = new Date();
+            const hour = now.getHours();
+            const isWithinAllowedTime = hour >= 9 && hour < 21;
+
+            // Format phone: SmartSMS expects 234XXXXXXXXX format
             let formattedPhone = phone_number.toString().trim().replace(/\s+/g, '').replace(/[^0-9]/g, '');
+            
+            // Remove +234 or 234 prefix if present
+            if (formattedPhone.startsWith('234')) {
+                formattedPhone = formattedPhone.substring(3);
+            }
             
             // Remove leading zeros
             while (formattedPhone.startsWith('0')) {
                 formattedPhone = formattedPhone.substring(1);
             }
             
-            // Add country code if not present
-            if (!formattedPhone.startsWith('234')) {
-                formattedPhone = '234' + formattedPhone;
-            }
-            
-            // Validate
-            if (formattedPhone.length !== 13) {
+            // Validate 10 digits
+            if (formattedPhone.length !== 10) {
                 return Response.json({ 
                     success: false,
                     error: 'Invalid phone number format' 
                 }, { status: 400 });
             }
+            
+            // Add country code
+            formattedPhone = '234' + formattedPhone;
 
-            const smsResponse = await fetch('https://api.ng.termii.com/api/sms/send', {
+            // Warn about time restrictions
+            if (!isWithinAllowedTime) {
+                return Response.json({ 
+                    success: false,
+                    error: 'OTP can only be sent between 9:00 AM and 9:00 PM (WAT) due to network restrictions on DND numbers. Please try again during allowed hours.',
+                    time_restricted: true
+                }, { status: 400 });
+            }
+
+            const formData = new FormData();
+            formData.append('token', smartSmsToken);
+            formData.append('sender', 'Transbill');
+            formData.append('to', formattedPhone);
+            formData.append('message', `Your Creditze verification code is: ${otp}. Valid for 10 minutes.`);
+            formData.append('type', '0');
+            formData.append('routing', '4');
+
+            const smsResponse = await fetch('https://smartsmssolutions.com/api/json.php', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    to: formattedPhone,
-                    from: 'generic',
-                    sms: `Your Creditze verification code is: ${otp}. Valid for 10 minutes.`,
-                    type: 'plain',
-                    channel: 'generic',
-                    api_key: termiiApiKey
-                })
+                body: formData
             });
 
             const smsData = await smsResponse.json();
             
-            console.log('Termii response:', smsData);
+            console.log('SmartSMS response:', smsData);
             
-            if (!smsResponse.ok || smsData.message_id === undefined) {
-                console.error('Termii error:', smsData);
+            if (!smsResponse.ok || smsData.code !== 1000) {
+                console.error('SmartSMS error:', smsData);
                 return Response.json({ 
                     success: false, 
-                    error: smsData.message || 'Failed to send SMS' 
+                    error: smsData.comment || 'Failed to send SMS' 
                 }, { status: 500 });
             }
 
             return Response.json({ 
                 success: true, 
-                message: 'OTP sent to phone' 
+                message: 'OTP sent to phone. Note: Delivery to DND numbers is subject to time restrictions.'
             });
 
         } else {
