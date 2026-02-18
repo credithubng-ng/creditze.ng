@@ -78,6 +78,25 @@ Deno.serve(async (req) => {
         // Log the full response for debugging
         console.log('CRC API Response:', JSON.stringify(crcData, null, 2));
 
+        // Check for error response
+        if (crcData.ErrorResponse) {
+            const errorCode = crcData.ErrorResponse.BODY?.ERRORLIST?.[0];
+            const errorDesc = crcData.ErrorResponse.HEADER?.RESPONSETYPE?.DESCRIPTION || 'Unknown error';
+            
+            await base44.asServiceRole.entities.CreditSearch.update(searchId, {
+                search_date: new Date().toISOString(),
+                search_status: 'unsuccessful',
+                failure_reason: `CRC Error Code ${errorCode}: ${errorDesc}. This may be a test environment issue.`
+            });
+            
+            return Response.json({
+                success: false,
+                error: `CRC API Error: ${errorDesc} (Code: ${errorCode})`,
+                message: 'Credit search could not be completed. This may be due to test environment limitations.',
+                errorCode: errorCode
+            });
+        }
+
         // Check response type
         const responseCode = crcData.ConsumerSearchResultResponse?.HEADER?.RESPONSETYPE?.CODE;
         console.log('Response Code:', responseCode);
