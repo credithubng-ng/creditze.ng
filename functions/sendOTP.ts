@@ -111,6 +111,16 @@ Deno.serve(async (req) => {
             
             if (!smsResponse.ok || smsData.code !== 1000) {
                 console.error('SmartSMS error:', smsData);
+                
+                // Check for DND time restriction errors
+                const errorMsg = smsData.comment || '';
+                if (errorMsg.toLowerCase().includes('dnd') || errorMsg.toLowerCase().includes('time')) {
+                    return Response.json({ 
+                        success: false, 
+                        error: 'This number is on DND. SMS can only be sent between 9:00 AM and 9:00 PM (WAT). Please try again during allowed hours.'
+                    }, { status: 400 });
+                }
+                
                 return Response.json({ 
                     success: false, 
                     error: smsData.comment || 'Failed to send SMS' 
@@ -119,7 +129,7 @@ Deno.serve(async (req) => {
 
             return Response.json({ 
                 success: true, 
-                message: 'OTP sent to phone. Note: Delivery to DND numbers is subject to time restrictions.'
+                message: 'OTP sent successfully'
             });
 
         } else {
