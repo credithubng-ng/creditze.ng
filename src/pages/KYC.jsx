@@ -489,6 +489,14 @@ export default function KYC() {
                 <CardContent className="space-y-4">
                   {!otpSent ? (
                     <>
+                      <div className="text-center mb-4">
+                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-50 rounded-lg">
+                          <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
+                            <span className="text-white font-bold text-lg">C</span>
+                          </div>
+                          <span className="font-bold text-xl text-gray-900">Creditze</span>
+                        </div>
+                      </div>
                       <div>
                         <Label>Phone Number</Label>
                         <div className="flex gap-2 mt-1">
@@ -515,6 +523,14 @@ export default function KYC() {
                     </>
                   ) : (
                     <>
+                      <div className="text-center mb-4">
+                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-50 rounded-lg">
+                          <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
+                            <span className="text-white font-bold text-lg">C</span>
+                          </div>
+                          <span className="font-bold text-xl text-gray-900">Creditze</span>
+                        </div>
+                      </div>
                       <div className="text-center">
                         <p className="text-sm text-gray-500 mb-4">
                           Enter the 6-digit code sent to +234{formData.phone_number}
