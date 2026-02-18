@@ -68,11 +68,6 @@ Deno.serve(async (req) => {
                 }, { status: 500 });
             }
 
-            // Check time restrictions (MTN DND: 9am-9pm WAT)
-            const now = new Date();
-            const hour = now.getHours();
-            const isWithinAllowedTime = hour >= 9 && hour < 21;
-
             // Format phone: SmartSMS expects 234XXXXXXXXX format
             let formattedPhone = phone_number.toString().trim().replace(/\s+/g, '').replace(/[^0-9]/g, '');
             
