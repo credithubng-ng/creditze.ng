@@ -76,7 +76,11 @@ Deno.serve(async (req) => {
         const crcData = await crcResponse.json();
         
         // Log the full response for debugging
-        console.log('CRC API Response:', JSON.stringify(crcData, null, 2));
+        console.log('=== CRC API FULL RESPONSE ===');
+        console.log('Status Code:', crcResponse.status);
+        console.log('Status Text:', crcResponse.statusText);
+        console.log('Response Body:', JSON.stringify(crcData, null, 2));
+        console.log('=== END CRC API RESPONSE ===');
 
         // Check for error response
         if (crcData.ErrorResponse) {
@@ -86,7 +90,8 @@ Deno.serve(async (req) => {
             await base44.asServiceRole.entities.CreditSearch.update(searchId, {
                 search_date: new Date().toISOString(),
                 search_status: 'unsuccessful',
-                failure_reason: `CRC Error Code ${errorCode}: ${errorDesc}. This may be a test environment issue.`
+                failure_reason: `CRC Error Code ${errorCode}: ${errorDesc}. This may be a test environment issue.`,
+                bureau_response: crcData
             });
             
             return Response.json({
@@ -94,7 +99,8 @@ Deno.serve(async (req) => {
                 error: `CRC API Error: ${errorDesc} (Code: ${errorCode})`,
                 message: 'The credit bureau is currently in test environment. This may affect search results. If you are testing, this is expected. For production use, please ensure CRC credentials are configured for production.',
                 errorCode: errorCode,
-                isTestEnvironmentIssue: true
+                isTestEnvironmentIssue: true,
+                fullCrcResponse: crcData
             });
         }
 
