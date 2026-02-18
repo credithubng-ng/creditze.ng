@@ -207,6 +207,9 @@ export default function CreditSearch() {
 
       await base44.entities.CreditSearch.update(searchId, result);
 
+      // Fetch the updated record to get complete object with id
+      const updatedSearch = await base44.entities.CreditSearch.filter({ id: searchId });
+
       // Send email with credit report
       await base44.integrations.Core.SendEmail({
         to: user.email,
@@ -231,7 +234,7 @@ The Creditze.ng Team
       });
 
       // Show result immediately
-      setSearchResult(result);
+      setSearchResult(updatedSearch[0] || result);
       setProcessing(false);
 
       // Redirect to KYC after showing result briefly
