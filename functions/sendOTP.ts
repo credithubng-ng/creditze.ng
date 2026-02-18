@@ -58,62 +58,61 @@ Deno.serve(async (req) => {
         }
 
         if (type === 'phone') {
-            // Send SMS via SmartSMS
-            const smartSmsToken = Deno.env.get('SMARTSMS_TOKEN');
+            // Send SMS via Termii using default sender ID
+            const termiiApiKey = Deno.env.get('TERMII_API_KEY');
             
-            if (!smartSmsToken) {
+            if (!termiiApiKey) {
                 return Response.json({ 
                     success: false,
                     error: 'SMS service not configured' 
                 }, { status: 500 });
             }
 
-            // Format phone: SmartSMS expects 234XXXXXXXXX format
+            // Format phone for Termii
             let formattedPhone = phone_number.toString().trim().replace(/\s+/g, '').replace(/[^0-9]/g, '');
-            
-            // Remove +234 or 234 prefix if present
-            if (formattedPhone.startsWith('234')) {
-                formattedPhone = formattedPhone.substring(3);
-            }
             
             // Remove leading zeros
             while (formattedPhone.startsWith('0')) {
                 formattedPhone = formattedPhone.substring(1);
             }
             
-            // Validate 10 digits
-            if (formattedPhone.length !== 10) {
-                return Response.json({ 
-                    success: false,
-                    error: 'Invalid phone number. Must be 10 digits after country code (e.g., 8012345678)' 
-                }, { status: 400 });
+            // Add country code if not present
+            if (!formattedPhone.startsWith('234')) {
+                formattedPhone = '234' + formattedPhone;
             }
             
-            // Add country code
-            formattedPhone = '234' + formattedPhone;
+            // Validate
+            if (formattedPhone.length !== 13) {
+                return Response.json({ 
+                    success: false,
+                    error: 'Invalid phone number format' 
+                }, { status: 400 });
+            }
 
-            const formData = new FormData();
-            formData.append('token', smartSmsToken);
-            formData.append('sender', 'Transbill');
-            formData.append('to', formattedPhone);
-            formData.append('message', `Your Creditze verification code is: ${otp}. Valid for 10 minutes.`);
-            formData.append('type', '0');
-            formData.append('routing', '4');
-
-            const smsResponse = await fetch('https://smartsmssolutions.com/api/json.php', {
+            const smsResponse = await fetch('https://api.ng.termii.com/api/sms/send', {
                 method: 'POST',
-                body: formData
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    to: formattedPhone,
+                    from: 'N-Alert',
+                    sms: `Your Creditze verification code is: ${otp}. Valid for 10 minutes.`,
+                    type: 'plain',
+                    channel: 'dnd',
+                    api_key: termiiApiKey
+                })
             });
 
             const smsData = await smsResponse.json();
             
-            console.log('SmartSMS response:', smsData);
+            console.log('Termii response:', smsData);
             
-            if (!smsResponse.ok || smsData.code !== 1000) {
-                console.error('SmartSMS error:', smsData);
+            if (!smsResponse.ok || smsData.message_id === undefined) {
+                console.error('Termii error:', smsData);
                 return Response.json({ 
                     success: false, 
-                    error: smsData.comment || 'Failed to send SMS' 
+                    error: smsData.message || 'Failed to send SMS' 
                 }, { status: 500 });
             }
 
