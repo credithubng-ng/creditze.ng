@@ -54,6 +54,7 @@ export default function KYC() {
   const [otp, setOtp] = useState('');
   const [banks, setBanks] = useState([]);
   const [verifyingAccount, setVerifyingAccount] = useState(false);
+  const [isDndBlocked, setIsDndBlocked] = useState(false);
 
   const [formData, setFormData] = useState({
     phone_number: '',
