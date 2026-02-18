@@ -170,6 +170,7 @@ export default function KYC() {
       return;
     }
     setSaving(true);
+    setIsDndBlocked(false);
     try {
       const response = await base44.functions.invoke('sendOTP', {
         phone_number: formData.phone_number,
@@ -177,6 +178,10 @@ export default function KYC() {
       });
 
       if (!response.data.success) {
+        // Check if it's a DND error
+        if (response.data.error?.toLowerCase().includes('dnd')) {
+          setIsDndBlocked(true);
+        }
         throw new Error(response.data.error || 'Failed to send OTP');
       }
 
