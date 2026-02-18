@@ -93,7 +93,7 @@ export default function Dashboard() {
   };
 
   const canApplyForLoan = () => {
-    return kyc?.kyc_status === 'verified' && isCreditSearchValid() && !creditLimit?.is_frozen;
+    return kyc?.kyc_status === 'verified' && kyc?.phone_verified && isCreditSearchValid() && !creditLimit?.is_frozen;
   };
 
   const getStatusBadge = (status) => {
