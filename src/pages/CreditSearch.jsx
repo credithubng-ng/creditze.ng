@@ -166,17 +166,23 @@ export default function CreditSearch() {
   const performCreditSearch = async (searchId) => {
     try {
       // Get fresh KYC data if not loaded yet
-      if (!kyc) {
+      let currentKyc = kyc;
+      if (!currentKyc) {
         const kycData = await base44.entities.KYCProfile.filter({ user_id: user.id });
         if (!kycData[0] || !kycData[0].bvn) {
           throw new Error('BVN not found. Please complete KYC first.');
         }
-        setKyc(kycData[0]);
+        currentKyc = kycData[0];
+        setKyc(currentKyc);
+      }
+
+      if (!currentKyc.bvn) {
+        throw new Error('BVN not found. Please complete KYC first.');
       }
 
       // Call CRC Credit Bureau API
       const response = await base44.functions.invoke('performCreditSearch', {
-        bvn: kyc?.bvn || (await base44.entities.KYCProfile.filter({ user_id: user.id }))[0]?.bvn,
+        bvn: currentKyc.bvn,
         searchId: searchId
       });
 
