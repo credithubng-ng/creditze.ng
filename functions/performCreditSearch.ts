@@ -15,6 +15,12 @@ Deno.serve(async (req) => {
             return Response.json({ error: 'BVN and searchId are required' }, { status: 400 });
         }
 
+        // Verify searchId exists
+        const existingSearch = await base44.asServiceRole.entities.CreditSearch.filter({ id: searchId });
+        if (!existingSearch || existingSearch.length === 0) {
+            return Response.json({ error: 'Search record not found' }, { status: 404 });
+        }
+
         const CRC_USERNAME = Deno.env.get('CRC_USERNAME');
         const CRC_PASSWORD = Deno.env.get('CRC_PASSWORD');
 
@@ -75,6 +81,20 @@ Deno.serve(async (req) => {
         // SCENARIO 1: Single Hit (CODE=1) - Direct credit report
         if (responseCode === '1') {
             const score = extractCreditScore(crcData);
+            
+            // Update database record
+            const expiryDate = new Date();
+            expiryDate.setDate(expiryDate.getDate() + 90);
+            
+            await base44.asServiceRole.entities.CreditSearch.update(searchId, {
+                search_date: new Date().toISOString(),
+                expiry_date: expiryDate.toISOString(),
+                search_status: 'successful',
+                bureau_score: score || 0,
+                crc_reference: 'single_hit',
+                bureau_response: crcData
+            });
+            
             return Response.json({
                 success: true,
                 responseType: 'single_hit',
@@ -85,6 +105,13 @@ Deno.serve(async (req) => {
 
         // SCENARIO 2: No Hit (CODE=2) - No data found
         if (responseCode === '2') {
+            // Update database record
+            await base44.asServiceRole.entities.CreditSearch.update(searchId, {
+                search_date: new Date().toISOString(),
+                search_status: 'unsuccessful',
+                failure_reason: 'No credit history found for this BVN'
+            });
+            
             return Response.json({
                 success: false,
                 responseType: 'no_hit',
@@ -157,6 +184,19 @@ Deno.serve(async (req) => {
 
             const mergeData = await mergeResponse.json();
             const score = extractCreditScore(mergeData);
+
+            // Update database record
+            const expiryDate = new Date();
+            expiryDate.setDate(expiryDate.getDate() + 90);
+            
+            await base44.asServiceRole.entities.CreditSearch.update(searchId, {
+                search_date: new Date().toISOString(),
+                expiry_date: expiryDate.toISOString(),
+                search_status: 'successful',
+                bureau_score: score || 0,
+                crc_reference: 'multi_hit_merged',
+                bureau_response: mergeData
+            });
 
             return Response.json({
                 success: true,

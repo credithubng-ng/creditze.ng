@@ -190,25 +190,15 @@ export default function CreditSearch() {
         throw new Error(response.data.error || 'Credit search failed');
       }
 
-      const crcResult = response.data;
-      const expiryDate = new Date();
-      expiryDate.setDate(expiryDate.getDate() + 90);
-
-      const result = {
-        search_date: new Date().toISOString(),
-        expiry_date: expiryDate.toISOString(),
-        search_status: crcResult.success ? 'successful' : 'unsuccessful',
-        bureau_score: crcResult.score || 0,
-        report_emailed: true,
-        failure_reason: crcResult.success ? null : crcResult.message || 'No credit history found',
-        crc_reference: crcResult.responseType || null,
-        full_report: JSON.stringify(crcResult.fullReport || {})
-      };
-
-      await base44.entities.CreditSearch.update(searchId, result);
-
-      // Fetch the updated record to get complete object with id
+      // Backend already updated the record, just fetch it
       const updatedSearch = await base44.entities.CreditSearch.filter({ id: searchId });
+      
+      if (!updatedSearch || updatedSearch.length === 0) {
+        throw new Error('Failed to retrieve search results');
+      }
+      
+      const result = updatedSearch[0];
+      const expiryDate = new Date(result.expiry_date || new Date());
 
       // Send email with credit report
       await base44.integrations.Core.SendEmail({
@@ -233,8 +223,11 @@ The Creditze.ng Team
         `
       });
 
+      // Mark as emailed
+      await base44.entities.CreditSearch.update(searchId, { report_emailed: true });
+
       // Show result immediately
-      setSearchResult(updatedSearch[0] || result);
+      setSearchResult(result);
       setProcessing(false);
 
       // Redirect to KYC after showing result briefly
