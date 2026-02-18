@@ -248,7 +248,7 @@ export default function Dashboard() {
                 </div>
                 <div className="space-y-2 mb-4">
                   {[
-                    { label: 'Phone Verification', done: kyc?.phone_verified },
+                    { label: 'Phone Verification', done: kyc?.phone_verified, warning: kyc?.phone_number && !kyc?.phone_verified },
                     { label: 'BVN Verification', done: kyc?.bvn_verified },
                     { label: 'NIN Verification', done: kyc?.nin_verified },
                     { label: 'Address Details', done: kyc?.residential_address },
@@ -257,10 +257,15 @@ export default function Dashboard() {
                     <div key={i} className="flex items-center gap-2 text-sm">
                       {item.done ? (
                         <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                      ) : item.warning ? (
+                        <AlertCircle className="w-4 h-4 text-amber-500" />
                       ) : (
                         <div className="w-4 h-4 rounded-full border-2 border-gray-300" />
                       )}
-                      <span className={item.done ? 'text-gray-500' : 'text-gray-700'}>{item.label}</span>
+                      <span className={item.done ? 'text-gray-500' : item.warning ? 'text-amber-600 font-medium' : 'text-gray-700'}>
+                        {item.label}
+                        {item.warning && ' (Unverified)'}
+                      </span>
                     </div>
                   ))}
                 </div>
