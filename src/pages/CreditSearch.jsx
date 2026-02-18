@@ -239,6 +239,7 @@ The Creditze.ng Team
 
     } catch (err) {
       console.error('Credit search error:', err);
+      console.error('Full error details for CRC support:', searchResult?.data);
       
       // User-friendly error message
       let userMessage = 'We could not complete your credit search at this time. ';
@@ -250,6 +251,13 @@ The Creditze.ng Team
         userMessage += 'Please ensure your BVN is correct and verified.';
       } else {
         userMessage += 'Please try again or contact our support team for assistance.';
+      }
+      
+      // Log full CRC response for sharing with support
+      if (searchResult?.data?.fullCrcResponse) {
+        console.log('=== COPY THIS FOR CRC SUPPORT ===');
+        console.log(JSON.stringify(searchResult.data.fullCrcResponse, null, 2));
+        console.log('=== END CRC RESPONSE ===');
       }
       
       setError(userMessage);
