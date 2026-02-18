@@ -92,8 +92,9 @@ Deno.serve(async (req) => {
             return Response.json({
                 success: false,
                 error: `CRC API Error: ${errorDesc} (Code: ${errorCode})`,
-                message: 'Credit search could not be completed. This may be due to test environment limitations.',
-                errorCode: errorCode
+                message: 'The credit bureau is currently in test environment. This may affect search results. If you are testing, this is expected. For production use, please ensure CRC credentials are configured for production.',
+                errorCode: errorCode,
+                isTestEnvironmentIssue: true
             });
         }
 

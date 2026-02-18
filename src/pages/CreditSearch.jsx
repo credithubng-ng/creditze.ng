@@ -239,7 +239,20 @@ The Creditze.ng Team
 
     } catch (err) {
       console.error('Credit search error:', err);
-      setError('Credit search failed: ' + (err.message || 'Unknown error'));
+      
+      // User-friendly error message
+      let userMessage = 'We could not complete your credit search at this time. ';
+      if (err.message?.includes('test environment')) {
+        userMessage += 'Our credit bureau is currently in test mode. Please try again later or contact support.';
+      } else if (err.message?.includes('No credit history')) {
+        userMessage += 'No credit history was found for your BVN. You may still be eligible for starter loans.';
+      } else if (err.message?.includes('BVN')) {
+        userMessage += 'Please ensure your BVN is correct and verified.';
+      } else {
+        userMessage += 'Please try again or contact our support team for assistance.';
+      }
+      
+      setError(userMessage);
       setProcessing(false);
     }
   };
