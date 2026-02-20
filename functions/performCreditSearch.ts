@@ -420,18 +420,18 @@ Deno.serve(async (req) => {
                                         
                                         <!-- Premium Option -->
                                         <div style="background: linear-gradient(135deg, #1f2937 0%, #374151 100%); padding: 25px; border-radius: 12px; margin: 0 0 30px 0;">
-                                            <h3 style="color: white; margin: 0 0 10px 0; font-size: 18px;">Need the Detailed Bureau Report?</h3>
+                                            <h3 style="color: white; margin: 0 0 10px 0; font-size: 18px;">Need a More Detailed Report?</h3>
                                             <p style="color: #d1d5db; margin: 0 0 20px 0; font-size: 14px; line-height: 1.6;">
-                                                Request the <strong>Premium Classic Consumer Report</strong> directly from Credit Reference Nigeria (CRC) for comprehensive credit analysis, detailed payment history, and complete account information.
+                                                Get the <strong>Premium Classic Consumer Report</strong> for comprehensive credit analysis, detailed payment history, and complete account information.
                                             </p>
                                             <div style="display: flex; align-items: center; justify-content: space-between;">
                                                 <div>
-                                                    <p style="color: #9ca3af; margin: 0 0 5px 0; font-size: 12px;">CRC Premium Report</p>
+                                                    <p style="color: #9ca3af; margin: 0 0 5px 0; font-size: 12px;">Premium Report</p>
                                                     <p style="color: white; margin: 0; font-size: 24px; font-weight: bold;">₦2,500</p>
                                                 </div>
-                                                <span style="background: #4b5563; color: #d1d5db; padding: 12px 24px; border-radius: 8px; font-weight: 600; font-size: 14px;">
-                                                    Coming Soon
-                                                </span>
+                                                <a href="https://creditze.ng/premium-report-payment?search_id=${searchId}" style="background: white; color: #1f2937; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px;">
+                                                    Get Report
+                                                </a>
                                             </div>
                                         </div>
                                         
