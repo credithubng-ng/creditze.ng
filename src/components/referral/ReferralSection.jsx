@@ -17,8 +17,12 @@ export default function ReferralSection({ user, referralStats, rewards, referral
   const [copied, setCopied] = useState(false);
   
   // Generate referral code from user ID
-  const referralCode = `CRDTZ${user.id.slice(0, 6).toUpperCase()}`;
+  const referralCode = user?.id ? `CRDTZ${user.id.slice(0, 6).toUpperCase()}` : 'LOADING';
   const referralLink = `${window.location.origin}/?ref=${referralCode}`;
+  
+  if (!user) {
+    return null;
+  }
 
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);
