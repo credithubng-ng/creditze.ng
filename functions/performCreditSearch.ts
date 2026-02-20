@@ -266,6 +266,15 @@ Deno.serve(async (req) => {
             Password: CRC_PASSWORD
         };
 
+        // Log request details for debugging
+        console.log('=== CRC API REQUEST ===');
+        console.log('URL:', 'https://webserver.creditreferencenigeria.net/JsonLiveRequest/JsonService.svc/CIRRequest/ProcessRequestJson');
+        console.log('BVN:', bvn);
+        console.log('Username:', CRC_USERNAME ? `${CRC_USERNAME.substring(0, 3)}***` : 'NOT SET');
+        console.log('Password:', CRC_PASSWORD ? '***SET***' : 'NOT SET');
+        console.log('Full Payload:', JSON.stringify(requestPayload, null, 2));
+        console.log('=== END REQUEST ===');
+
         // Call CRC API
         const crcResponse = await fetch(
             'https://webserver.creditreferencenigeria.net/JsonLiveRequest/JsonService.svc/CIRRequest/ProcessRequestJson',
