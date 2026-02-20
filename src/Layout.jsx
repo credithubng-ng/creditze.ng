@@ -49,7 +49,7 @@ export default function Layout({ children, currentPageName }) {
   };
 
   // Pages that don't need the bottom nav
-  const noNavPages = ['Home', 'VerifyEmployment'];
+  const noNavPages = ['Home', 'VerifyEmployment', 'CompleteProfile'];
   const showNav = isAuthenticated && !noNavPages.includes(currentPageName);
 
   // Admin pages - show admin nav instead
