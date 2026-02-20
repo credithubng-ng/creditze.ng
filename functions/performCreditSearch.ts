@@ -342,7 +342,11 @@ Deno.serve(async (req) => {
 
         // SCENARIO 1: Direct Hit (ConsumerHitResponse) - Direct credit report with score
         if (consumerHit) {
-            const score = extractCreditScore(crcData);
+            const score = consumerHit.BODY?.CREDIT_SCORE_DETAILS?.CREDIT_SCORE_SUMMARY?.CREDIT_SCORE || 0;
+            const creditRating = consumerHit.BODY?.CREDIT_SCORE_DETAILS?.CREDIT_SCORE_SUMMARY?.CREDIT_RATING || 'N/A';
+            
+            console.log('Credit Score Found:', score);
+            console.log('Credit Rating:', creditRating);
             
             // Update database record
             const expiryDate = new Date();
@@ -361,8 +365,8 @@ Deno.serve(async (req) => {
                 search_date: new Date().toISOString(),
                 expiry_date: expiryDate.toISOString(),
                 search_status: 'successful',
-                bureau_score: score || 0,
-                crc_reference: 'single_hit',
+                bureau_score: score,
+                crc_reference: 'direct_hit',
                 bureau_response: crcData,
                 report_url: file_url,
                 report_emailed: true
