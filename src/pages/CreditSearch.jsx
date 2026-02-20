@@ -449,16 +449,52 @@ The Creditze.ng Team
                     <AlertCircle className="h-4 w-4" />
                     <AlertDescription className="text-xs">
                       The search fee is non-refundable. A copy of your credit report will be emailed to you regardless of the outcome.
-                  </AlertDescription>
-                </Alert>
+                    </AlertDescription>
+                  </Alert>
 
-                <Button 
-                  className="w-full bg-amber-500 hover:bg-amber-600 py-6"
-                  onClick={initiatePayment}
-                >
-                  <CreditCard className="w-5 h-5 mr-2" />
-                  Pay ₦{CREDIT_SEARCH_FEE.toLocaleString()} & Search
-                </Button>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      checked={testMode}
+                      onChange={(e) => setTestMode(e.target.checked)}
+                      className="w-4 h-4 text-emerald-600 rounded"
+                    />
+                    <span className="text-sm text-gray-600">Test Mode (Skip payment & use mock data)</span>
+                  </label>
+                </div>
+
+                {testMode ? (
+                  <Button 
+                    className="w-full bg-blue-500 hover:bg-blue-600 py-6"
+                    onClick={async () => {
+                      setProcessing(true);
+                      setError(null);
+                      try {
+                        const search = await base44.entities.CreditSearch.create({
+                          user_id: user.id,
+                          fee_paid: 0,
+                          payment_status: 'paid',
+                          search_status: 'pending',
+                          payment_reference: 'TEST_MODE_' + Date.now()
+                        });
+                        await performCreditSearch(search.id);
+                      } catch (err) {
+                        setError(err.message);
+                        setProcessing(false);
+                      }
+                    }}
+                  >
+                    🧪 Run Test Search (Mock Data)
+                  </Button>
+                ) : (
+                  <Button 
+                    className="w-full bg-amber-500 hover:bg-amber-600 py-6"
+                    onClick={initiatePayment}
+                  >
+                    <CreditCard className="w-5 h-5 mr-2" />
+                    Pay ₦{CREDIT_SEARCH_FEE.toLocaleString()} & Search
+                  </Button>
+                )}
               </CardContent>
             </Card>
           </motion.div>
