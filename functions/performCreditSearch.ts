@@ -413,31 +413,31 @@ Deno.serve(async (req) => {
                                         <!-- Download Report -->
                                         <div style="background: white; border: 2px dashed #d1d5db; padding: 20px; border-radius: 8px; text-align: center; margin: 0 0 30px 0;">
                                             <p style="color: #6b7280; margin: 0 0 15px 0; font-size: 14px;">Your full credit report has been attached</p>
-                                            <a href="${file_url}" style="display: inline-block; background: #059669; color: white; padding: 12px 30px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px;">
+                                            <a href="${file_url}" download style="display: inline-block; background: #059669; color: white; padding: 12px 30px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px;">
                                                 📄 Download Report
                                             </a>
                                         </div>
                                         
                                         <!-- Premium Option -->
                                         <div style="background: linear-gradient(135deg, #1f2937 0%, #374151 100%); padding: 25px; border-radius: 12px; margin: 0 0 30px 0;">
-                                            <h3 style="color: white; margin: 0 0 10px 0; font-size: 18px;">Need a More Detailed Report?</h3>
+                                            <h3 style="color: white; margin: 0 0 10px 0; font-size: 18px;">Need the Detailed Bureau Report?</h3>
                                             <p style="color: #d1d5db; margin: 0 0 20px 0; font-size: 14px; line-height: 1.6;">
-                                                Upgrade to our <strong>Premium Classic Consumer Report</strong> for comprehensive credit analysis, payment history, and detailed account information.
+                                                Request the <strong>Premium Classic Consumer Report</strong> directly from Credit Reference Nigeria (CRC) for comprehensive credit analysis, detailed payment history, and complete account information.
                                             </p>
                                             <div style="display: flex; align-items: center; justify-content: space-between;">
                                                 <div>
-                                                    <p style="color: #9ca3af; margin: 0 0 5px 0; font-size: 12px;">Premium Report</p>
+                                                    <p style="color: #9ca3af; margin: 0 0 5px 0; font-size: 12px;">CRC Premium Report</p>
                                                     <p style="color: white; margin: 0; font-size: 24px; font-weight: bold;">₦2,500</p>
                                                 </div>
-                                                <a href="https://creditze.ng/premium-report" style="background: white; color: #1f2937; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px;">
-                                                    Learn More
-                                                </a>
+                                                <span style="background: #4b5563; color: #d1d5db; padding: 12px 24px; border-radius: 8px; font-weight: 600; font-size: 14px;">
+                                                    Coming Soon
+                                                </span>
                                             </div>
                                         </div>
                                         
                                         <!-- CTA Button -->
                                         <div style="text-align: center; margin: 0 0 30px 0;">
-                                            <a href="https://creditze.ng/dashboard" style="display: inline-block; background: #059669; color: white; padding: 16px 40px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 6px rgba(5, 150, 105, 0.3);">
+                                            <a href="https://creditze.ng/apply-loan" style="display: inline-block; background: #059669; color: white; padding: 16px 40px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 6px rgba(5, 150, 105, 0.3);">
                                                 Apply for Loan Now
                                             </a>
                                         </div>
