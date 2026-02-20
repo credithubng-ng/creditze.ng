@@ -184,7 +184,8 @@ export default function CreditSearch() {
       // Call CRC Credit Bureau API
       const response = await base44.functions.invoke('performCreditSearch', {
         bvn: currentKyc.bvn,
-        searchId: searchId
+        searchId: searchId,
+        testMode: testMode
       });
 
       if (!response.data.success) {
