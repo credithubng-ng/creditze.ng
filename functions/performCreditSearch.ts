@@ -437,7 +437,7 @@ Deno.serve(async (req) => {
                                         
                                         <!-- CTA Button -->
                                         <div style="text-align: center; margin: 0 0 30px 0;">
-                                            <a href="https://creditze.ng/apply-loan" style="display: inline-block; background: #059669; color: white; padding: 16px 40px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 6px rgba(5, 150, 105, 0.3);">
+                                            <a href="https://creditze.base44.app/ApplyLoan" style="display: inline-block; background: #059669; color: white; padding: 16px 40px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 6px rgba(5, 150, 105, 0.3);">
                                                 Apply for Loan Now
                                             </a>
                                         </div>
