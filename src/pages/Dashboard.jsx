@@ -166,6 +166,36 @@ export default function Dashboard() {
       </div>
 
       <div className="max-w-2xl mx-auto px-4 -mt-4 space-y-4">
+        {/* Phone Verification Warning */}
+        {kyc?.phone_number && !kyc?.phone_verified && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.05 }}
+          >
+            <Card className="border-0 shadow-lg border-l-4 border-l-amber-500">
+              <CardContent className="p-4">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <AlertCircle className="w-6 h-6 text-amber-600" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-gray-900 mb-1">Phone Not Verified</h3>
+                    <p className="text-sm text-gray-500 mb-3">
+                      Your phone number {kyc.phone_number} is not verified. This may affect your loan eligibility.
+                    </p>
+                    <Button asChild className="bg-amber-500 hover:bg-amber-600">
+                      <Link to={createPageUrl('KYC')}>
+                        Verify Phone Now <ArrowRight className="ml-2 w-4 h-4" />
+                      </Link>
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+
         {/* Direct Debit Setup Required */}
         {approvedLoansWithoutMandate.length > 0 && (
           <motion.div
