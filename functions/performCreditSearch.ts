@@ -332,12 +332,16 @@ Deno.serve(async (req) => {
             });
         }
 
-        // Check response type
-        const responseCode = crcData.ConsumerSearchResultResponse?.HEADER?.RESPONSETYPE?.CODE;
+        // Check response type - handle both ConsumerHitResponse and ConsumerSearchResultResponse
+        const consumerHit = crcData.ConsumerHitResponse;
+        const consumerSearch = crcData.ConsumerSearchResultResponse;
+        const responseCode = consumerSearch?.HEADER?.RESPONSETYPE?.CODE;
         console.log('Response Code:', responseCode);
+        console.log('Has ConsumerHitResponse:', !!consumerHit);
+        console.log('Has ConsumerSearchResultResponse:', !!consumerSearch);
 
-        // SCENARIO 1: Single Hit (CODE=1) - Direct credit report
-        if (responseCode === '1') {
+        // SCENARIO 1: Direct Hit (ConsumerHitResponse) - Direct credit report with score
+        if (consumerHit) {
             const score = extractCreditScore(crcData);
             
             // Update database record
