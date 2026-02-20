@@ -85,11 +85,13 @@ Deno.serve(async (req) => {
                 if (userRecord[0]) {
                     // Create formatted CRC report
                     const reportContent = JSON.stringify(mockCrcData, null, 2);
-                    const reportBlob = new Blob([reportContent], { type: 'application/json' });
+                    const reportFile = new File([reportContent], `credit_report_${searchId}.json`, { 
+                        type: 'application/json' 
+                    });
                     
                     // Upload report
                     const { file_url } = await base44.integrations.Core.UploadFile({
-                        file: reportBlob
+                        file: reportFile
                     });
                     
                     // Update search record with report URL
