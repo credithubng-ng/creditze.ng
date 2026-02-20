@@ -444,24 +444,22 @@ The Creditze.ng Team
                   </div>
                 </div>
 
-                <div className="space-y-3">
-                  <Alert>
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertDescription className="text-xs">
-                      The search fee is non-refundable. A copy of your credit report will be emailed to you regardless of the outcome.
-                    </AlertDescription>
-                  </Alert>
+                <Alert>
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription className="text-xs">
+                    The search fee is non-refundable. A copy of your credit report will be emailed to you regardless of the outcome.
+                  </AlertDescription>
+                </Alert>
 
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input 
-                      type="checkbox" 
-                      checked={testMode}
-                      onChange={(e) => setTestMode(e.target.checked)}
-                      className="w-4 h-4 text-emerald-600 rounded"
-                    />
-                    <span className="text-sm text-gray-600">Test Mode (Skip payment & use mock data)</span>
-                  </label>
-                </div>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input 
+                    type="checkbox" 
+                    checked={testMode}
+                    onChange={(e) => setTestMode(e.target.checked)}
+                    className="w-4 h-4 text-emerald-600 rounded"
+                  />
+                  <span className="text-sm text-gray-600">Test Mode (Skip payment & use mock data)</span>
+                </label>
 
                 {testMode ? (
                   <Button 
