@@ -296,19 +296,29 @@ Deno.serve(async (req) => {
             const errorCode = crcData.ErrorResponse.BODY?.ERRORLIST?.[0];
             const errorDesc = crcData.ErrorResponse.HEADER?.RESPONSETYPE?.DESCRIPTION || 'Unknown error';
             
+            // Map common CRC error codes to user-friendly messages
+            const errorMessages = {
+                '36': 'BVN not found in credit bureau records. This person may not have any credit history.',
+                '1': 'Invalid request format',
+                '2': 'Authentication failed',
+                '3': 'Service temporarily unavailable',
+                '4': 'Invalid BVN format'
+            };
+            
+            const userMessage = errorMessages[errorCode] || `Credit bureau error: ${errorDesc}`;
+            
             await base44.asServiceRole.entities.CreditSearch.update(searchId, {
                 search_date: new Date().toISOString(),
                 search_status: 'unsuccessful',
-                failure_reason: `CRC Error Code ${errorCode}: ${errorDesc}. This may be a test environment issue.`,
+                failure_reason: `CRC Error ${errorCode}: ${userMessage}`,
                 bureau_response: crcData
             });
             
             return Response.json({
                 success: false,
-                error: `CRC API Error: ${errorDesc} (Code: ${errorCode})`,
-                message: 'The credit bureau is currently in test environment. This may affect search results. If you are testing, this is expected. For production use, please ensure CRC credentials are configured for production.',
+                error: userMessage,
                 errorCode: errorCode,
-                isTestEnvironmentIssue: true,
+                technicalDetails: errorDesc,
                 fullCrcResponse: crcData
             });
         }
