@@ -35,6 +35,13 @@ export default function Layout({ children, currentPageName }) {
       if (auth) {
         const currentUser = await base44.auth.me();
         setUser(currentUser);
+        
+        // Check if profile is incomplete and redirect to complete it
+        if (currentPageName !== 'CompleteProfile' && 
+            currentPageName !== 'Home' && 
+            (!currentUser.phone_number || !currentUser.date_of_birth || !currentUser.gender || !currentUser.state_of_residence)) {
+          window.location.href = createPageUrl('CompleteProfile');
+        }
       }
     } catch (error) {
       console.error('Auth check error:', error);
