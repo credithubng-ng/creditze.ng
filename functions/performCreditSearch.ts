@@ -9,7 +9,7 @@ Deno.serve(async (req) => {
             return Response.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const { bvn, searchId } = await req.json();
+        const { bvn, searchId, testMode } = await req.json();
 
         if (!bvn || !searchId) {
             return Response.json({ error: 'BVN and searchId are required' }, { status: 400 });
@@ -19,6 +19,116 @@ Deno.serve(async (req) => {
         const existingSearch = await base44.asServiceRole.entities.CreditSearch.filter({ id: searchId });
         if (!existingSearch || existingSearch.length === 0) {
             return Response.json({ error: 'Search record not found' }, { status: 404 });
+        }
+
+        // TEST MODE: Return mock data for testing
+        if (testMode === true) {
+            console.log('=== TEST MODE: Using mock CRC data ===');
+            
+            const mockScore = 720; // Good credit score
+            const mockCrcData = {
+                ConsumerSearchResultResponse: {
+                    HEADER: {
+                        RESPONSETYPE: {
+                            CODE: '1',
+                            DESCRIPTION: 'Single Hit - Credit report found'
+                        }
+                    },
+                    BODY: {
+                        CONSUMER: {
+                            NAME: {
+                                FIRSTNAME: 'Test',
+                                LASTNAME: 'User'
+                            }
+                        },
+                        SCORE: {
+                            CREDITBUREAU: {
+                                '@SCORE': mockScore.toString()
+                            }
+                        },
+                        ACCOUNTLIST: [
+                            {
+                                ACCOUNT: {
+                                    '@ACCOUNT-TYPE': 'Credit Card',
+                                    '@INSTITUTION': 'Test Bank',
+                                    '@BALANCE': '50000',
+                                    '@STATUS': 'Active'
+                                }
+                            }
+                        ]
+                    }
+                }
+            };
+
+            // Update database with mock data
+            const expiryDate = new Date();
+            expiryDate.setDate(expiryDate.getDate() + 90);
+            
+            await base44.asServiceRole.entities.CreditSearch.update(searchId, {
+                search_date: new Date().toISOString(),
+                expiry_date: expiryDate.toISOString(),
+                search_status: 'successful',
+                bureau_score: mockScore,
+                crc_reference: 'test_mode_single_hit',
+                bureau_response: mockCrcData
+            });
+
+            // Send email notification
+            const searchRecord = await base44.asServiceRole.entities.CreditSearch.filter({ id: searchId });
+            if (searchRecord[0]) {
+                const userRecord = await base44.asServiceRole.entities.User.filter({ id: searchRecord[0].user_id });
+                if (userRecord[0]) {
+                    await base44.integrations.Core.SendEmail({
+                        to: userRecord[0].email,
+                        subject: '✅ Your Credit Search is Complete (TEST MODE)',
+                        body: `
+                            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                                <div style="background: linear-gradient(135deg, #059669 0%, #047857 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+                                    <h1 style="color: white; margin: 0;">Credit Search Complete</h1>
+                                    <p style="color: #d1fae5; margin: 10px 0 0 0;">TEST MODE - Mock Data</p>
+                                </div>
+                                
+                                <div style="background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px;">
+                                    <p style="color: #374151; font-size: 16px;">Hello ${userRecord[0].full_name},</p>
+                                    
+                                    <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #059669;">
+                                        <p style="color: #6b7280; margin: 0 0 10px 0;">Your Credit Score</p>
+                                        <h2 style="color: #059669; margin: 0; font-size: 36px;">${mockScore}</h2>
+                                        <p style="color: #10b981; margin: 10px 0 0 0; font-weight: 600;">Excellent Credit</p>
+                                    </div>
+                                    
+                                    <p style="color: #374151; line-height: 1.6;">
+                                        Your credit search has been completed successfully. Your credit report is now valid for 90 days and you can proceed to apply for loans.
+                                    </p>
+                                    
+                                    <div style="background: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                                        <p style="color: #92400e; margin: 0; font-size: 14px;">
+                                            ⚠️ <strong>TEST MODE:</strong> This is a mock credit search result for testing purposes only.
+                                        </p>
+                                    </div>
+                                    
+                                    <a href="https://creditze.ng" style="display: inline-block; background: #059669; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; margin: 20px 0; font-weight: 600;">
+                                        Apply for Loan Now
+                                    </a>
+                                    
+                                    <p style="color: #9ca3af; font-size: 14px; margin-top: 30px;">
+                                        If you have questions, contact our support team.
+                                    </p>
+                                </div>
+                            </div>
+                        `
+                    });
+                }
+            }
+            
+            return Response.json({
+                success: true,
+                responseType: 'single_hit',
+                score: mockScore,
+                testMode: true,
+                message: 'Test mode: Mock data used',
+                fullReport: mockCrcData
+            });
         }
 
         const CRC_USERNAME = Deno.env.get('CRC_USERNAME');
