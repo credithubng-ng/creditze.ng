@@ -444,10 +444,11 @@ The Creditze.ng Team
                   </div>
                 </div>
 
-                <Alert>
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription className="text-xs">
-                    The search fee is non-refundable. A copy of your credit report will be emailed to you regardless of the outcome.
+                <div className="space-y-3">
+                  <Alert>
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription className="text-xs">
+                      The search fee is non-refundable. A copy of your credit report will be emailed to you regardless of the outcome.
                   </AlertDescription>
                 </Alert>
 
