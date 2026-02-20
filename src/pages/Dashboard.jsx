@@ -41,6 +41,12 @@ export default function Dashboard() {
       const currentUser = await base44.auth.me();
       setUser(currentUser);
 
+      // Check if profile is incomplete and redirect
+      if (!currentUser.phone_number || !currentUser.date_of_birth || !currentUser.gender || !currentUser.state_of_residence) {
+        navigate(createPageUrl('CompleteProfile'));
+        return;
+      }
+
       const [kycData, creditData, limitData, loanData] = await Promise.all([
         base44.entities.KYCProfile.filter({ user_id: currentUser.id }),
         base44.entities.CreditSearch.filter({ user_id: currentUser.id }, '-created_date', 1),
