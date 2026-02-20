@@ -182,7 +182,7 @@ Deno.serve(async (req) => {
                                                     <p style="color: #9ca3af; margin: 0 0 5px 0; font-size: 12px;">Premium Report</p>
                                                     <p style="color: white; margin: 0; font-size: 24px; font-weight: bold;">₦2,500</p>
                                                 </div>
-                                                <a href="https://creditze.ng/premium-report-payment?search_id=${searchId}" style="background: white; color: #1f2937; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px;">
+                                                <a href="https://creditze.base44.app/PremiumReportPayment?search_id=${searchId}" style="background: white; color: #1f2937; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px;">
                                                     Get Report
                                                 </a>
                                             </div>
