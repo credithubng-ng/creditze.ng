@@ -323,14 +323,145 @@ Deno.serve(async (req) => {
             const expiryDate = new Date();
             expiryDate.setDate(expiryDate.getDate() + 90);
             
+            // Upload CRC report
+            const reportContent = JSON.stringify(crcData, null, 2);
+            const reportBlob = new Blob([reportContent], { type: 'application/json' });
+            const { file_url } = await base44.integrations.Core.UploadFile({
+                file: reportBlob
+            });
+            
             await base44.asServiceRole.entities.CreditSearch.update(searchId, {
                 search_date: new Date().toISOString(),
                 expiry_date: expiryDate.toISOString(),
                 search_status: 'successful',
                 bureau_score: score || 0,
                 crc_reference: 'single_hit',
-                bureau_response: crcData
+                bureau_response: crcData,
+                report_url: file_url,
+                report_emailed: true
             });
+            
+            // Send professional email with report
+            const searchRecord = await base44.asServiceRole.entities.CreditSearch.filter({ id: searchId });
+            if (searchRecord[0]) {
+                const userRecord = await base44.asServiceRole.entities.User.filter({ id: searchRecord[0].user_id });
+                if (userRecord[0]) {
+                    const scoreRating = score >= 700 ? 'Excellent' : score >= 600 ? 'Good' : score >= 500 ? 'Fair' : 'Poor';
+                    const scoreColor = score >= 700 ? '#059669' : score >= 600 ? '#10b981' : score >= 500 ? '#f59e0b' : '#ef4444';
+                    
+                    await base44.integrations.Core.SendEmail({
+                        to: userRecord[0].email,
+                        subject: '✅ Your Credit Search Report - Creditze',
+                        body: `
+                            <!DOCTYPE html>
+                            <html>
+                            <head>
+                                <meta charset="UTF-8">
+                                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                            </head>
+                            <body style="margin: 0; padding: 20px; background-color: #f3f4f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+                                <div style="max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                                    <!-- Header -->
+                                    <div style="background: linear-gradient(135deg, #059669 0%, #047857 100%); padding: 40px 30px; text-align: center;">
+                                        <div style="background: white; width: 60px; height: 60px; border-radius: 12px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;">
+                                            <span style="font-size: 32px; font-weight: bold; color: #059669;">C</span>
+                                        </div>
+                                        <h1 style="color: white; margin: 0 0 10px 0; font-size: 28px;">Credit Search Complete</h1>
+                                        <p style="color: #d1fae5; margin: 0; font-size: 14px;">Your Credit Report is Ready</p>
+                                    </div>
+                                    
+                                    <!-- Content -->
+                                    <div style="padding: 40px 30px;">
+                                        <p style="color: #374151; font-size: 16px; margin: 0 0 20px 0;">Dear ${userRecord[0].full_name},</p>
+                                        
+                                        <p style="color: #6b7280; line-height: 1.6; margin: 0 0 30px 0;">
+                                            Your credit search has been successfully processed. Please find your credit report details below:
+                                        </p>
+                                        
+                                        <!-- Credit Score Card -->
+                                        <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); padding: 25px; border-radius: 12px; margin: 0 0 30px 0; border: 2px solid ${scoreColor};">
+                                            <div style="text-align: center;">
+                                                <p style="color: #6b7280; margin: 0 0 10px 0; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Your Credit Score</p>
+                                                <h2 style="color: ${scoreColor}; margin: 0 0 10px 0; font-size: 48px; font-weight: bold;">${score || 'N/A'}</h2>
+                                                <p style="color: ${scoreColor}; margin: 0; font-weight: 600; font-size: 16px;">${scoreRating} Credit Rating</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Report Details -->
+                                        <div style="background: #f9fafb; padding: 20px; border-radius: 8px; margin: 0 0 30px 0;">
+                                            <h3 style="color: #1f2937; margin: 0 0 15px 0; font-size: 16px;">Report Details</h3>
+                                            <table style="width: 100%; border-collapse: collapse;">
+                                                <tr>
+                                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Report Type:</td>
+                                                    <td style="padding: 8px 0; color: #1f2937; font-weight: 600; text-align: right; font-size: 14px;">Basic Credit Report</td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Valid Until:</td>
+                                                    <td style="padding: 8px 0; color: #1f2937; font-weight: 600; text-align: right; font-size: 14px;">${expiryDate.toLocaleDateString('en-NG')}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Report Date:</td>
+                                                    <td style="padding: 8px 0; color: #1f2937; font-weight: 600; text-align: right; font-size: 14px;">${new Date().toLocaleDateString('en-NG')}</td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                        
+                                        <!-- Download Report -->
+                                        <div style="background: white; border: 2px dashed #d1d5db; padding: 20px; border-radius: 8px; text-align: center; margin: 0 0 30px 0;">
+                                            <p style="color: #6b7280; margin: 0 0 15px 0; font-size: 14px;">Your full credit report has been attached</p>
+                                            <a href="${file_url}" style="display: inline-block; background: #059669; color: white; padding: 12px 30px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px;">
+                                                📄 Download Report
+                                            </a>
+                                        </div>
+                                        
+                                        <!-- Premium Option -->
+                                        <div style="background: linear-gradient(135deg, #1f2937 0%, #374151 100%); padding: 25px; border-radius: 12px; margin: 0 0 30px 0;">
+                                            <h3 style="color: white; margin: 0 0 10px 0; font-size: 18px;">Need a More Detailed Report?</h3>
+                                            <p style="color: #d1d5db; margin: 0 0 20px 0; font-size: 14px; line-height: 1.6;">
+                                                Upgrade to our <strong>Premium Classic Consumer Report</strong> for comprehensive credit analysis, payment history, and detailed account information.
+                                            </p>
+                                            <div style="display: flex; align-items: center; justify-content: space-between;">
+                                                <div>
+                                                    <p style="color: #9ca3af; margin: 0 0 5px 0; font-size: 12px;">Premium Report</p>
+                                                    <p style="color: white; margin: 0; font-size: 24px; font-weight: bold;">₦2,500</p>
+                                                </div>
+                                                <a href="https://creditze.ng/premium-report" style="background: white; color: #1f2937; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px;">
+                                                    Learn More
+                                                </a>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- CTA Button -->
+                                        <div style="text-align: center; margin: 0 0 30px 0;">
+                                            <a href="https://creditze.ng/dashboard" style="display: inline-block; background: #059669; color: white; padding: 16px 40px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 6px rgba(5, 150, 105, 0.3);">
+                                                Apply for Loan Now
+                                            </a>
+                                        </div>
+                                        
+                                        <!-- Footer Note -->
+                                        <div style="border-top: 1px solid #e5e7eb; padding-top: 20px;">
+                                            <p style="color: #9ca3af; font-size: 13px; line-height: 1.6; margin: 0;">
+                                                <strong>Note:</strong> This report is valid for 90 days from the date of issue. If you have any questions or need assistance, please contact our support team at support@creditze.ng
+                                            </p>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Footer -->
+                                    <div style="background: #f9fafb; padding: 30px; text-align: center; border-top: 1px solid #e5e7eb;">
+                                        <p style="color: #6b7280; font-size: 13px; margin: 0 0 10px 0;">
+                                            © 2026 Creditze. All rights reserved.
+                                        </p>
+                                        <p style="color: #9ca3af; font-size: 12px; margin: 0;">
+                                            This is an automated email. Please do not reply directly to this message.
+                                        </p>
+                                    </div>
+                                </div>
+                            </body>
+                            </html>
+                        `
+                    });
+                }
+            }
             
             return Response.json({
                 success: true,
