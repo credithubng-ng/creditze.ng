@@ -30,6 +30,7 @@ export default function CreditSearch() {
   const [processing, setProcessing] = useState(false);
   const [searchResult, setSearchResult] = useState(null);
   const [error, setError] = useState(null);
+  const [testMode, setTestMode] = useState(false);
 
   useEffect(() => {
     loadData();
