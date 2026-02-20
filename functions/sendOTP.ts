@@ -100,10 +100,22 @@ Deno.serve(async (req) => {
             formData.append('type', '0');
             formData.append('routing', '4');
 
+            console.log('Sending SMS to:', formattedPhone);
+
             const smsResponse = await fetch('https://smartsmssolutions.com/api/json.php', {
                 method: 'POST',
                 body: formData
             });
+
+            console.log('SMS Response status:', smsResponse.status);
+
+            if (!smsResponse.ok) {
+                console.error('SMS API HTTP error:', smsResponse.status);
+                return Response.json({ 
+                    success: false, 
+                    error: 'SMS service temporarily unavailable. You can continue without verification.'
+                }, { status: 400 });
+            }
 
             const smsData = await smsResponse.json();
             
@@ -123,7 +135,7 @@ Deno.serve(async (req) => {
                 
                 return Response.json({ 
                     success: false, 
-                    error: smsData.comment || smsData.error || 'Failed to send SMS' 
+                    error: smsData.comment || smsData.error || 'Failed to send SMS. You can continue without verification.'
                 }, { status: 400 });
             }
 
