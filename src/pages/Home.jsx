@@ -84,21 +84,20 @@ export default function Home() {
       });
       if (existing.length > 0) return;
 
-      // Find referrer by code pattern (CRDTZXXXXXX)
+      // Extract user ID from referral code (CRDTZXXXXXX format)
       const referrerId = referralCode.replace('CRDTZ', '').toLowerCase();
-      const referrer = await base44.entities.User.filter({ id: { $regex: referrerId } });
       
-      if (referrer[0] && referrer[0].id !== currentUser.id) {
-        await base44.entities.UserReferral.create({
-          referrer_id: referrer[0].id,
-          referrer_email: referrer[0].email,
-          referred_user_id: currentUser.id,
-          referred_email: currentUser.email,
-          referral_code: referralCode,
-          status: 'pending'
-        });
-        localStorage.removeItem('referral_code');
-      }
+      // Store referral code for processing after signup
+      // The actual referral will be processed by a backend function
+      await base44.entities.UserReferral.create({
+        referrer_id: referrerId, // Will be validated server-side
+        referred_user_id: currentUser.id,
+        referred_email: currentUser.email,
+        referral_code: referralCode,
+        status: 'pending'
+      });
+      
+      localStorage.removeItem('referral_code');
     } catch (error) {
       console.error('Error processing referral:', error);
     }
