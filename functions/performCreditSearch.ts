@@ -252,7 +252,7 @@ Deno.serve(async (req) => {
                     },
                     'APPLICATION': {
                         '@PRODUCT': '017',
-                        '@NUMBER': searchId.toString(),
+                        '@NUMBER': '232',
                         '@AMOUNT': '15000',
                         '@CURRENCY': 'NGN'
                     }
