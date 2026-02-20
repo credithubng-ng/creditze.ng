@@ -37,18 +37,6 @@ export default function Home() {
       try {
         const currentUser = await base44.auth.me();
         setUser(currentUser);
-        
-        // Load credit search status
-        const searches = await base44.entities.CreditSearch.filter({ 
-          user_id: currentUser.id 
-        }, '-created_date', 1);
-        
-        if (searches[0]) {
-          const expiry = new Date(searches[0].expiry_date);
-          if (expiry > new Date() && searches[0].search_status === 'successful') {
-            setCreditSearch(searches[0]);
-          }
-        }
       } catch (error) {
         console.error('Error loading user:', error);
       }
