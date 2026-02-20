@@ -327,9 +327,11 @@ Deno.serve(async (req) => {
             
             // Upload CRC report
             const reportContent = JSON.stringify(crcData, null, 2);
-            const reportBlob = new Blob([reportContent], { type: 'application/json' });
+            const reportFile = new File([reportContent], `credit_report_${searchId}.json`, { 
+                type: 'application/json' 
+            });
             const { file_url } = await base44.integrations.Core.UploadFile({
-                file: reportBlob
+                file: reportFile
             });
             
             await base44.asServiceRole.entities.CreditSearch.update(searchId, {
