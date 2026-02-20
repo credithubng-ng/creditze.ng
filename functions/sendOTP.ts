@@ -109,22 +109,22 @@ Deno.serve(async (req) => {
             
             console.log('SmartSMS response:', smsData);
             
-            if (!smsResponse.ok || smsData.code !== 1000) {
+            if (smsData.code !== 1000 && smsData.code !== '1000') {
                 console.error('SmartSMS error:', smsData);
                 
                 // Check for DND time restriction errors
-                const errorMsg = smsData.comment || '';
-                if (errorMsg.toLowerCase().includes('dnd') || errorMsg.toLowerCase().includes('time')) {
+                const errorMsg = (smsData.comment || smsData.error || '').toLowerCase();
+                if (errorMsg.includes('dnd') || errorMsg.includes('time') || errorMsg.includes('do not disturb')) {
                     return Response.json({ 
                         success: false, 
-                        error: 'This number is on DND. SMS can only be sent between 9:00 AM and 9:00 PM (WAT). Please try again during allowed hours.'
+                        error: 'This number is on DND. You can continue without verification or try again later.'
                     }, { status: 400 });
                 }
                 
                 return Response.json({ 
                     success: false, 
-                    error: smsData.comment || 'Failed to send SMS' 
-                }, { status: 500 });
+                    error: smsData.comment || smsData.error || 'Failed to send SMS' 
+                }, { status: 400 });
             }
 
             return Response.json({ 
