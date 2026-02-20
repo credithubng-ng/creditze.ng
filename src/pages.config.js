@@ -77,12 +77,12 @@ import LoanDetails from './pages/LoanDetails';
 import LoanHistory from './pages/LoanHistory';
 import MyDisputes from './pages/MyDisputes';
 import MyDocuments from './pages/MyDocuments';
+import PremiumReportPayment from './pages/PremiumReportPayment';
 import Profile from './pages/Profile';
 import RaiseDispute from './pages/RaiseDispute';
 import SetupDirectDebit from './pages/SetupDirectDebit';
 import Tier1Verification from './pages/Tier1Verification';
 import VerifyEmployment from './pages/VerifyEmployment';
-import PremiumReportPayment from './pages/PremiumReportPayment';
 import __Layout from './Layout.jsx';
 
 
@@ -117,12 +117,12 @@ export const PAGES = {
     "LoanHistory": LoanHistory,
     "MyDisputes": MyDisputes,
     "MyDocuments": MyDocuments,
+    "PremiumReportPayment": PremiumReportPayment,
     "Profile": Profile,
     "RaiseDispute": RaiseDispute,
     "SetupDirectDebit": SetupDirectDebit,
     "Tier1Verification": Tier1Verification,
     "VerifyEmployment": VerifyEmployment,
-    "PremiumReportPayment": PremiumReportPayment,
 }
 
 export const pagesConfig = {
