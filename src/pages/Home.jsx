@@ -63,16 +63,11 @@ export default function Home() {
     }
   };
 
-  const captureReferral = async () => {
+  const captureReferral = () => {
     const urlParams = new URLSearchParams(window.location.search);
     const referralCode = urlParams.get('ref');
     if (referralCode) {
       localStorage.setItem('referral_code', referralCode);
-      
-      // If user is authenticated, process referral immediately
-      if (isAuthenticated && user) {
-        await processReferral(referralCode, user);
-      }
     }
   };
 
