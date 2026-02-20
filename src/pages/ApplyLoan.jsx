@@ -536,7 +536,8 @@ export default function ApplyLoan() {
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              {!kyc?.kyc_status === 'verified' && 'Please complete KYC verification first.'}
+              {kyc?.kyc_status !== 'verified' && 'Please complete KYC verification first.'}
+              {!kyc?.phone_verified && 'Please verify your phone number first.'}
               {!isCreditSearchValid() && 'Please complete a credit search first.'}
               {creditLimit?.is_frozen && 'Your account is frozen due to missed payments.'}
             </AlertDescription>
