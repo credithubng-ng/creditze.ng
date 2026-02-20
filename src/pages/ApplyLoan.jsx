@@ -105,7 +105,7 @@ export default function ApplyLoan() {
   };
 
   const canApply = () => {
-    return kyc?.kyc_status === 'verified' && isCreditSearchValid() && !creditLimit?.is_frozen;
+    return kyc?.kyc_status === 'verified' && kyc?.phone_verified && isCreditSearchValid() && !creditLimit?.is_frozen;
   };
 
   const calculateScore = () => {

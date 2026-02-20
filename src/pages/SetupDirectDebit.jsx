@@ -129,6 +129,14 @@ export default function SetupDirectDebit() {
       ]);
 
       setKyc(kycData[0]);
+      
+      // Block if phone not verified
+      if (!kycData[0]?.phone_verified) {
+        toast.error('Please verify your phone number first');
+        navigate(createPageUrl('KYC'));
+        return;
+      }
+      
       if (loanData[0]) {
         setLoan(loanData[0]);
         
