@@ -11,8 +11,13 @@ Deno.serve(async (req) => {
 
         const { bvn, searchId, testMode } = await req.json();
 
-        if (!bvn || !searchId) {
-            return Response.json({ error: 'BVN and searchId are required' }, { status: 400 });
+        if (!searchId) {
+            return Response.json({ error: 'searchId is required' }, { status: 400 });
+        }
+
+        // In test mode, BVN is optional (we'll use a mock one)
+        if (!testMode && !bvn) {
+            return Response.json({ error: 'BVN is required' }, { status: 400 });
         }
 
         // Verify searchId exists
