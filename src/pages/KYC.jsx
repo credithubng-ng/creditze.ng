@@ -13,7 +13,9 @@ import {
   ArrowRight,
   CheckCircle2,
   Loader2,
-  AlertCircle
+  AlertCircle,
+  User as UserIcon,
+  Calendar
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,8 +24,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { STATES, getLGAsForState } from '@/components/utils/nigeriaStatesLgas';
 
 const STEPS = [
+  { id: 'personal', title: 'Personal', icon: UserIcon },
   { id: 'phone', title: 'Phone', icon: Phone },
   { id: 'bvn', title: 'BVN', icon: CreditCard },
   { id: 'nin', title: 'NIN', icon: CreditCard },
@@ -32,13 +36,7 @@ const STEPS = [
   { id: 'bank', title: 'Bank', icon: Banknote }
 ];
 
-const NIGERIAN_STATES = [
-  'Abia', 'Adamawa', 'Akwa Ibom', 'Anambra', 'Bauchi', 'Bayelsa', 'Benue', 'Borno',
-  'Cross River', 'Delta', 'Ebonyi', 'Edo', 'Ekiti', 'Enugu', 'FCT', 'Gombe', 'Imo',
-  'Jigawa', 'Kaduna', 'Kano', 'Katsina', 'Kebbi', 'Kogi', 'Kwara', 'Lagos', 'Nasarawa',
-  'Niger', 'Ogun', 'Ondo', 'Osun', 'Oyo', 'Plateau', 'Rivers', 'Sokoto', 'Taraba',
-  'Yobe', 'Zamfara'
-];
+
 
 
 
@@ -57,10 +55,14 @@ export default function KYC() {
   const [isDndBlocked, setIsDndBlocked] = useState(false);
 
   const [formData, setFormData] = useState({
+    full_name: '',
+    date_of_birth: '',
+    gender: '',
     phone_number: '',
     bvn: '',
     nin: '',
     residential_address: '',
+    city: '',
     residential_state: '',
     residential_lga: '',
     property_address: '',
@@ -89,12 +91,13 @@ export default function KYC() {
           ...kycData[0]
         }));
         // Find the first incomplete step
-        if (!kycData[0].phone_verified) setCurrentStep(0);
-        else if (!kycData[0].bvn_verified) setCurrentStep(1);
-        else if (!kycData[0].nin_verified) setCurrentStep(2);
-        else if (!kycData[0].residential_address) setCurrentStep(3);
-        else if (!kycData[0].property_address) setCurrentStep(4);
-        else if (!kycData[0].account_number) setCurrentStep(5);
+        if (!kycData[0].full_name || !kycData[0].date_of_birth || !kycData[0].gender) setCurrentStep(0);
+        else if (!kycData[0].phone_verified) setCurrentStep(1);
+        else if (!kycData[0].bvn_verified) setCurrentStep(2);
+        else if (!kycData[0].nin_verified) setCurrentStep(3);
+        else if (!kycData[0].residential_address) setCurrentStep(4);
+        else if (!kycData[0].property_address) setCurrentStep(5);
+        else if (!kycData[0].account_number) setCurrentStep(6);
         else {
           // All complete, redirect to dashboard
           navigate(createPageUrl('Dashboard'));
@@ -163,6 +166,35 @@ export default function KYC() {
       verifyAccount();
     }
   }, [formData.bank_name, formData.account_number]);
+
+  const savePersonalInfo = async () => {
+    if (!formData.full_name || !formData.date_of_birth || !formData.gender) {
+      setError('Please fill in all personal information');
+      return;
+    }
+    setSaving(true);
+    try {
+      const kycUpdate = {
+        user_id: user.id,
+        full_name: formData.full_name,
+        date_of_birth: formData.date_of_birth,
+        gender: formData.gender
+      };
+
+      if (kyc) {
+        await base44.entities.KYCProfile.update(kyc.id, kycUpdate);
+      } else {
+        const newKyc = await base44.entities.KYCProfile.create(kycUpdate);
+        setKyc(newKyc);
+      }
+      setCurrentStep(1);
+      setError(null);
+    } catch (err) {
+      setError('Failed to save personal information. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const sendOTP = async () => {
     if (!formData.phone_number || formData.phone_number.length < 10) {
@@ -326,7 +358,7 @@ export default function KYC() {
         bvn_date_of_birth: bvnData.date_of_birth,
         bvn_gender: bvnData.gender
       });
-      setCurrentStep(2);
+      setCurrentStep(3);
       setError(null);
     } catch (err) {
       setError(err.message || 'BVN verification failed. Please check and try again.');
@@ -354,7 +386,7 @@ export default function KYC() {
         nin: formData.nin,
         nin_verified: true
       });
-      setCurrentStep(3);
+      setCurrentStep(4);
       setError(null);
     } catch (err) {
       setError(err.message || 'NIN verification failed. Please check and try again.');
@@ -364,7 +396,7 @@ export default function KYC() {
   };
 
   const saveAddress = async () => {
-    if (!formData.residential_address || !formData.residential_state) {
+    if (!formData.residential_address || !formData.city || !formData.residential_state || !formData.residential_lga) {
       setError('Please fill in all address fields');
       return;
     }
@@ -372,10 +404,11 @@ export default function KYC() {
     try {
       await base44.entities.KYCProfile.update(kyc.id, {
         residential_address: formData.residential_address,
+        city: formData.city,
         residential_state: formData.residential_state,
         residential_lga: formData.residential_lga
       });
-      setCurrentStep(4);
+      setCurrentStep(5);
     } catch (err) {
       setError('Failed to save address. Please try again.');
     } finally {
@@ -395,7 +428,7 @@ export default function KYC() {
         property_type: formData.property_type,
         property_years: parseInt(formData.property_years) || 0
       });
-      setCurrentStep(5);
+      setCurrentStep(6);
     } catch (err) {
       setError('Failed to save property details. Please try again.');
     } finally {
@@ -421,6 +454,18 @@ export default function KYC() {
         kyc_status: 'verified',
         kyc_completed_date: new Date().toISOString()
       });
+
+      // Sync to user entity
+      await base44.auth.updateMe({
+        phone_number: kyc.phone_number,
+        date_of_birth: kyc.date_of_birth,
+        gender: kyc.gender,
+        residential_address: kyc.residential_address,
+        city: kyc.city,
+        state: kyc.residential_state,
+        lga: kyc.residential_lga
+      });
+
       navigate(createPageUrl('Dashboard'));
     } catch (err) {
       setError('Failed to save bank details. Please try again.');
@@ -476,8 +521,61 @@ export default function KYC() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
           >
-            {/* Phone Verification */}
+            {/* Personal Information */}
             {currentStep === 0 && (
+              <Card className="border-0 shadow-md">
+                <CardHeader>
+                  <div className="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center mb-4">
+                    <UserIcon className="w-7 h-7 text-emerald-600" />
+                  </div>
+                  <CardTitle>Personal Information</CardTitle>
+                  <CardDescription>Tell us about yourself</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label>Full Name</Label>
+                    <Input
+                      placeholder="Enter your full name"
+                      value={formData.full_name}
+                      onChange={(e) => handleChange('full_name', e.target.value)}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label>Date of Birth</Label>
+                    <Input
+                      type="date"
+                      value={formData.date_of_birth}
+                      onChange={(e) => handleChange('date_of_birth', e.target.value)}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label>Gender</Label>
+                    <Select value={formData.gender} onValueChange={(v) => handleChange('gender', v)}>
+                      <SelectTrigger className="mt-1">
+                        <SelectValue placeholder="Select gender" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="male">Male</SelectItem>
+                        <SelectItem value="female">Female</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button 
+                    className="w-full bg-emerald-600 hover:bg-emerald-700"
+                    onClick={savePersonalInfo}
+                    disabled={saving}
+                  >
+                    {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                    Continue <ArrowRight className="ml-2 w-4 h-4" />
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Phone Verification */}
+            {currentStep === 1 && (
               <Card className="border-0 shadow-md">
                 <CardHeader>
                   <div className="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center mb-4">
@@ -594,7 +692,7 @@ export default function KYC() {
             )}
 
             {/* BVN Verification */}
-            {currentStep === 1 && (
+            {currentStep === 2 && (
               <Card className="border-0 shadow-md">
                 <CardHeader>
                   <div className="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center mb-4">
@@ -628,7 +726,7 @@ export default function KYC() {
             )}
 
             {/* NIN Verification */}
-            {currentStep === 2 && (
+            {currentStep === 3 && (
               <Card className="border-0 shadow-md">
                 <CardHeader>
                   <div className="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center mb-4">
@@ -662,7 +760,7 @@ export default function KYC() {
             )}
 
             {/* Address */}
-            {currentStep === 3 && (
+            {currentStep === 4 && (
               <Card className="border-0 shadow-md">
                 <CardHeader>
                   <div className="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center mb-4">
@@ -682,26 +780,46 @@ export default function KYC() {
                     />
                   </div>
                   <div>
+                    <Label>City/Town</Label>
+                    <Input
+                      placeholder="e.g., Lagos, Abuja, Kano"
+                      value={formData.city}
+                      onChange={(e) => handleChange('city', e.target.value)}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
                     <Label>State</Label>
-                    <Select value={formData.residential_state} onValueChange={(v) => handleChange('residential_state', v)}>
+                    <Select value={formData.residential_state} onValueChange={(v) => {
+                      handleChange('residential_state', v);
+                      handleChange('residential_lga', '');
+                    }}>
                       <SelectTrigger className="mt-1">
                         <SelectValue placeholder="Select state" />
                       </SelectTrigger>
                       <SelectContent>
-                        {NIGERIAN_STATES.map(state => (
+                        {STATES.map(state => (
                           <SelectItem key={state} value={state}>{state}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </div>
                   <div>
-                    <Label>LGA (Optional)</Label>
-                    <Input
-                      placeholder="Local Government Area"
-                      value={formData.residential_lga}
-                      onChange={(e) => handleChange('residential_lga', e.target.value)}
-                      className="mt-1"
-                    />
+                    <Label>LGA</Label>
+                    <Select 
+                      value={formData.residential_lga} 
+                      onValueChange={(v) => handleChange('residential_lga', v)}
+                      disabled={!formData.residential_state}
+                    >
+                      <SelectTrigger className="mt-1">
+                        <SelectValue placeholder={formData.residential_state ? "Select LGA" : "Select state first"} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {formData.residential_state && getLGAsForState(formData.residential_state).map(lga => (
+                          <SelectItem key={lga} value={lga}>{lga}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <Button 
                     className="w-full bg-emerald-600 hover:bg-emerald-700"
@@ -716,7 +834,7 @@ export default function KYC() {
             )}
 
             {/* Property */}
-            {currentStep === 4 && (
+            {currentStep === 5 && (
               <Card className="border-0 shadow-md">
                 <CardHeader>
                   <div className="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center mb-4">
@@ -771,7 +889,7 @@ export default function KYC() {
             )}
 
             {/* Bank Details */}
-            {currentStep === 5 && (
+            {currentStep === 6 && (
               <Card className="border-0 shadow-md">
                 <CardHeader>
                   <div className="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center mb-4">
