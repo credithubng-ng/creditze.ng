@@ -13,42 +13,15 @@ import {
   Building2,
   Users,
   FileText,
-  Globe,
-  User,
-  Phone,
-  Mail,
-  MapPin
+  Globe
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { STATES, getLGAsForState } from '@/components/utils/nigeriaStatesLgas';
 
 export default function Home() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [affiliateCode, setAffiliateCode] = useState(null);
   const [user, setUser] = useState(null);
   const [creditSearch, setCreditSearch] = useState(null);
-  const [showPersonalDetailsModal, setShowPersonalDetailsModal] = useState(false);
-  const [personalDetails, setPersonalDetails] = useState({
-    full_name: '',
-    phone_number: '',
-    email: '',
-    residential_address: '',
-    city: '',
-    state: '',
-    lga: '',
-    date_of_birth: '',
-    gender: ''
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     checkAuth();
@@ -64,22 +37,6 @@ export default function Home() {
       try {
         const currentUser = await base44.auth.me();
         setUser(currentUser);
-        
-        // Check if personal details are missing
-        if (!currentUser.phone_number || !currentUser.residential_address) {
-          setShowPersonalDetailsModal(true);
-          setPersonalDetails({
-            full_name: '',
-            phone_number: currentUser.phone_number || '',
-            email: currentUser.email || '',
-            residential_address: currentUser.residential_address || '',
-            city: currentUser.city || '',
-            state: currentUser.state || '',
-            lga: currentUser.lga || '',
-            date_of_birth: currentUser.date_of_birth || '',
-            gender: currentUser.gender || ''
-          });
-        }
       } catch (error) {
         console.error('Error loading user:', error);
       }
@@ -122,195 +79,8 @@ export default function Home() {
     window.location.href = createPageUrl(`CreditCheckGateway?type=${type}&url=${encodeURIComponent(url)}`);
   };
 
-  const handlePersonalDetailsSubmit = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    
-    try {
-      // Update user profile with personal details
-      await base44.auth.updateMe({
-        full_name: personalDetails.full_name,
-        phone_number: personalDetails.phone_number,
-        residential_address: personalDetails.residential_address,
-        city: personalDetails.city,
-        state: personalDetails.state,
-        lga: personalDetails.lga,
-        date_of_birth: personalDetails.date_of_birth,
-        gender: personalDetails.gender
-      });
-      
-      setShowPersonalDetailsModal(false);
-      setUser({ ...user, ...personalDetails });
-    } catch (error) {
-      console.error('Error updating personal details:', error);
-      alert('Failed to save personal details. Please try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-emerald-50 via-white to-white">
-      {/* Personal Details Modal */}
-      <Dialog open={showPersonalDetailsModal} onOpenChange={setShowPersonalDetailsModal}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-2xl">Complete Your Profile</DialogTitle>
-            <DialogDescription>
-              Please provide your personal details to continue with your loan application
-            </DialogDescription>
-          </DialogHeader>
-          
-          <form onSubmit={handlePersonalDetailsSubmit} className="space-y-4 mt-4">
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="full_name">Full Name</Label>
-                <div className="relative">
-                  <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                  <Input
-                    id="full_name"
-                    value={personalDetails.full_name}
-                    onChange={(e) => setPersonalDetails({ ...personalDetails, full_name: e.target.value })}
-                    className="pl-10"
-                    placeholder="Enter your full name"
-                    required
-                  />
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="phone_number">Phone Number</Label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                  <Input
-                    id="phone_number"
-                    type="tel"
-                    value={personalDetails.phone_number}
-                    onChange={(e) => setPersonalDetails({ ...personalDetails, phone_number: e.target.value })}
-                    className="pl-10"
-                    placeholder="080XXXXXXXX"
-                    required
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="email">Email Address</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                <Input
-                  id="email"
-                  type="email"
-                  value={personalDetails.email}
-                  className="pl-10"
-                  disabled
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="residential_address">Residential Address</Label>
-              <div className="relative">
-                <MapPin className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                <Input
-                  id="residential_address"
-                  value={personalDetails.residential_address}
-                  onChange={(e) => setPersonalDetails({ ...personalDetails, residential_address: e.target.value })}
-                  className="pl-10"
-                  placeholder="Your full residential address"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="city">Town/City</Label>
-              <Input
-                id="city"
-                value={personalDetails.city}
-                onChange={(e) => setPersonalDetails({ ...personalDetails, city: e.target.value })}
-                placeholder="e.g., Ikeja, Aba, Kano"
-                required
-              />
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="state">State</Label>
-                <select
-                  id="state"
-                  value={personalDetails.state}
-                  onChange={(e) => setPersonalDetails({ ...personalDetails, state: e.target.value, lga: '' })}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  required
-                >
-                  <option value="">Select State</option>
-                  {STATES.map((state) => (
-                    <option key={state} value={state}>{state}</option>
-                  ))}
-                </select>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="lga">LGA</Label>
-                <select
-                  id="lga"
-                  value={personalDetails.lga}
-                  onChange={(e) => setPersonalDetails({ ...personalDetails, lga: e.target.value })}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  required
-                  disabled={!personalDetails.state}
-                >
-                  <option value="">{personalDetails.state ? 'Select LGA' : 'Select State First'}</option>
-                  {personalDetails.state && getLGAsForState(personalDetails.state).map((lga) => (
-                    <option key={lga} value={lga}>{lga}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="date_of_birth">Date of Birth</Label>
-                <Input
-                  id="date_of_birth"
-                  type="date"
-                  value={personalDetails.date_of_birth}
-                  onChange={(e) => setPersonalDetails({ ...personalDetails, date_of_birth: e.target.value })}
-                  required
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="gender">Gender</Label>
-                <select
-                  id="gender"
-                  value={personalDetails.gender}
-                  onChange={(e) => setPersonalDetails({ ...personalDetails, gender: e.target.value })}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  required
-                >
-                  <option value="">Select Gender</option>
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-3 pt-4">
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-                className="bg-emerald-600 hover:bg-emerald-700"
-              >
-                {isSubmitting ? 'Saving...' : 'Save & Continue'}
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
-
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-lg border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
