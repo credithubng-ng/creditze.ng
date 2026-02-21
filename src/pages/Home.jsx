@@ -108,7 +108,7 @@ export default function Home() {
     if (isAuthenticated) {
       window.location.href = createPageUrl('Dashboard');
     } else {
-      base44.auth.redirectToLogin(createPageUrl('Dashboard'));
+      base44.auth.redirectToLogin(createPageUrl('Home'));
     }
   };
 
