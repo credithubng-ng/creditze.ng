@@ -241,7 +241,7 @@ export default function KYC() {
         const newKyc = await base44.entities.KYCProfile.create(kycUpdate);
         setKyc(newKyc);
       }
-      setCurrentStep(1);
+      setCurrentStep(2);
       setError(null);
     } catch (err) {
       setError('Failed to save phone number. Please try again.');
@@ -288,7 +288,7 @@ export default function KYC() {
         const newKyc = await base44.entities.KYCProfile.create(kycUpdate);
         setKyc(newKyc);
       }
-      setCurrentStep(1);
+      setCurrentStep(2);
       setError(null);
     } catch (err) {
       setError(err.message || 'Verification failed. Please try again.');
