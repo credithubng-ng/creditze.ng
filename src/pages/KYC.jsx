@@ -470,7 +470,7 @@ export default function KYC() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 pb-32">
       {/* Header */}
       <div className="bg-white border-b px-4 py-4 sticky top-0 z-10">
         <div className="max-w-lg mx-auto flex items-center gap-4">
