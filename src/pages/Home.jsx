@@ -42,6 +42,7 @@ export default function Home() {
     phone_number: '',
     email: '',
     residential_address: '',
+    city: '',
     state: '',
     lga: '',
     date_of_birth: '',
@@ -72,6 +73,7 @@ export default function Home() {
             phone_number: currentUser.phone_number || '',
             email: currentUser.email || '',
             residential_address: currentUser.residential_address || '',
+            city: currentUser.city || '',
             state: currentUser.state || '',
             lga: currentUser.lga || '',
             date_of_birth: currentUser.date_of_birth || '',
@@ -130,6 +132,7 @@ export default function Home() {
         full_name: personalDetails.full_name,
         phone_number: personalDetails.phone_number,
         residential_address: personalDetails.residential_address,
+        city: personalDetails.city,
         state: personalDetails.state,
         lga: personalDetails.lga,
         date_of_birth: personalDetails.date_of_birth,
@@ -219,6 +222,17 @@ export default function Home() {
                   required
                 />
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="city">Town/City</Label>
+              <Input
+                id="city"
+                value={personalDetails.city}
+                onChange={(e) => setPersonalDetails({ ...personalDetails, city: e.target.value })}
+                placeholder="e.g., Ikeja, Aba, Kano"
+                required
+              />
             </div>
 
             <div className="grid md:grid-cols-2 gap-4">
