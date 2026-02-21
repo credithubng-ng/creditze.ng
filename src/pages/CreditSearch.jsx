@@ -241,25 +241,31 @@ The Creditze.ng Team
 
     } catch (err) {
       console.error('Credit search error:', err);
-      console.error('Full error details for CRC support:', searchResult?.data);
       
-      // User-friendly error message
-      let userMessage = 'We could not complete your credit search at this time. ';
-      if (err.message?.includes('test environment')) {
-        userMessage += 'Our credit bureau is currently in test mode. Please try again later or contact support.';
-      } else if (err.message?.includes('No credit history')) {
-        userMessage += 'No credit history was found for your BVN. You may still be eligible for starter loans.';
-      } else if (err.message?.includes('BVN')) {
-        userMessage += 'Please ensure your BVN is correct and verified.';
-      } else {
-        userMessage += 'Please try again or contact our support team for assistance.';
+      // Check if this is a backend error response with details
+      const errorData = err.response?.data || err;
+      
+      // Log full error details for debugging
+      if (errorData?.fullCrcResponse) {
+        console.log('=== COPY THIS FOR CRC SUPPORT ===');
+        console.log(JSON.stringify(errorData.fullCrcResponse, null, 2));
+        console.log('=== END CRC RESPONSE ===');
       }
       
-      // Log full CRC response for sharing with support
-      if (searchResult?.data?.fullCrcResponse) {
-        console.log('=== COPY THIS FOR CRC SUPPORT ===');
-        console.log(JSON.stringify(searchResult.data.fullCrcResponse, null, 2));
-        console.log('=== END CRC RESPONSE ===');
+      // User-friendly error message based on specific error types
+      let userMessage = '';
+      
+      if (err.message?.includes('test environment') || err.message?.includes('test mode')) {
+        userMessage = 'Our credit bureau is currently in test mode. Please try again later or contact support.';
+      } else if (err.message?.includes('No credit history') || err.message?.includes('no hit')) {
+        userMessage = 'No credit history was found for your BVN. You may still be eligible for starter loans.';
+      } else if (err.message?.includes('BVN')) {
+        userMessage = 'Please ensure your BVN is correct and verified in your KYC profile.';
+      } else if (err.message?.includes('Invalid request') || err.message?.includes('Authentication failed')) {
+        userMessage = 'There was an issue connecting to the credit bureau. Our team has been notified. Please try again later.';
+      } else {
+        // Generic error message - include the actual error for context
+        userMessage = err.message || 'We could not complete your credit search at this time. Please try again or contact our support team for assistance.';
       }
       
       setError(userMessage);
