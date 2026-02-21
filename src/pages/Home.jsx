@@ -29,6 +29,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { STATES, getLGAsForState } from '@/components/utils/nigeriaStatesLgas';
 
 export default function Home() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -223,24 +224,35 @@ export default function Home() {
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="state">State</Label>
-                <Input
+                <select
                   id="state"
                   value={personalDetails.state}
-                  onChange={(e) => setPersonalDetails({ ...personalDetails, state: e.target.value })}
-                  placeholder="e.g., Lagos"
+                  onChange={(e) => setPersonalDetails({ ...personalDetails, state: e.target.value, lga: '' })}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   required
-                />
+                >
+                  <option value="">Select State</option>
+                  {STATES.map((state) => (
+                    <option key={state} value={state}>{state}</option>
+                  ))}
+                </select>
               </div>
               
               <div className="space-y-2">
                 <Label htmlFor="lga">LGA</Label>
-                <Input
+                <select
                   id="lga"
                   value={personalDetails.lga}
                   onChange={(e) => setPersonalDetails({ ...personalDetails, lga: e.target.value })}
-                  placeholder="Local Government Area"
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   required
-                />
+                  disabled={!personalDetails.state}
+                >
+                  <option value="">{personalDetails.state ? 'Select LGA' : 'Select State First'}</option>
+                  {personalDetails.state && getLGAsForState(personalDetails.state).map((lga) => (
+                    <option key={lga} value={lga}>{lga}</option>
+                  ))}
+                </select>
               </div>
             </div>
 
