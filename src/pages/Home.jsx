@@ -69,7 +69,7 @@ export default function Home() {
         if (!currentUser.phone_number || !currentUser.residential_address) {
           setShowPersonalDetailsModal(true);
           setPersonalDetails({
-            full_name: currentUser.full_name || '',
+            full_name: '',
             phone_number: currentUser.phone_number || '',
             email: currentUser.email || '',
             residential_address: currentUser.residential_address || '',
@@ -172,8 +172,8 @@ export default function Home() {
                     value={personalDetails.full_name}
                     onChange={(e) => setPersonalDetails({ ...personalDetails, full_name: e.target.value })}
                     className="pl-10"
+                    placeholder="Enter your full name"
                     required
-                    disabled
                   />
                 </div>
               </div>
