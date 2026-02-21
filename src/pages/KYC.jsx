@@ -534,7 +534,10 @@ export default function KYC() {
                       type="date"
                       value={formData.date_of_birth}
                       onChange={(e) => handleChange('date_of_birth', e.target.value)}
+                      max={new Date().toISOString().split('T')[0]}
+                      min="1940-01-01"
                       className="mt-1"
+                      placeholder="Select your date of birth"
                     />
                   </div>
                   <div>
