@@ -23,7 +23,7 @@ Deno.serve(async (req) => {
         // Verify searchId exists
         const existingSearch = await base44.asServiceRole.entities.CreditSearch.filter({ id: searchId });
         if (!existingSearch || existingSearch.length === 0) {
-            return Response.json({ error: 'Search record not found' }, { status: 404 });
+            return Response.json({ success: false, error: 'Search record not found' }, { status: 404 });
         }
 
         // TEST MODE: Return mock data for testing
