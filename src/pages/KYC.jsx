@@ -32,7 +32,6 @@ const STEPS = [
   { id: 'bvn', title: 'BVN', icon: CreditCard },
   { id: 'nin', title: 'NIN', icon: CreditCard },
   { id: 'address', title: 'Address', icon: MapPin },
-  { id: 'property', title: 'Property', icon: Building },
   { id: 'bank', title: 'Bank', icon: Banknote }
 ];
 
@@ -95,9 +94,8 @@ export default function KYC() {
         else if (!kycData[0].phone_verified) setCurrentStep(1);
         else if (!kycData[0].bvn_verified) setCurrentStep(2);
         else if (!kycData[0].nin_verified) setCurrentStep(3);
-        else if (!kycData[0].residential_address) setCurrentStep(4);
-        else if (!kycData[0].property_address) setCurrentStep(5);
-        else if (!kycData[0].account_number) setCurrentStep(6);
+        else if (!kycData[0].residential_address || !kycData[0].property_address) setCurrentStep(4);
+        else if (!kycData[0].account_number) setCurrentStep(5);
         else {
           // All complete, redirect to dashboard
           navigate(createPageUrl('Dashboard'));
@@ -400,13 +398,20 @@ export default function KYC() {
       setError('Please fill in all address fields');
       return;
     }
+    if (!formData.property_address || !formData.property_type) {
+      setError('Please fill in all property fields');
+      return;
+    }
     setSaving(true);
     try {
       await base44.entities.KYCProfile.update(kyc.id, {
         residential_address: formData.residential_address,
         city: formData.city,
         residential_state: formData.residential_state,
-        residential_lga: formData.residential_lga
+        residential_lga: formData.residential_lga,
+        property_address: formData.property_address,
+        property_type: formData.property_type,
+        property_years: parseInt(formData.property_years) || 0
       });
       setCurrentStep(5);
     } catch (err) {
@@ -416,25 +421,7 @@ export default function KYC() {
     }
   };
 
-  const saveProperty = async () => {
-    if (!formData.property_address || !formData.property_type) {
-      setError('Please fill in all property fields');
-      return;
-    }
-    setSaving(true);
-    try {
-      await base44.entities.KYCProfile.update(kyc.id, {
-        property_address: formData.property_address,
-        property_type: formData.property_type,
-        property_years: parseInt(formData.property_years) || 0
-      });
-      setCurrentStep(6);
-    } catch (err) {
-      setError('Failed to save property details. Please try again.');
-    } finally {
-      setSaving(false);
-    }
-  };
+
 
   const saveBank = async () => {
     if (!formData.bank_name || !formData.account_number || !formData.account_name) {
@@ -759,68 +746,108 @@ export default function KYC() {
               </Card>
             )}
 
-            {/* Address */}
+            {/* Address & Property */}
             {currentStep === 4 && (
               <Card className="border-0 shadow-md">
                 <CardHeader>
                   <div className="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center mb-4">
                     <MapPin className="w-7 h-7 text-emerald-600" />
                   </div>
-                  <CardTitle>Residential Address</CardTitle>
+                  <CardTitle>Address & Property Details</CardTitle>
                   <CardDescription>Where do you currently live?</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div>
-                    <Label>Street Address</Label>
-                    <Input
-                      placeholder="123 Main Street, Lekki"
-                      value={formData.residential_address}
-                      onChange={(e) => handleChange('residential_address', e.target.value)}
-                      className="mt-1"
-                    />
+                  <div className="space-y-4 pb-4 border-b">
+                    <h3 className="font-semibold text-sm text-gray-700">Residential Address</h3>
+                    <div>
+                      <Label>Street Address</Label>
+                      <Input
+                        placeholder="123 Main Street, Lekki"
+                        value={formData.residential_address}
+                        onChange={(e) => handleChange('residential_address', e.target.value)}
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label>City/Town</Label>
+                      <Input
+                        placeholder="e.g., Lagos, Abuja, Kano"
+                        value={formData.city}
+                        onChange={(e) => handleChange('city', e.target.value)}
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label>State</Label>
+                      <Select value={formData.residential_state} onValueChange={(v) => {
+                        handleChange('residential_state', v);
+                        handleChange('residential_lga', '');
+                      }}>
+                        <SelectTrigger className="mt-1">
+                          <SelectValue placeholder="Select state" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {STATES.map(state => (
+                            <SelectItem key={state} value={state}>{state}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>LGA</Label>
+                      <Select 
+                        value={formData.residential_lga} 
+                        onValueChange={(v) => handleChange('residential_lga', v)}
+                        disabled={!formData.residential_state}
+                      >
+                        <SelectTrigger className="mt-1">
+                          <SelectValue placeholder={formData.residential_state ? "Select LGA" : "Select state first"} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {formData.residential_state && getLGAsForState(formData.residential_state).map(lga => (
+                            <SelectItem key={lga} value={lga}>{lga}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
-                  <div>
-                    <Label>City/Town</Label>
-                    <Input
-                      placeholder="e.g., Lagos, Abuja, Kano"
-                      value={formData.city}
-                      onChange={(e) => handleChange('city', e.target.value)}
-                      className="mt-1"
-                    />
+
+                  <div className="space-y-4 pt-2">
+                    <h3 className="font-semibold text-sm text-gray-700">Property Details</h3>
+                    <div>
+                      <Label>Property Address</Label>
+                      <Input
+                        placeholder="Address of property"
+                        value={formData.property_address}
+                        onChange={(e) => handleChange('property_address', e.target.value)}
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label>Property Type</Label>
+                      <Select value={formData.property_type} onValueChange={(v) => handleChange('property_type', v)}>
+                        <SelectTrigger className="mt-1">
+                          <SelectValue placeholder="Select type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="owned">Owned</SelectItem>
+                          <SelectItem value="rented">Rented</SelectItem>
+                          <SelectItem value="family">Family Property</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>Years at this Property</Label>
+                      <Input
+                        type="number"
+                        placeholder="2"
+                        value={formData.property_years}
+                        onChange={(e) => handleChange('property_years', e.target.value)}
+                        className="mt-1"
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <Label>State</Label>
-                    <Select value={formData.residential_state} onValueChange={(v) => {
-                      handleChange('residential_state', v);
-                      handleChange('residential_lga', '');
-                    }}>
-                      <SelectTrigger className="mt-1">
-                        <SelectValue placeholder="Select state" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {STATES.map(state => (
-                          <SelectItem key={state} value={state}>{state}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label>LGA</Label>
-                    <Select 
-                      value={formData.residential_lga} 
-                      onValueChange={(v) => handleChange('residential_lga', v)}
-                      disabled={!formData.residential_state}
-                    >
-                      <SelectTrigger className="mt-1">
-                        <SelectValue placeholder={formData.residential_state ? "Select LGA" : "Select state first"} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {formData.residential_state && getLGAsForState(formData.residential_state).map(lga => (
-                          <SelectItem key={lga} value={lga}>{lga}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+
                   <Button 
                     className="w-full bg-emerald-600 hover:bg-emerald-700"
                     onClick={saveAddress}
@@ -833,63 +860,8 @@ export default function KYC() {
               </Card>
             )}
 
-            {/* Property */}
-            {currentStep === 5 && (
-              <Card className="border-0 shadow-md">
-                <CardHeader>
-                  <div className="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center mb-4">
-                    <Building className="w-7 h-7 text-emerald-600" />
-                  </div>
-                  <CardTitle>Property Details</CardTitle>
-                  <CardDescription>This helps us assess your application</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label>Property Address</Label>
-                    <Input
-                      placeholder="Address of property"
-                      value={formData.property_address}
-                      onChange={(e) => handleChange('property_address', e.target.value)}
-                      className="mt-1"
-                    />
-                  </div>
-                  <div>
-                    <Label>Property Type</Label>
-                    <Select value={formData.property_type} onValueChange={(v) => handleChange('property_type', v)}>
-                      <SelectTrigger className="mt-1">
-                        <SelectValue placeholder="Select type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="owned">Owned</SelectItem>
-                        <SelectItem value="rented">Rented</SelectItem>
-                        <SelectItem value="family">Family Property</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label>Years at this Property</Label>
-                    <Input
-                      type="number"
-                      placeholder="2"
-                      value={formData.property_years}
-                      onChange={(e) => handleChange('property_years', e.target.value)}
-                      className="mt-1"
-                    />
-                  </div>
-                  <Button 
-                    className="w-full bg-emerald-600 hover:bg-emerald-700"
-                    onClick={saveProperty}
-                    disabled={saving}
-                  >
-                    {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                    Continue <ArrowRight className="ml-2 w-4 h-4" />
-                  </Button>
-                </CardContent>
-              </Card>
-            )}
-
             {/* Bank Details */}
-            {currentStep === 6 && (
+            {currentStep === 5 && (
               <Card className="border-0 shadow-md">
                 <CardHeader>
                   <div className="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center mb-4">
