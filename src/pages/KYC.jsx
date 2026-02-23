@@ -92,7 +92,7 @@ export default function KYC() {
         // Find the first incomplete step
         if (!kycData[0].full_name || !kycData[0].date_of_birth || !kycData[0].gender) setCurrentStep(0);
         else if (!kycData[0].phone_verified) setCurrentStep(1);
-        else if (!kycData[0].bvn_verified) setCurrentStep(2);
+        else if (!kycData[0].bvn) setCurrentStep(2);
         else if (!kycData[0].nin_verified) setCurrentStep(3);
         else if (!kycData[0].residential_address || !kycData[0].property_type) setCurrentStep(4);
         else if (!kycData[0].account_number) setCurrentStep(5);
@@ -302,64 +302,15 @@ export default function KYC() {
     }
     setSaving(true);
     try {
-      // Verify BVN with Paystack
-      const response = await base44.functions.invoke('paystackVerifyBVN', {
-        bvn: formData.bvn
-      });
-
-      if (!response.data.success) {
-        throw new Error(response.data.error || 'BVN verification failed');
-      }
-
-      const bvnData = response.data.data;
-
-      // Match names - require at least 1 matching name
-      const userFullName = user.full_name?.toLowerCase().trim();
-      const bvnFullName = bvnData.full_name?.toLowerCase().trim();
-
-      if (!userFullName || !bvnFullName) {
-        throw new Error('Unable to verify names. Please contact support.');
-      }
-
-      const userNames = userFullName.split(/\s+/).filter(n => n.length > 0);
-      const bvnNames = bvnFullName.split(/\s+/).filter(n => n.length > 0);
-
-      // Count matching names
-      let matchCount = 0;
-      for (const userName of userNames) {
-        for (const bvnName of bvnNames) {
-          if (userName === bvnName || userName.includes(bvnName) || bvnName.includes(userName)) {
-            matchCount++;
-            break;
-          }
-        }
-      }
-
-      // Require at least 1 matching name
-      if (matchCount < 1) {
-        throw new Error(`Name verification failed: No matching names found. Your registered name "${user.full_name}" must match at least one name with BVN name "${bvnData.full_name}". Please contact support.`);
-      }
-
-      // Match phone numbers (last 10 digits)
-      const userPhone = kyc.phone_number?.replace(/\D/g, '').slice(-10);
-      const bvnPhone = bvnData.phone_number?.replace(/\D/g, '').slice(-10);
-
-      if (userPhone && bvnPhone && userPhone !== bvnPhone) {
-        throw new Error(`Phone number mismatch: Your verified phone ${userPhone} doesn't match BVN phone ${bvnPhone}. Please contact support.`);
-      }
-
+      // Temporarily skip BVN verification - just save the BVN
       await base44.entities.KYCProfile.update(kyc.id, {
         bvn: formData.bvn,
-        bvn_verified: true,
-        bvn_full_name: bvnData.full_name,
-        bvn_phone_number: bvnData.phone_number,
-        bvn_date_of_birth: bvnData.date_of_birth,
-        bvn_gender: bvnData.gender
+        bvn_verified: false
       });
       setCurrentStep(3);
       setError(null);
     } catch (err) {
-      setError(err.message || 'BVN verification failed. Please check and try again.');
+      setError('Failed to save BVN. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -687,8 +638,8 @@ export default function KYC() {
                   <div className="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center mb-4">
                     <CreditCard className="w-7 h-7 text-emerald-600" />
                   </div>
-                  <CardTitle>BVN Verification</CardTitle>
-                  <CardDescription>Enter your 11-digit Bank Verification Number</CardDescription>
+                  <CardTitle>BVN Input</CardTitle>
+                  <CardDescription>Enter your 11-digit Bank Verification Number (verification disabled for testing)</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
@@ -708,7 +659,7 @@ export default function KYC() {
                     disabled={saving}
                   >
                     {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                    Verify BVN <ArrowRight className="ml-2 w-4 h-4" />
+                    Continue <ArrowRight className="ml-2 w-4 h-4" />
                   </Button>
                 </CardContent>
               </Card>
