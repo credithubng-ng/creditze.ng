@@ -394,32 +394,31 @@ export default function KYC() {
   };
 
   const saveAddress = async () => {
-    if (!formData.residential_address || !formData.city || !formData.residential_state || !formData.residential_lga) {
-      setError('Please fill in all address fields');
-      return;
-    }
-    if (!formData.property_address || !formData.property_type) {
-      setError('Please fill in all property fields');
-      return;
-    }
-    setSaving(true);
-    try {
-      await base44.entities.KYCProfile.update(kyc.id, {
-        residential_address: formData.residential_address,
-        city: formData.city,
-        residential_state: formData.residential_state,
-        residential_lga: formData.residential_lga,
-        property_address: formData.property_address,
-        property_type: formData.property_type,
-        property_years: parseInt(formData.property_years) || 0
-      });
-      setCurrentStep(5);
-    } catch (err) {
-      setError('Failed to save address. Please try again.');
-    } finally {
-      setSaving(false);
-    }
-  };
+      if (!formData.residential_address || !formData.city || !formData.residential_state || !formData.residential_lga) {
+        setError('Please fill in all address fields');
+        return;
+      }
+      if (!formData.property_type) {
+        setError('Please select property type');
+        return;
+      }
+      setSaving(true);
+      try {
+        await base44.entities.KYCProfile.update(kyc.id, {
+          residential_address: formData.residential_address,
+          city: formData.city,
+          residential_state: formData.residential_state,
+          residential_lga: formData.residential_lga,
+          property_type: formData.property_type,
+          property_years: parseInt(formData.property_years) || 0
+        });
+        setCurrentStep(5);
+      } catch (err) {
+        setError('Failed to save address. Please try again.');
+      } finally {
+        setSaving(false);
+      }
+    };
 
 
 
@@ -817,15 +816,6 @@ export default function KYC() {
 
                   <div className="space-y-4 pt-2">
                     <h3 className="font-semibold text-sm text-gray-700">Property Details</h3>
-                    <div>
-                      <Label>Property Address</Label>
-                      <Input
-                        placeholder="Address of property"
-                        value={formData.property_address}
-                        onChange={(e) => handleChange('property_address', e.target.value)}
-                        className="mt-1"
-                      />
-                    </div>
                     <div>
                       <Label>Property Type</Label>
                       <Select value={formData.property_type} onValueChange={(v) => handleChange('property_type', v)}>
