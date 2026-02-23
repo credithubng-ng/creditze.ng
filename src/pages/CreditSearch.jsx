@@ -52,6 +52,9 @@ export default function CreditSearch() {
         });
 
         if (verifyResponse.data.success && verifyResponse.data.status === 'success') {
+          // Detect test mode from Paystack reference (test refs start with 'T-' or contain 'test')
+          const isTestPayment = reference.startsWith('T-') || reference.toLowerCase().includes('test');
+          
           // Find the search record by reference
           const searches = await base44.entities.CreditSearch.filter({ 
             payment_reference: reference 
@@ -65,8 +68,9 @@ export default function CreditSearch() {
               payment_status: 'paid'
             });
 
-            // Perform credit search and get result
-            await performCreditSearch(search.id);
+            // Perform credit search with test mode if payment was in test
+            setTestMode(isTestPayment);
+            await performCreditSearch(search.id, isTestPayment);
           } else {
             setError('Payment record not found');
             setProcessing(false);
