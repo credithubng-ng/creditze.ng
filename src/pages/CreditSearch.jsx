@@ -193,13 +193,12 @@ export default function CreditSearch() {
       }
 
       // Backend already updated the record, just fetch it
-      const updatedSearch = await base44.entities.CreditSearch.filter({ id: searchId });
+      const searches = await base44.entities.CreditSearch.list();
+      const result = searches.find(s => s.id === searchId);
       
-      if (!updatedSearch || updatedSearch.length === 0) {
+      if (!result) {
         throw new Error('Failed to retrieve search results');
       }
-      
-      const result = updatedSearch[0];
       const expiryDate = new Date(result.expiry_date || new Date());
 
       // Send email with credit report
