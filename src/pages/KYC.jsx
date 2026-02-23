@@ -94,7 +94,7 @@ export default function KYC() {
         else if (!kycData[0].phone_verified) setCurrentStep(1);
         else if (!kycData[0].bvn_verified) setCurrentStep(2);
         else if (!kycData[0].nin_verified) setCurrentStep(3);
-        else if (!kycData[0].residential_address || !kycData[0].property_address) setCurrentStep(4);
+        else if (!kycData[0].residential_address || !kycData[0].property_type) setCurrentStep(4);
         else if (!kycData[0].account_number) setCurrentStep(5);
         else {
           // All complete, redirect to dashboard
