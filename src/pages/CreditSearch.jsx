@@ -185,11 +185,12 @@ export default function CreditSearch() {
         throw new Error('BVN not found. Please complete KYC first.');
       }
 
-      // Call CRC Credit Bureau API
+      // Call CRC Credit Bureau API (use forceTestMode if provided, otherwise use state)
+      const useTestMode = forceTestMode !== null ? forceTestMode : testMode;
       const response = await base44.functions.invoke('performCreditSearch', {
         bvn: currentKyc.bvn,
         searchId: searchId,
-        testMode: testMode
+        testMode: useTestMode
       });
 
       if (!response.data.success) {
