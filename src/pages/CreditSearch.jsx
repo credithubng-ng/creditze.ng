@@ -168,7 +168,7 @@ export default function CreditSearch() {
     }
   };
 
-  const performCreditSearch = async (searchId) => {
+  const performCreditSearch = async (searchId, forceTestMode = null) => {
     try {
       // Get fresh KYC data if not loaded yet
       let currentKyc = kyc;
