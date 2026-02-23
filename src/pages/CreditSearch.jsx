@@ -282,7 +282,7 @@ The Creditze.ng Team
   }
 
   // Check if KYC is complete
-  if (!kyc || !kyc.id || kyc.kyc_status !== 'verified') {
+  if (!kyc || kyc.kyc_status !== 'verified') {
     return (
       <div className="min-h-screen bg-gray-50">
         <div className="bg-white border-b px-4 py-4">
