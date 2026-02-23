@@ -309,7 +309,7 @@ export default function Dashboard() {
         )}
 
         {/* Credit Search */}
-        {kyc?.kyc_status === 'verified' && !isCreditSearchValid() && (
+        {kyc?.bvn && !isCreditSearchValid() && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

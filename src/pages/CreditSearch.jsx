@@ -281,8 +281,8 @@ The Creditze.ng Team
     );
   }
 
-  // Check if KYC is complete
-  if (!kyc || kyc.kyc_status !== 'verified') {
+  // Check if BVN is available (minimum requirement for credit search)
+  if (!kyc || !kyc.bvn) {
     return (
       <div className="min-h-screen bg-gray-50">
         <div className="bg-white border-b px-4 py-4">
@@ -297,14 +297,14 @@ The Creditze.ng Team
           <Alert>
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              Please complete your KYC verification first before proceeding with credit search.
+              Please verify your BVN before proceeding with credit search.
             </AlertDescription>
           </Alert>
           <Button 
             className="w-full mt-4 bg-emerald-600 hover:bg-emerald-700"
             onClick={() => navigate(createPageUrl('KYC'))}
           >
-            Complete KYC
+            Verify BVN
           </Button>
         </div>
       </div>
