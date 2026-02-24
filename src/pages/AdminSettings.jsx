@@ -35,7 +35,7 @@ export default function AdminSettings() {
     tier1_max_amount: 5000000,
     tier1_interest_rate: 12,
     tier1_tenure_days: 90,
-    credit_search_fee: 500,
+    credit_search_fee: 50,
     credit_report_validity_days: 90,
     verification_link_validity_hours: 24,
     default_affiliate_commission: 5
