@@ -50,7 +50,7 @@ Deno.serve(async (req) => {
         }
 
         // Call Paystack NIN verification API (live mode)
-        const response = await fetch(`https://api.paystack.co/bank/resolve_bvn/${nin}`, {
+        const response = await fetch(`https://api.paystack.co/identity/nin/${nin}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${paystackKey}`,
