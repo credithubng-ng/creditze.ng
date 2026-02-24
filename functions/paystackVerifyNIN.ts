@@ -54,13 +54,12 @@ Deno.serve(async (req) => {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${paystackKey}`,
-                'Content-Type': 'application/json',
-                'X-Source': 'Base44_mvp'
+                'Content-Type': 'application/json'
             }
         });
 
         const responseText = await response.text();
-        console.log('Paystack NIN API Response:', responseText);
+        console.log('Paystack NIN API Response:', response.status, responseText);
         
         let data;
         try {
@@ -73,7 +72,14 @@ Deno.serve(async (req) => {
             }, { status: 500 });
         }
 
-        if (!response.ok || !data.status) {
+        if (!response.ok) {
+            return Response.json({ 
+                success: false, 
+                error: data.message || `NIN verification failed (${response.status})` 
+            }, { status: response.status });
+        }
+        
+        if (!data.status) {
             return Response.json({ 
                 success: false, 
                 error: data.message || 'NIN verification failed' 
