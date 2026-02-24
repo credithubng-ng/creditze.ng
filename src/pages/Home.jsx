@@ -65,13 +65,13 @@ export default function Home() {
     if (isAuthenticated) {
       window.location.href = createPageUrl('Dashboard');
     } else {
-      base44.auth.redirectToLogin(createPageUrl('Home'));
+      base44.auth.redirectToLogin(createPageUrl('Dashboard'));
     }
   };
 
   const handleExternalLoan = (url, type) => {
     if (!isAuthenticated) {
-      base44.auth.redirectToLogin(createPageUrl('Home'));
+      base44.auth.redirectToLogin(createPageUrl(`CreditCheckGateway?type=${type}&url=${encodeURIComponent(url)}`));
       return;
     }
     
