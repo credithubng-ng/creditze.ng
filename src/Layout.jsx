@@ -49,7 +49,7 @@ export default function Layout({ children, currentPageName }) {
   const isAdminPage = currentPageName?.startsWith('Admin');
 
   const handleLogout = async () => {
-    await base44.auth.logout();
+    await base44.auth.logout(createPageUrl('Home'));
   };
 
   return (
