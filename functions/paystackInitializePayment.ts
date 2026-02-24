@@ -31,7 +31,16 @@ Deno.serve(async (req) => {
             body: JSON.stringify({
                 email: email,
                 amount: amount * 100, // Convert to kobo
-                metadata: metadata || {},
+                metadata: {
+                    ...(metadata || {}),
+                    custom_fields: [
+                        {
+                            display_name: "Source",
+                            variable_name: "source",
+                            value: "Base44_mvp"
+                        }
+                    ]
+                },
                 callback_url: callback_url || undefined
             })
         });

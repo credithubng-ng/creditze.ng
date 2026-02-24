@@ -54,7 +54,8 @@ Deno.serve(async (req) => {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${paystackKey}`,
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'X-Source': 'Base44_mvp'
             }
         });
 
