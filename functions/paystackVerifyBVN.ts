@@ -50,17 +50,16 @@ Deno.serve(async (req) => {
         }
 
         // Call Paystack BVN verification API
-        const response = await fetch(`https://api.paystack.co/bank/resolve_bvn/${bvn}`, {
+        const response = await fetch(`https://api.paystack.co/identity/bvn/${bvn}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${paystackKey}`,
-                'Content-Type': 'application/json',
-                'X-Source': 'Base44_mvp'
+                'Content-Type': 'application/json'
             }
         });
 
         const responseText = await response.text();
-        console.log('Paystack BVN API Response:', responseText);
+        console.log('Paystack BVN API Response:', response.status, responseText);
         
         let data;
         try {
@@ -73,7 +72,14 @@ Deno.serve(async (req) => {
             }, { status: 500 });
         }
 
-        if (!response.ok || !data.status) {
+        if (!response.ok) {
+            return Response.json({ 
+                success: false, 
+                error: data.message || `BVN verification failed (${response.status})` 
+            }, { status: response.status });
+        }
+        
+        if (!data.status) {
             return Response.json({ 
                 success: false, 
                 error: data.message || 'BVN verification failed' 
