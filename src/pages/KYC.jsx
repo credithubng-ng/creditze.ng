@@ -92,7 +92,7 @@ export default function KYC() {
         // Find the first incomplete step
         if (!kycData[0].full_name || !kycData[0].date_of_birth || !kycData[0].gender) setCurrentStep(0);
         else if (!kycData[0].phone_verified) setCurrentStep(1);
-        else if (!kycData[0].bvn) setCurrentStep(2);
+        else if (!kycData[0].bvn_verified) setCurrentStep(2);
         else if (!kycData[0].nin_verified) setCurrentStep(3);
         else if (!kycData[0].residential_address || !kycData[0].property_type) setCurrentStep(4);
         else if (!kycData[0].account_number) setCurrentStep(5);
@@ -302,15 +302,26 @@ export default function KYC() {
     }
     setSaving(true);
     try {
-      // Temporarily skip BVN verification - just save the BVN
+      const response = await base44.functions.invoke('paystackVerifyBVN', {
+        bvn: formData.bvn
+      });
+
+      if (!response.data.success) {
+        throw new Error(response.data.error || 'BVN verification failed');
+      }
+
       await base44.entities.KYCProfile.update(kyc.id, {
         bvn: formData.bvn,
-        bvn_verified: false
+        bvn_verified: true,
+        bvn_full_name: response.data.data.full_name,
+        bvn_phone_number: response.data.data.phone_number,
+        bvn_date_of_birth: response.data.data.date_of_birth,
+        bvn_gender: response.data.data.gender
       });
       setCurrentStep(3);
       setError(null);
     } catch (err) {
-      setError('Failed to save BVN. Please try again.');
+      setError(err.message || 'BVN verification failed. Please check and try again.');
     } finally {
       setSaving(false);
     }
@@ -638,8 +649,8 @@ export default function KYC() {
                   <div className="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center mb-4">
                     <CreditCard className="w-7 h-7 text-emerald-600" />
                   </div>
-                  <CardTitle>BVN Input</CardTitle>
-                  <CardDescription>Enter your 11-digit Bank Verification Number (verification disabled for testing)</CardDescription>
+                  <CardTitle>BVN Verification</CardTitle>
+                  <CardDescription>Enter your 11-digit Bank Verification Number</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
