@@ -1,4 +1,4 @@
-import * as React from "react"
+import * as React from "react" // v2
 import { OTPInput, OTPInputContext } from "input-otp"
 import { Minus } from "lucide-react"
 
