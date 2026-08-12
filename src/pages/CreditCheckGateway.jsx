@@ -70,7 +70,15 @@ export default function CreditCheckGateway() {
       // Verify payment
       const verifyResponse = await base44.functions.invoke('paystackVerifyPayment', { reference });
       
-      if (!verifyResponse.data.status) {
+      if (
+        !verifyResponse.data.success ||
+        verifyResponse.data.status !== 'success' ||
+        verifyResponse.data.reference !== reference ||
+        verifyResponse.data.currency !== 'NGN' ||
+        verifyResponse.data.amount_kobo !== 85000 ||
+        verifyResponse.data.metadata?.purpose !== 'credit_search' ||
+        verifyResponse.data.metadata?.user_id !== userId
+      ) {
         alert('Payment verification failed. Please contact support.');
         setProcessingSearch(false);
         return;
@@ -118,8 +126,8 @@ export default function CreditCheckGateway() {
         }
       });
 
-      if (response.data.status && response.data.data.authorization_url) {
-        window.location.href = response.data.data.authorization_url;
+      if (response.data.success && response.data.authorization_url) {
+        window.location.href = response.data.authorization_url;
       }
     } catch (error) {
       console.error('Payment error:', error);

@@ -85,6 +85,11 @@ export default function PremiumReportPayment() {
       const response = await base44.functions.invoke('paystackInitializePayment', {
         amount: 2500,
         email: user.email,
+        metadata: {
+          purpose: 'premium_report',
+          user_id: user.id,
+          search_id: searchId
+        },
         callback_url: `${window.location.origin}${createPageUrl('PremiumReportPayment')}?search_id=${searchId}`
       });
 

@@ -27,7 +27,7 @@ Deno.serve(async (req) => {
         }
 
         // Step 1: Create transfer recipient
-        console.log('Creating transfer recipient for account:', account_number, 'bank:', bank_code);
+        console.log('Creating transfer recipient for requested bank');
         const recipientResponse = await fetch('https://api.paystack.co/transferrecipient', {
             method: 'POST',
             headers: {
@@ -44,7 +44,6 @@ Deno.serve(async (req) => {
         });
 
         const recipientData = await recipientResponse.json();
-        console.log('Recipient creation response:', JSON.stringify(recipientData));
 
         if (!recipientResponse.ok || !recipientData.status) {
             return Response.json({ 
@@ -55,7 +54,6 @@ Deno.serve(async (req) => {
         }
 
         const recipientCode = recipientData.data.recipient_code;
-        console.log('Recipient code created:', recipientCode);
 
         // Step 2: Initiate transfer using recipient code
         const transferResponse = await fetch('https://api.paystack.co/transfer', {
@@ -75,7 +73,6 @@ Deno.serve(async (req) => {
         });
 
         const transferData = await transferResponse.json();
-        console.log('Transfer response:', JSON.stringify(transferData));
 
         if (!transferResponse.ok || !transferData.status) {
             console.error('Paystack transfer error:', transferData);

@@ -36,10 +36,17 @@ Deno.serve(async (req) => {
 
         const data = await response.json();
 
+        if (data.data.metadata?.user_id && data.data.metadata.user_id !== user.id) {
+            return Response.json({ error: 'Payment does not belong to this user' }, { status: 403 });
+        }
+
         return Response.json({
             success: true,
+            reference: data.data.reference,
             status: data.data.status,
-            amount: data.data.amount / 100, // Convert from kobo
+            amount_kobo: data.data.amount,
+            currency: data.data.currency,
+            metadata: data.data.metadata || {},
             customer: data.data.customer,
             paid_at: data.data.paid_at,
             authorization: data.data.authorization

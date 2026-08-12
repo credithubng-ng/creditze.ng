@@ -55,8 +55,9 @@ Deno.serve(async (req) => {
             }, { status: 400 });
         }
 
-        // Verify OTP
-        if (storedOTP !== otp) {
+        // Verify the hash. OTP_PEPPER must be configured in the function environment.
+        const submittedHash = await hashOtp(user.id, type, otp);
+        if (!constantTimeEqual(storedOTP, submittedHash)) {
             return Response.json({ 
                 success: false, 
                 error: 'Invalid OTP. Please try again.' 
@@ -87,3 +88,25 @@ Deno.serve(async (req) => {
         }, { status: 500 });
     }
 });
+
+async function hashOtp(userId, type, otp) {
+    const pepper = Deno.env.get('OTP_PEPPER');
+    if (!pepper) {
+        throw new Error('OTP service not configured');
+    }
+
+    const input = new TextEncoder().encode(`${userId}:${type}:${otp}:${pepper}`);
+    const digest = await crypto.subtle.digest('SHA-256', input);
+    return Array.from(new Uint8Array(digest))
+        .map(byte => byte.toString(16).padStart(2, '0'))
+        .join('');
+}
+
+function constantTimeEqual(left, right) {
+    if (left.length !== right.length) return false;
+    let difference = 0;
+    for (let index = 0; index < left.length; index++) {
+        difference |= left.charCodeAt(index) ^ right.charCodeAt(index);
+    }
+    return difference === 0;
+}

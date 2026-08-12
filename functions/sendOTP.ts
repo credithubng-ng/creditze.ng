@@ -35,15 +35,18 @@ Deno.serve(async (req) => {
             }, { status: 400 });
         }
 
-        // Generate 6-digit OTP
-        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        // Generate the OTP with a cryptographically secure source and store only its hash.
+        const randomBytes = new Uint32Array(1);
+        crypto.getRandomValues(randomBytes);
+        const otp = (100000 + (randomBytes[0] % 900000)).toString();
+        const otpHash = await hashOtp(user.id, type, otp);
         const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
         // Get or create KYC profile to store OTP
         let kycProfile = await base44.entities.KYCProfile.filter({ user_id: user.id });
         
         const otpData = {
-            [`otp_${type}`]: otp,
+            [`otp_${type}`]: otpHash,
             [`otp_${type}_expires`]: expiresAt.toISOString(),
             [`otp_${type}_target`]: type === 'phone' ? phone_number : email
         };
@@ -174,3 +177,16 @@ Deno.serve(async (req) => {
         }, { status: 500 });
     }
 });
+
+async function hashOtp(userId, type, otp) {
+    const pepper = Deno.env.get('OTP_PEPPER');
+    if (!pepper) {
+        throw new Error('OTP service not configured');
+    }
+
+    const input = new TextEncoder().encode(`${userId}:${type}:${otp}:${pepper}`);
+    const digest = await crypto.subtle.digest('SHA-256', input);
+    return Array.from(new Uint8Array(digest))
+        .map(byte => byte.toString(16).padStart(2, '0'))
+        .join('');
+}

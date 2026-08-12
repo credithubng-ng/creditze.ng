@@ -30,14 +30,34 @@ Deno.serve(async (req) => {
       }, { status: 400 });
     }
 
-    const paymentData = verifyResponse.data.data;
+    const paymentData = verifyResponse.data;
 
-    // Check payment amount (should be 2500 NGN = 250000 kobo)
-    if (paymentData.amount < 250000) {
+    if (
+      paymentData.status !== 'success' ||
+      paymentData.reference !== reference ||
+      paymentData.currency !== 'NGN' ||
+      paymentData.amount_kobo !== 250000 ||
+      paymentData.metadata?.purpose !== 'premium_report' ||
+      paymentData.metadata?.user_id !== user.id ||
+      paymentData.metadata?.search_id !== search_id
+    ) {
       return Response.json({ 
         success: false, 
-        error: 'Insufficient payment amount' 
+        error: 'Payment does not match this premium report purchase'
       }, { status: 400 });
+    }
+
+    const searches = await base44.asServiceRole.entities.CreditSearch.filter({ id: search_id });
+    if (!searches[0] || searches[0].user_id !== user.id) {
+      return Response.json({ success: false, error: 'Credit search not found' }, { status: 404 });
+    }
+
+    if (searches[0].premium_payment_reference === reference) {
+      return Response.json({
+        success: true,
+        message: 'Premium report already purchased',
+        report_url: searches[0].premium_report_url
+      });
     }
 
     // Get user's KYC profile for BVN
@@ -211,6 +231,12 @@ Deno.serve(async (req) => {
       to: user.email,
       subject: '📄 Your Premium Credit Report is Ready',
       body: emailHtml
+    });
+
+    await base44.asServiceRole.entities.CreditSearch.update(search_id, {
+      premium_payment_reference: reference,
+      premium_report_url: reportUrl,
+      premium_purchased_at: new Date().toISOString()
     });
 
     return Response.json({

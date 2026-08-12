@@ -69,13 +69,39 @@ Deno.serve(async (req) => {
             const amountReceived = event.data.amount / 100; // Convert from kobo
             const totalRepayment = loan.total_repayment;
 
+            // Paystack retries webhook delivery. Record references before applying balances
+            // so the same transfer cannot be credited twice.
+            const existingRepayments = await base44.asServiceRole.entities.LoanRepayment.filter({
+                payment_reference: event.data.reference
+            });
+            if (existingRepayments.length === 0) {
+                await base44.asServiceRole.entities.LoanRepayment.create({
+                    loan_id,
+                    amount: amountReceived,
+                    payment_reference: event.data.reference,
+                    payment_method: 'virtual_account',
+                    status: 'successful'
+                });
+            }
+
+            // Derive the balance from immutable repayment records instead of incrementing
+            // the stored balance. This makes retries safe and repairs interrupted runs.
+            const confirmedRepayments = await base44.asServiceRole.entities.LoanRepayment.filter({
+                loan_id,
+                status: 'successful'
+            });
+            const newTotalReceived = confirmedRepayments.reduce(
+                (total, repayment) => total + (Number(repayment.amount) || 0),
+                0
+            );
+
             // Update virtual account total received
             await base44.asServiceRole.entities.VirtualAccount.update(virtualAccount.id, {
-                total_received: (virtualAccount.total_received || 0) + amountReceived
+                total_received: newTotalReceived
             });
 
             // Check if full repayment
-            if (amountReceived >= totalRepayment && loan.status === 'disbursed') {
+            if (newTotalReceived >= totalRepayment && ['disbursed', 'overdue'].includes(loan.status)) {
                 // Mark loan as repaid
                 await base44.asServiceRole.entities.LoanApplication.update(loan_id, {
                     status: 'repaid',
@@ -137,7 +163,7 @@ Deno.serve(async (req) => {
                         account_number: virtualAccount.account_number
                     }
                 });
-            } else if (amountReceived < totalRepayment) {
+            } else if (existingRepayments.length === 0 && newTotalReceived < totalRepayment) {
                 // Partial payment received
                 console.log(`Partial payment received: ₦${amountReceived} of ₦${totalRepayment}`);
                 
@@ -154,7 +180,7 @@ Deno.serve(async (req) => {
                                 <div style="background: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0;">
                                     <p><strong>Amount Received:</strong> ₦${amountReceived.toLocaleString()}</p>
                                     <p><strong>Total Due:</strong> ₦${totalRepayment.toLocaleString()}</p>
-                                    <p><strong>Balance:</strong> ₦${(totalRepayment - (virtualAccount.total_received + amountReceived)).toLocaleString()}</p>
+                                    <p><strong>Balance:</strong> ₦${Math.max(0, totalRepayment - newTotalReceived).toLocaleString()}</p>
                                 </div>
                                 <p>Please transfer the remaining balance to complete your repayment.</p>
                             </div>
