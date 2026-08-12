@@ -1,17 +1,15 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
 import { motion } from 'framer-motion';
 import {
   ArrowLeft,
   ArrowRight,
-  Shield,
   Clock,
   TrendingUp,
   Users,
   CheckCircle2,
-  CreditCard,
   FileText,
   Zap,
   Building2,

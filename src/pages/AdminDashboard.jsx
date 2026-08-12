@@ -9,20 +9,17 @@ import {
   Building2, 
   UserCheck,
   TrendingUp,
-  TrendingDown,
   AlertTriangle,
   FileText,
   Settings,
   DollarSign,
   ChevronRight,
-  Search,
   ArrowLeft,
   Brain,
   MessageSquare
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function AdminDashboard() {

@@ -6,11 +6,9 @@ import { motion } from 'framer-motion';
 import { 
   Wallet, 
   TrendingUp, 
-  Clock, 
   AlertCircle,
   ArrowRight,
   CheckCircle2,
-  XCircle,
   FileText,
   Shield,
   Building2,

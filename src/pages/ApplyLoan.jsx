@@ -10,8 +10,7 @@ import { toast } from 'sonner';
 import { 
   Zap, 
   Building2, 
-  ArrowLeft, 
-  ArrowRight,
+  ArrowLeft,
   CheckCircle2,
   Loader2,
   AlertCircle,
@@ -21,7 +20,7 @@ import {
 } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';

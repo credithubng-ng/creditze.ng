@@ -4,18 +4,15 @@ import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
 import { format, differenceInDays } from 'date-fns';
 import { 
-  ArrowLeft, 
-  AlertTriangle,
+  ArrowLeft,
   Mail,
   MessageSquare,
   Phone,
   FileText,
   CheckCircle2,
-  XCircle,
   Clock,
   Wallet,
   User,
-  Building2,
   CreditCard,
   Loader2,
   Send,

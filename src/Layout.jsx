@@ -1,12 +1,10 @@
-import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { base44 } from '@/api/base44Client';
+import { useAuth } from '@/lib/AuthContext';
 import { 
   Home, 
   Wallet, 
-  User, 
-  Settings,
+  User,
   LayoutDashboard,
   MessageSquare,
   AlertTriangle,
@@ -21,25 +19,7 @@ const NAV_ITEMS = [
 ];
 
 export default function Layout({ children, currentPageName }) {
-  const [user, setUser] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  useEffect(() => {
-    checkAuth();
-  }, []);
-
-  const checkAuth = async () => {
-    try {
-      const auth = await base44.auth.isAuthenticated();
-      setIsAuthenticated(auth);
-      if (auth) {
-        const currentUser = await base44.auth.me();
-        setUser(currentUser);
-      }
-    } catch (error) {
-      console.error('Auth check error:', error);
-    }
-  };
+  const { user, isAuthenticated, logout } = useAuth();
 
   // Pages that don't need the bottom nav
   const noNavPages = ['Home', 'VerifyEmployment'];
@@ -49,7 +29,7 @@ export default function Layout({ children, currentPageName }) {
   const isAdminPage = currentPageName?.startsWith('Admin');
 
   const handleLogout = async () => {
-    await base44.auth.logout(createPageUrl('Home'));
+    await logout(true, createPageUrl('Home'));
   };
 
   return (

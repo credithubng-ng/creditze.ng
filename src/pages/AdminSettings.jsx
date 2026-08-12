@@ -6,9 +6,7 @@ import {
   ArrowLeft, 
   Save,
   Loader2,
-  Settings,
   Percent,
-  Clock,
   Wallet,
   Shield
 } from 'lucide-react';

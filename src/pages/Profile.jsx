@@ -5,8 +5,7 @@ import { base44 } from '@/api/base44Client';
 import ReferralSection from '../components/referral/ReferralSection';
 import { motion } from 'framer-motion';
 import { 
-  ArrowLeft, 
-  User,
+  ArrowLeft,
   Mail,
   Phone,
   Shield,
@@ -17,7 +16,6 @@ import {
   ChevronRight,
   CheckCircle2,
   AlertCircle,
-  Loader2,
   FileText
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
