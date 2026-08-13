@@ -6,7 +6,6 @@ import { motion } from 'framer-motion';
 import { 
   ArrowLeft,
   Search,
-  Filter,
   Calendar,
   CheckCircle2,
   XCircle,

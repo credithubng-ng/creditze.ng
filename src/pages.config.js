@@ -47,43 +47,45 @@
  *
  * The mainPage value must match a key in the PAGES object exactly.
  */
-import AdminABTests from './pages/AdminABTests';
-import AdminAffiliates from './pages/AdminAffiliates';
-import AdminCollectionConfig from './pages/AdminCollectionConfig';
-import AdminCollections from './pages/AdminCollections';
-import AdminDashboard from './pages/AdminDashboard';
-import AdminDisbursements from './pages/AdminDisbursements';
-import AdminDisputeDetail from './pages/AdminDisputeDetail';
-import AdminDisputes from './pages/AdminDisputes';
-import AdminEmployers from './pages/AdminEmployers';
-import AdminLoanCollection from './pages/AdminLoanCollection';
-import AdminLoanReview from './pages/AdminLoanReview';
-import AdminLoans from './pages/AdminLoans';
-import AdminMLScoring from './pages/AdminMLScoring';
-import AdminReferrals from './pages/AdminReferrals';
-import AdminSettings from './pages/AdminSettings';
-import AdminUsers from './pages/AdminUsers';
-import ApplyLoan from './pages/ApplyLoan';
-import CreditCheckGateway from './pages/CreditCheckGateway';
-import CreditHistory from './pages/CreditHistory';
-import CreditSearch from './pages/CreditSearch';
-import CreditSearchHistory from './pages/CreditSearchHistory';
-import Dashboard from './pages/Dashboard';
-import DisputeDetail from './pages/DisputeDetail';
-import Home from './pages/Home';
-import HowItWorks from './pages/HowItWorks';
-import KYC from './pages/KYC';
-import LoanDetails from './pages/LoanDetails';
-import LoanHistory from './pages/LoanHistory';
-import MyDisputes from './pages/MyDisputes';
-import MyDocuments from './pages/MyDocuments';
-import PremiumReportPayment from './pages/PremiumReportPayment';
-import Profile from './pages/Profile';
-import RaiseDispute from './pages/RaiseDispute';
-import SetupDirectDebit from './pages/SetupDirectDebit';
-import Tier1Verification from './pages/Tier1Verification';
-import VerifyEmployment from './pages/VerifyEmployment';
+import { lazy } from 'react';
 import __Layout from './Layout.jsx';
+
+const AdminABTests = lazy(() => import('./pages/AdminABTests'));
+const AdminAffiliates = lazy(() => import('./pages/AdminAffiliates'));
+const AdminCollectionConfig = lazy(() => import('./pages/AdminCollectionConfig'));
+const AdminCollections = lazy(() => import('./pages/AdminCollections'));
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+const AdminDisbursements = lazy(() => import('./pages/AdminDisbursements'));
+const AdminDisputeDetail = lazy(() => import('./pages/AdminDisputeDetail'));
+const AdminDisputes = lazy(() => import('./pages/AdminDisputes'));
+const AdminEmployers = lazy(() => import('./pages/AdminEmployers'));
+const AdminLoanCollection = lazy(() => import('./pages/AdminLoanCollection'));
+const AdminLoanReview = lazy(() => import('./pages/AdminLoanReview'));
+const AdminLoans = lazy(() => import('./pages/AdminLoans'));
+const AdminMLScoring = lazy(() => import('./pages/AdminMLScoring'));
+const AdminReferrals = lazy(() => import('./pages/AdminReferrals'));
+const AdminSettings = lazy(() => import('./pages/AdminSettings'));
+const AdminUsers = lazy(() => import('./pages/AdminUsers'));
+const ApplyLoan = lazy(() => import('./pages/ApplyLoan'));
+const CreditHistory = lazy(() => import('./pages/CreditHistory'));
+const CreditSearch = lazy(() => import('./pages/CreditSearch'));
+const CreditSearchHistory = lazy(() => import('./pages/CreditSearchHistory'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const DisputeDetail = lazy(() => import('./pages/DisputeDetail'));
+const Home = lazy(() => import('./pages/Home'));
+const HowItWorks = lazy(() => import('./pages/HowItWorks'));
+const KYC = lazy(() => import('./pages/KYC'));
+const LoanDetails = lazy(() => import('./pages/LoanDetails'));
+const LoanHistory = lazy(() => import('./pages/LoanHistory'));
+const Login = lazy(() => import('./pages/Login'));
+const MyDisputes = lazy(() => import('./pages/MyDisputes'));
+const MyDocuments = lazy(() => import('./pages/MyDocuments'));
+const PremiumReportPayment = lazy(() => import('./pages/PremiumReportPayment'));
+const Profile = lazy(() => import('./pages/Profile'));
+const RaiseDispute = lazy(() => import('./pages/RaiseDispute'));
+const SetupDirectDebit = lazy(() => import('./pages/SetupDirectDebit'));
+const Tier1Verification = lazy(() => import('./pages/Tier1Verification'));
+const VerifyEmployment = lazy(() => import('./pages/VerifyEmployment'));
 
 
 export const PAGES = {
@@ -104,7 +106,6 @@ export const PAGES = {
     "AdminSettings": AdminSettings,
     "AdminUsers": AdminUsers,
     "ApplyLoan": ApplyLoan,
-    "CreditCheckGateway": CreditCheckGateway,
     "CreditHistory": CreditHistory,
     "CreditSearch": CreditSearch,
     "CreditSearchHistory": CreditSearchHistory,
@@ -115,6 +116,7 @@ export const PAGES = {
     "KYC": KYC,
     "LoanDetails": LoanDetails,
     "LoanHistory": LoanHistory,
+    "Login": Login,
     "MyDisputes": MyDisputes,
     "MyDocuments": MyDocuments,
     "PremiumReportPayment": PremiumReportPayment,

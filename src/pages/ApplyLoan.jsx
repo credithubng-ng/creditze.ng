@@ -10,8 +10,7 @@ import { toast } from 'sonner';
 import { 
   Zap, 
   Building2, 
-  ArrowLeft, 
-  ArrowRight,
+  ArrowLeft,
   CheckCircle2,
   Loader2,
   AlertCircle,
@@ -21,7 +20,7 @@ import {
 } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -39,7 +38,7 @@ export default function ApplyLoan() {
   const [successMessage, setSuccessMessage] = useState(null);
   
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [loanAmount, setLoanAmount] = useState(10000);
+  const [loanAmount, setLoanAmount] = useState(50000);
   const [loanDetails, setLoanDetails] = useState(null);
   const [mlScoreResult, setMlScoreResult] = useState(null);
   const [mlConfig, setMlConfig] = useState(null);
@@ -216,7 +215,8 @@ export default function ApplyLoan() {
     }
     
     if (product === 'urgent_10k') {
-      const maxAmount = creditLimit?.current_limit || (loanConfig?.urgent_10k_base_amount || 10000);
+      const configuredAmount = 50000;
+      const maxAmount = 50000;
       const baseRate = loanConfig?.urgent_10k_interest_rate || 15;
       const baseTenure = loanConfig?.urgent_10k_tenure_days || 30;
       
@@ -234,7 +234,7 @@ export default function ApplyLoan() {
       });
       
       setPersonalizedOfferData(personalized);
-      setLoanAmount(Math.min(loanConfig?.urgent_10k_base_amount || 10000, personalized.personalizedAmount));
+      setLoanAmount(Math.min(configuredAmount, personalized.personalizedAmount, 50000));
       setSelectedTenure(personalized.tenureOptions[0]);
       
       setLoanDetails({
@@ -243,7 +243,7 @@ export default function ApplyLoan() {
         tenureOptions: personalized.tenureOptions,
         score,
         minScore: loanConfig?.urgent_10k_min_score || 60,
-        maxAmount: personalized.personalizedAmount,
+        maxAmount: Math.min(personalized.personalizedAmount, 50000),
         isPersonalized: true,
         adjustments: personalized.adjustments
       });
@@ -372,7 +372,7 @@ export default function ApplyLoan() {
             : (loanConfig?.tier1_interest_rate || 12),
           personalized_interest_rate: loanDetails.interestRate,
           base_max_amount: selectedProduct === 'urgent_10k'
-            ? (creditLimit?.current_limit || 10000)
+            ? 50000
             : (loanConfig?.tier1_max_amount || 5000000),
           personalized_max_amount: loanDetails.maxAmount,
           base_tenure_days: selectedProduct === 'urgent_10k' 
@@ -417,7 +417,9 @@ export default function ApplyLoan() {
       if (!creditLimit) {
         await base44.entities.UserCreditLimit.create({
           user_id: user.id,
-          current_limit: 10000,
+          current_limit: 50000,
+          initial_limit: 50000,
+          max_limit: 50000,
           total_loans_taken: 1
         });
       } else {
@@ -515,7 +517,7 @@ export default function ApplyLoan() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="creditze-shell flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-emerald-600" />
       </div>
     );
@@ -523,13 +525,13 @@ export default function ApplyLoan() {
 
   if (!canApply()) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="bg-white border-b px-4 py-4">
+      <div className="creditze-shell">
+        <div className="border-b border-white/10 bg-emerald-950 px-4 py-5 text-white">
           <div className="max-w-lg mx-auto flex items-center gap-4">
             <Button variant="ghost" size="icon" onClick={() => navigate(createPageUrl('Dashboard'))}>
               <ArrowLeft className="w-5 h-5" />
             </Button>
-            <h1 className="font-semibold text-gray-900">Apply for Loan</h1>
+            <h1 className="font-semibold">Apply for Loan</h1>
           </div>
         </div>
         <div className="max-w-lg mx-auto px-4 py-6">
@@ -548,14 +550,17 @@ export default function ApplyLoan() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24">
+    <div className="creditze-shell pb-28">
       {/* Header */}
-      <div className="bg-white border-b px-4 py-4">
+      <div className="border-b border-white/10 bg-emerald-950 px-4 py-5 text-white">
         <div className="max-w-lg mx-auto flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={() => navigate(createPageUrl('Dashboard'))}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <h1 className="font-semibold text-gray-900">Apply for Loan</h1>
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-200/70">Creditze</p>
+            <h1 className="font-semibold">Apply for a loan</h1>
+          </div>
         </div>
       </div>
 
@@ -567,11 +572,14 @@ export default function ApplyLoan() {
             animate={{ opacity: 1, y: 0 }}
             className="space-y-4"
           >
-            <h2 className="text-lg font-semibold text-gray-900">Select Loan Product</h2>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700">Your offer</p>
+              <h2 className="mt-1 text-2xl font-semibold tracking-tight text-emerald-950">Choose the right credit option.</h2>
+            </div>
             
-            {/* Urgent 10k */}
+            {/* Urgent 50k */}
             <Card 
-              className={`border-2 cursor-pointer transition hover:border-emerald-300 ${
+              className={`cursor-pointer border-2 transition hover:-translate-y-0.5 hover:border-emerald-300 ${
                 selectedProduct === 'urgent_10k' ? 'border-emerald-500' : 'border-gray-200'
               }`}
               onClick={() => selectProduct('urgent_10k')}
@@ -582,8 +590,8 @@ export default function ApplyLoan() {
                     <Zap className="w-6 h-6 text-emerald-600" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900">Urgent ₦10,000</h3>
-                    <p className="text-sm text-gray-500 mb-2">Credit limit builder</p>
+                    <h3 className="font-semibold text-gray-900">Urgent ₦50,000</h3>
+                    <p className="text-sm text-gray-500 mb-2">Fast, transparent support for urgent needs</p>
                     <div className="flex gap-2">
                       <Badge variant="outline">15% interest</Badge>
                       <Badge variant="outline">30 days</Badge>
@@ -685,14 +693,14 @@ export default function ApplyLoan() {
                   <Slider
                     value={[loanAmount]}
                     onValueChange={([v]) => setLoanAmount(v)}
-                    min={selectedProduct === 'urgent_10k' ? 5000 : 50000}
+                    min={selectedProduct === 'urgent_10k' ? 10000 : 50000}
                     max={loanDetails.maxAmount}
                     step={selectedProduct === 'urgent_10k' ? 1000 : 10000}
                     className="py-4"
                   />
                   
                   <div className="flex justify-between text-sm text-gray-500">
-                    <span>₦{selectedProduct === 'urgent_10k' ? '5,000' : '50,000'}</span>
+                    <span>₦{selectedProduct === 'urgent_10k' ? '10,000' : '50,000'}</span>
                     <span>₦{loanDetails.maxAmount.toLocaleString()}</span>
                   </div>
 

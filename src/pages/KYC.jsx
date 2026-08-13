@@ -7,15 +7,13 @@ import {
   Phone, 
   CreditCard, 
   MapPin, 
-  Building, 
   Banknote,
   ArrowLeft,
   ArrowRight,
   CheckCircle2,
   Loader2,
   AlertCircle,
-  User as UserIcon,
-  Calendar
+  User as UserIcon
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

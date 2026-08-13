@@ -4,9 +4,7 @@ import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
 import { format } from 'date-fns';
 import { 
-  ArrowLeft, 
-  Search,
-  Filter,
+  ArrowLeft,
   MoreVertical,
   Eye,
   CheckCircle2,
@@ -16,8 +14,7 @@ import {
   AlertTriangle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import {

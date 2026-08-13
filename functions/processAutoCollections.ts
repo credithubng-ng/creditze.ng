@@ -4,10 +4,16 @@ Deno.serve(async (req) => {
     try {
         const base44 = createClientFromRequest(req);
 
-        // Verify admin access (scheduled automations should run as service role)
-        // Allow service role or admin users only
+        // Scheduled calls must present a shared secret; interactive calls require an admin.
+        // Never treat a missing user as implicit service-role authorization.
         const user = await base44.auth.me().catch(() => null);
-        if (user && user.role !== 'admin') {
+        const automationSecret = Deno.env.get('AUTO_COLLECTIONS_SECRET');
+        const suppliedSecret = req.headers.get('x-automation-secret');
+        const isScheduledCall = Boolean(
+            automationSecret && suppliedSecret && automationSecret === suppliedSecret
+        );
+
+        if (!isScheduledCall && user?.role !== 'admin') {
             return Response.json({ 
                 success: false,
                 error: 'Forbidden: Admin access required' 
@@ -133,7 +139,12 @@ Deno.serve(async (req) => {
                     status: chargeSuccess ? 'paid' : 'failed',
                     channel: 'direct_debit',
                     message_content: chargeSuccess ? 'Direct debit successful' : 'Direct debit failed',
-                    response_notes: JSON.stringify(chargeResponse.data),
+                    response_notes: JSON.stringify({
+                        success: chargeResponse.data?.success,
+                        status: chargeResponse.data?.status,
+                        reference: chargeResponse.data?.reference,
+                        message: chargeResponse.data?.message
+                    }),
                     initiated_by: 'system',
                     days_overdue: Math.floor((today - new Date(loan.due_date)) / (1000 * 60 * 60 * 24)),
                     amount_outstanding: loan.total_repayment
@@ -161,20 +172,16 @@ Deno.serve(async (req) => {
                         user_id: loan.user_id 
                     });
                     if (creditLimits[0]) {
-                        const creditLimit = creditLimits[0];
-                        const loanConfigs = await base44.asServiceRole.entities.LoanConfig.filter({ config_key: 'default' });
-                        const loanConfig = loanConfigs[0];
-                        const incrementPercent = loanConfig?.urgent_10k_increment_percent || 20;
-                        
-                        await base44.asServiceRole.entities.UserCreditLimit.update(creditLimit.id, {
-                            successful_repayments: creditLimit.successful_repayments + 1,
-                            current_limit: Math.round(creditLimit.current_limit * (1 + incrementPercent / 100))
+                        await base44.asServiceRole.entities.UserCreditLimit.update(creditLimits[0].id, {
+                            successful_repayments: (creditLimits[0].successful_repayments || 0) + 1,
+                            current_limit: 50000,
+                            max_limit: 50000
                         });
                     }
 
                     // Send success notification
                     await base44.asServiceRole.integrations.Core.SendEmail({
-                        to: loan.user_id,
+                        to: userEmail,
                         subject: '✅ Loan Repayment Successful',
                         body: `Your loan repayment of ₦${loan.total_repayment.toLocaleString()} has been successfully processed via direct debit. Your credit limit has been increased!`
                     });
@@ -195,7 +202,7 @@ Deno.serve(async (req) => {
                     // Send failure notification
                     const retriesLeft = config.max_direct_debit_retries - (failedAttempts + 1);
                     await base44.asServiceRole.integrations.Core.SendEmail({
-                        to: loan.user_id,
+                        to: userEmail,
                         subject: '⚠️ Loan Repayment Failed',
                         body: `We were unable to process your loan repayment of ₦${loan.total_repayment.toLocaleString()} via direct debit. ${retriesLeft > 0 ? `We will retry in ${config.direct_debit_retry_days} days. ${retriesLeft} ${retriesLeft === 1 ? 'retry' : 'retries'} remaining.` : 'Please contact support or make a manual payment to avoid penalties.'}`
                     });

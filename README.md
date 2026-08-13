@@ -28,6 +28,13 @@ VITE_BASE44_APP_BASE_URL=https://my-to-do-list-81bfaad7.base44.app
 
 Run the app: `npm run dev`
 
+**Required production secrets**
+
+- `AUTO_COLLECTIONS_SECRET`: a high-entropy secret sent by the scheduler in the `x-automation-secret` header when invoking `processAutoCollections`.
+- `OTP_PEPPER`: a high-entropy secret used to hash one-time passcodes before storage. Rotating it invalidates outstanding OTPs.
+
+Never expose either value through `VITE_` environment variables or client-side code.
+
 **Publish your changes**
 
 Open [Base44.com](http://Base44.com) and click on Publish.

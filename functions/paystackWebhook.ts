@@ -57,6 +57,11 @@ async function handleChargeSuccess(base44, data) {
             payment_reference: data.reference
         });
     } else if (metadata.payment_type === 'loan_repayment') {
+        const existingRepayments = await base44.asServiceRole.entities.LoanRepayment.filter({
+            payment_reference: data.reference
+        });
+        if (existingRepayments.length > 0) return;
+
         // Create repayment record
         await base44.asServiceRole.entities.LoanRepayment.create({
             loan_id: metadata.loan_id,

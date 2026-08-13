@@ -10,13 +10,11 @@ import {
   Clock,
   AlertTriangle,
   XCircle,
-  Loader2,
   Wallet,
   Calendar,
   Percent,
   Calculator,
   Copy,
-  ExternalLink,
   MessageSquare,
   Building2,
   CreditCard

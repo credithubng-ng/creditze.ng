@@ -43,7 +43,7 @@ Deno.serve(async (req) => {
         });
         const kyc = kycProfiles[0];
 
-        if (!kyc || !kyc.bank_name || !kyc.account_number) {
+        if (!kyc || !kyc.bank_name || !kyc.account_number || !kyc.bank_code) {
             return Response.json({ 
                 success: false, 
                 error: 'Bank details not found' 
@@ -86,7 +86,7 @@ Deno.serve(async (req) => {
             amount: loan.amount_approved,
             account_number: kyc.account_number,
             account_name: kyc.account_name,
-            bank_code: kyc.bank_code || '058', // Default to GTBank if missing
+            bank_code: kyc.bank_code,
             reference: reference,
             reason: `Loan disbursement for ${loan.loan_type}`
         });

@@ -53,8 +53,9 @@ export const validateLoanAmount = (amount, loanType, creditLimit) => {
   }
   
   if (loanType === 'urgent_10k') {
-    if (num > creditLimit) {
-      return `Amount cannot exceed your credit limit of ₦${creditLimit.toLocaleString()}`;
+    const urgent50kLimit = Math.min(Math.max(creditLimit || 50000, 50000), 50000);
+    if (num > urgent50kLimit) {
+      return `Amount cannot exceed the Urgent ₦50,000 limit`;
     }
     if (num < 1000) {
       return 'Minimum loan amount is ₦1,000';

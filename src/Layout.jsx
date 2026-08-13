@@ -1,12 +1,10 @@
-import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { base44 } from '@/api/base44Client';
+import { useAuth } from '@/lib/AuthContext';
 import { 
   Home, 
   Wallet, 
-  User, 
-  Settings,
+  User,
   LayoutDashboard,
   MessageSquare,
   AlertTriangle,
@@ -21,44 +19,26 @@ const NAV_ITEMS = [
 ];
 
 export default function Layout({ children, currentPageName }) {
-  const [user, setUser] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  useEffect(() => {
-    checkAuth();
-  }, []);
-
-  const checkAuth = async () => {
-    try {
-      const auth = await base44.auth.isAuthenticated();
-      setIsAuthenticated(auth);
-      if (auth) {
-        const currentUser = await base44.auth.me();
-        setUser(currentUser);
-      }
-    } catch (error) {
-      console.error('Auth check error:', error);
-    }
-  };
+  const { user, isAuthenticated, logout } = useAuth();
 
   // Pages that don't need the bottom nav
-  const noNavPages = ['Home', 'VerifyEmployment'];
+  const noNavPages = ['Home', 'Login', 'VerifyEmployment'];
   const showNav = isAuthenticated && !noNavPages.includes(currentPageName);
 
   // Admin pages - show admin nav instead
   const isAdminPage = currentPageName?.startsWith('Admin');
 
   const handleLogout = async () => {
-    await base44.auth.logout(createPageUrl('Home'));
+    await logout(true, createPageUrl('Home'));
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="creditze-shell">
       {/* Logout Button - Fixed Top Right */}
       {isAuthenticated && (
         <button
           onClick={handleLogout}
-          className="fixed top-4 right-4 z-50 p-2 bg-white rounded-full shadow-md hover:shadow-lg transition-all hover:bg-red-50 group"
+          className="fixed top-4 right-4 z-50 grid h-10 w-10 place-items-center rounded-full border border-white/60 bg-white/85 shadow-lg backdrop-blur-xl transition-all hover:-translate-y-0.5 hover:bg-red-50 group"
           title="Logout"
         >
           <LogOut className="w-5 h-5 text-gray-600 group-hover:text-red-600" />
@@ -69,8 +49,8 @@ export default function Layout({ children, currentPageName }) {
       
       {/* Bottom Navigation */}
       {showNav && !isAdminPage && (
-        <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2 safe-area-pb">
-          <div className="max-w-lg mx-auto flex justify-around">
+        <nav className="fixed bottom-0 left-0 right-0 z-40 px-3 pb-3 safe-area-pb">
+          <div className="creditze-glass max-w-xl mx-auto flex justify-around rounded-[1.4rem] px-2 py-1.5">
             {NAV_ITEMS.map((item) => {
               const Icon = item.icon;
               const isActive = currentPageName === item.page;
@@ -78,13 +58,13 @@ export default function Layout({ children, currentPageName }) {
                 <Link
                   key={item.page}
                   to={createPageUrl(item.page)}
-                  className={`flex flex-col items-center py-2 px-4 rounded-xl transition ${
+                  className={`flex min-w-[4.25rem] flex-col items-center rounded-xl px-3 py-2 transition ${
                     isActive 
-                      ? 'text-emerald-600' 
-                      : 'text-gray-500 hover:text-gray-700'
+                      ? 'bg-emerald-950 text-white shadow-md'
+                      : 'text-slate-500 hover:bg-emerald-50 hover:text-emerald-900'
                   }`}
                 >
-                  <Icon className={`w-6 h-6 ${isActive ? 'stroke-[2.5px]' : ''}`} />
+                  <Icon className={`w-5 h-5 ${isActive ? 'stroke-[2.5px]' : ''}`} />
                   <span className="text-xs mt-1 font-medium">{item.label}</span>
                 </Link>
               );

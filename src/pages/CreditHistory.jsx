@@ -44,8 +44,9 @@ export default function CreditHistory() {
 
       setLoans(loanData);
       setCreditLimit(limitData[0] || { 
-        current_limit: 10000, 
-        initial_limit: 10000,
+        current_limit: 50000,
+        initial_limit: 50000,
+        max_limit: 50000,
         successful_repayments: 0,
         total_borrowed: 0,
         total_repaid: 0
@@ -62,21 +63,21 @@ export default function CreditHistory() {
 
   const buildCreditLimitHistory = (loanData, limitData) => {
     if (!limitData) {
-      setCreditLimitHistory([{ date: 'Start', limit: 10000 }]);
+      setCreditLimitHistory([{ date: 'Start', limit: 50000 }]);
       return;
     }
 
-    const history = [{ date: 'Start', limit: limitData.initial_limit || 10000 }];
+    const history = [{ date: 'Start', limit: 50000 }];
     
     // Get repaid loans and calculate limit increases
     const repaidLoans = loanData.filter(l => l.status === 'repaid').sort((a, b) => 
       new Date(a.repayment_date) - new Date(b.repayment_date)
     );
 
-    let currentLimit = limitData.initial_limit || 10000;
+    let currentLimit = 50000;
     repaidLoans.forEach((loan, index) => {
       if (loan.loan_type === 'urgent_10k') {
-        currentLimit = Math.floor(currentLimit * 1.2); // 20% increase
+        currentLimit = Math.min(Math.floor(currentLimit * 1.2), 50000);
         history.push({
           date: new Date(loan.repayment_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
           limit: currentLimit

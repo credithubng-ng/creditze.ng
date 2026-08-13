@@ -9,10 +9,10 @@ Deno.serve(async (req) => {
             return Response.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const { amount, email, metadata, callback_url } = await req.json();
+        const { amount, metadata, callback_url } = await req.json();
 
-        if (!amount || !email) {
-            return Response.json({ error: 'Amount and email are required' }, { status: 400 });
+        if (!Number.isFinite(amount) || amount <= 0) {
+            return Response.json({ error: 'A valid amount is required' }, { status: 400 });
         }
 
         const PAYSTACK_SECRET_KEY = Deno.env.get('PAYSTACK_SECRET_KEY');
@@ -29,10 +29,11 @@ Deno.serve(async (req) => {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                email: email,
-                amount: amount * 100, // Convert to kobo
+                email: user.email,
+                amount: Math.round(amount * 100), // Convert to integer kobo
                 metadata: {
                     ...(metadata || {}),
+                    user_id: user.id,
                     custom_fields: [
                         {
                             display_name: "Source",
