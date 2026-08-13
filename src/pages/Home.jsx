@@ -68,20 +68,20 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-emerald-50 via-white to-white">
+    <div className="creditze-shell overflow-hidden">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-lg border-b border-gray-100">
+      <header className="fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-emerald-950/85 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 rounded-xl bg-white px-3 py-2 shadow-lg shadow-black/10">
             <img 
               src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69864d541609ebe758aa5d6d/ea48dae69_PHOTO-2026-02-05-09-26-23.jpg" 
               alt="Creditze Logo" 
-              className="h-10"
+              className="h-8"
             />
           </div>
           <Button 
             onClick={handleGetStarted}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-full px-6"
+            className="creditze-primary-button px-6"
           >
             {isAuthenticated ? 'Dashboard' : 'Get Started'}
           </Button>
@@ -89,36 +89,37 @@ export default function Home() {
       </header>
 
       {/* Hero Section */}
-      <section className="pt-32 pb-20 px-4">
-        <div className="max-w-4xl mx-auto text-center">
+      <section className="relative overflow-hidden bg-emerald-950 px-5 pb-28 pt-40 text-white">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_20%,rgba(52,211,153,0.20),transparent_32rem)]" />
+        <div className="relative max-w-5xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <span className="inline-block px-4 py-2 bg-emerald-100 text-emerald-700 rounded-full text-sm font-medium mb-6">
-              Fast • Secure • Trusted
+            <span className="creditze-eyebrow mb-7">
+              <Shield className="h-4 w-4" /> Licensed credit. Designed around you.
             </span>
-            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-              Get instant loans,
+            <h1 className="text-5xl md:text-7xl font-semibold tracking-[-0.045em] mb-7 leading-[0.98]">
+              Credit that moves
               <br />
-              <span className="text-emerald-600">build your credit</span>
+              <span className="text-emerald-300">at your pace.</span>
             </h1>
-            <p className="text-lg md:text-xl text-gray-600 mb-10 max-w-2xl mx-auto">
-              Access quick loans up to ₦5,000,000. Build your credit limit with every successful repayment.
+            <p className="text-lg md:text-xl text-emerald-50/70 mb-10 max-w-2xl mx-auto leading-relaxed">
+              Get transparent access to Urgent ₦50,000 and Tier-1 personal loans, with secure verification and no confusing paperwork.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
                 onClick={handleGetStarted}
                 size="lg"
-                className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-full px-8 py-6 text-lg"
+                className="creditze-primary-button px-8 py-6 text-base"
               >
                 Apply Now <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
               <Button 
                 variant="outline"
                 size="lg"
-                className="rounded-full px-8 py-6 text-lg border-2"
+                className="rounded-xl border-white/25 bg-white/5 px-8 py-6 text-base text-white hover:bg-white/10 hover:text-white"
                 asChild
               >
                 <Link to={createPageUrl('HowItWorks')}>
@@ -131,9 +132,9 @@ export default function Home() {
       </section>
 
       {/* Stats */}
-      <section className="py-12 px-4">
-        <div className="max-w-5xl mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+      <section className="relative z-10 -mt-12 px-5 pb-16">
+        <div className="creditze-glass max-w-5xl mx-auto rounded-[1.75rem] p-3 md:p-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
             {[
               { value: '₦50k', label: 'Loan Amount' },
               { value: '5 mins', label: 'Quick Approval' },
@@ -145,10 +146,10 @@ export default function Home() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: i * 0.1 }}
-                className="text-center p-6 bg-white rounded-2xl shadow-sm border border-gray-100"
+                className="rounded-2xl p-5 text-center transition hover:bg-emerald-50/70"
               >
-                <div className="text-2xl md:text-3xl font-bold text-emerald-600">{stat.value}</div>
-                <div className="text-gray-500 text-sm mt-1">{stat.label}</div>
+                <div className="text-2xl md:text-3xl font-semibold tracking-tight text-emerald-950">{stat.value}</div>
+                <div className="text-slate-500 text-xs font-medium uppercase tracking-wider mt-1">{stat.label}</div>
               </motion.div>
             ))}
           </div>
@@ -156,11 +157,12 @@ export default function Home() {
       </section>
 
       {/* Products */}
-      <section className="py-20 px-4 bg-gray-50">
+      <section className="px-5 py-24">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Our Loan Products</h2>
-            <p className="text-gray-600">Choose the option that works best for you</p>
+            <span className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">Simple by design</span>
+            <h2 className="text-3xl md:text-5xl font-semibold tracking-tight text-emerald-950 mt-3 mb-4">Credit for today and tomorrow.</h2>
+            <p className="text-slate-500">Two focused options. Clear terms. No product maze.</p>
           </div>
           <div className="grid md:grid-cols-2 gap-8">
             {/* Urgent 50k */}
@@ -168,7 +170,7 @@ export default function Home() {
               initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className="bg-white rounded-3xl p-8 shadow-lg border border-gray-100 relative overflow-hidden"
+              className="creditze-card relative overflow-hidden p-8 md:p-10"
             >
               <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50 rounded-full -translate-y-16 translate-x-16" />
               <div className="relative">
@@ -204,7 +206,7 @@ export default function Home() {
               initial={{ opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl p-8 shadow-lg relative overflow-hidden"
+              className="relative overflow-hidden rounded-[1.5rem] border border-emerald-800 bg-emerald-950 p-8 shadow-[0_30px_70px_-40px_rgba(2,44,34,0.9)] md:p-10"
             >
               <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/20 rounded-full -translate-y-16 translate-x-16" />
               <div className="relative">
@@ -240,10 +242,10 @@ export default function Home() {
       </section>
 
       {/* How It Works */}
-      <section className="py-20 px-4">
+      <section className="border-y border-emerald-950/[0.06] bg-white/70 px-5 py-24">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">How It Works</h2>
+            <h2 className="text-3xl md:text-5xl font-semibold tracking-tight text-emerald-950 mb-4">From application to access.</h2>
             <p className="text-gray-600">Simple steps to get your loan</p>
           </div>
           <div className="grid md:grid-cols-4 gap-8">
@@ -262,7 +264,7 @@ export default function Home() {
                 className="text-center"
               >
                 <div className="relative inline-block mb-4">
-                  <div className="w-16 h-16 bg-emerald-100 rounded-2xl flex items-center justify-center">
+                  <div className="w-16 h-16 border border-emerald-200 bg-emerald-50 rounded-2xl flex items-center justify-center shadow-sm">
                     <step.icon className="w-8 h-8 text-emerald-600" />
                   </div>
                   <span className="absolute -top-2 -right-2 w-7 h-7 bg-emerald-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
@@ -278,7 +280,7 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12 px-4">
+      <footer className="bg-emerald-950 text-white py-14 px-5">
         <div className="max-w-5xl mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-2">

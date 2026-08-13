@@ -108,7 +108,7 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 p-4">
+      <div className="creditze-shell p-4">
         <div className="max-w-2xl mx-auto space-y-4">
           <Skeleton className="h-32 rounded-2xl" />
           <Skeleton className="h-48 rounded-2xl" />
@@ -119,17 +119,18 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-32">
+    <div className="creditze-shell pb-32">
       {/* Header */}
-      <div className="bg-gradient-to-br from-emerald-600 to-emerald-700 px-4 pt-6 pb-12">
-        <div className="max-w-2xl mx-auto">
+      <div className="relative overflow-hidden bg-emerald-950 px-5 pb-16 pt-8 text-white">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_10%,rgba(52,211,153,0.18),transparent_24rem)]" />
+        <div className="relative max-w-2xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <p className="text-emerald-100 text-sm">Welcome back,</p>
-              <h1 className="text-white text-xl font-bold">{user?.full_name?.split(' ')[0] || 'User'}</h1>
+              <p className="text-emerald-100/60 text-xs font-semibold uppercase tracking-[0.16em]">Welcome back</p>
+              <h1 className="text-white text-2xl font-semibold tracking-tight mt-1">{user?.full_name?.split(' ')[0] || 'User'}</h1>
             </div>
             <Link to={createPageUrl('Profile')}>
-              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+              <div className="w-11 h-11 border border-white/15 bg-white/10 rounded-full flex items-center justify-center backdrop-blur">
                 <span className="text-white font-semibold">
                   {user?.full_name?.charAt(0) || 'U'}
                 </span>
@@ -141,20 +142,20 @@ export default function Dashboard() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-2xl p-6 shadow-lg"
+            className="rounded-[1.5rem] border border-white/15 bg-white/[0.08] p-6 shadow-2xl backdrop-blur-xl"
           >
             <div className="flex items-center justify-between mb-4">
-              <span className="text-gray-500 text-sm">Your Credit Limit</span>
+              <span className="text-emerald-100/60 text-xs font-semibold uppercase tracking-[0.16em]">Available to borrow</span>
               {creditLimit?.is_frozen && (
                 <Badge variant="destructive" className="text-xs">Frozen</Badge>
               )}
             </div>
-            <div className="text-3xl font-bold text-gray-900 mb-2">
+            <div className="text-4xl font-semibold tracking-tight text-white mb-3">
               ₦50,000
             </div>
             <div className="flex items-center gap-2 text-sm">
               <TrendingUp className="w-4 h-4 text-emerald-500" />
-              <span className="text-gray-600">
+              <span className="text-emerald-50/70">
                 {creditLimit?.successful_repayments || 0} successful repayments
               </span>
             </div>
@@ -162,7 +163,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="max-w-2xl mx-auto px-4 -mt-4 space-y-4">
+      <div className="relative z-10 max-w-2xl mx-auto px-4 -mt-7 space-y-4">
         {/* Phone Verification Warning */}
         {kyc?.phone_number && !kyc?.phone_verified && (
           <motion.div

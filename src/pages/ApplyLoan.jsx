@@ -517,7 +517,7 @@ export default function ApplyLoan() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="creditze-shell flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-emerald-600" />
       </div>
     );
@@ -525,13 +525,13 @@ export default function ApplyLoan() {
 
   if (!canApply()) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="bg-white border-b px-4 py-4">
+      <div className="creditze-shell">
+        <div className="border-b border-white/10 bg-emerald-950 px-4 py-5 text-white">
           <div className="max-w-lg mx-auto flex items-center gap-4">
             <Button variant="ghost" size="icon" onClick={() => navigate(createPageUrl('Dashboard'))}>
               <ArrowLeft className="w-5 h-5" />
             </Button>
-            <h1 className="font-semibold text-gray-900">Apply for Loan</h1>
+            <h1 className="font-semibold">Apply for Loan</h1>
           </div>
         </div>
         <div className="max-w-lg mx-auto px-4 py-6">
@@ -550,14 +550,17 @@ export default function ApplyLoan() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24">
+    <div className="creditze-shell pb-28">
       {/* Header */}
-      <div className="bg-white border-b px-4 py-4">
+      <div className="border-b border-white/10 bg-emerald-950 px-4 py-5 text-white">
         <div className="max-w-lg mx-auto flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={() => navigate(createPageUrl('Dashboard'))}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <h1 className="font-semibold text-gray-900">Apply for Loan</h1>
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-200/70">Creditze</p>
+            <h1 className="font-semibold">Apply for a loan</h1>
+          </div>
         </div>
       </div>
 
@@ -569,11 +572,14 @@ export default function ApplyLoan() {
             animate={{ opacity: 1, y: 0 }}
             className="space-y-4"
           >
-            <h2 className="text-lg font-semibold text-gray-900">Select Loan Product</h2>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700">Your offer</p>
+              <h2 className="mt-1 text-2xl font-semibold tracking-tight text-emerald-950">Choose the right credit option.</h2>
+            </div>
             
             {/* Urgent 50k */}
             <Card 
-              className={`border-2 cursor-pointer transition hover:border-emerald-300 ${
+              className={`cursor-pointer border-2 transition hover:-translate-y-0.5 hover:border-emerald-300 ${
                 selectedProduct === 'urgent_10k' ? 'border-emerald-500' : 'border-gray-200'
               }`}
               onClick={() => selectProduct('urgent_10k')}
@@ -585,7 +591,7 @@ export default function ApplyLoan() {
                   </div>
                   <div className="flex-1">
                     <h3 className="font-semibold text-gray-900">Urgent ₦50,000</h3>
-                    <p className="text-sm text-gray-500 mb-2">Credit limit builder</p>
+                    <p className="text-sm text-gray-500 mb-2">Fast, transparent support for urgent needs</p>
                     <div className="flex gap-2">
                       <Badge variant="outline">15% interest</Badge>
                       <Badge variant="outline">30 days</Badge>
