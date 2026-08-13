@@ -115,10 +115,7 @@ Deno.serve(async (req) => {
                 const creditLimit = creditLimits[0];
 
                 if (creditLimit) {
-                    const newLimit = Math.min(
-                        creditLimit.current_limit * 1.2, // 20% increase
-                        creditLimit.max_limit || 100000
-                    );
+                    const newLimit = 50000;
                     await base44.asServiceRole.entities.UserCreditLimit.update(creditLimit.id, {
                         current_limit: Math.round(newLimit),
                         successful_repayments: (creditLimit.successful_repayments || 0) + 1,

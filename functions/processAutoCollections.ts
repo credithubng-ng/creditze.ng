@@ -172,14 +172,10 @@ Deno.serve(async (req) => {
                         user_id: loan.user_id 
                     });
                     if (creditLimits[0]) {
-                        const creditLimit = creditLimits[0];
-                        const loanConfigs = await base44.asServiceRole.entities.LoanConfig.filter({ config_key: 'default' });
-                        const loanConfig = loanConfigs[0];
-                        const incrementPercent = loanConfig?.urgent_10k_increment_percent || 20;
-                        
-                        await base44.asServiceRole.entities.UserCreditLimit.update(creditLimit.id, {
-                            successful_repayments: creditLimit.successful_repayments + 1,
-                            current_limit: Math.round(creditLimit.current_limit * (1 + incrementPercent / 100))
+                        await base44.asServiceRole.entities.UserCreditLimit.update(creditLimits[0].id, {
+                            successful_repayments: (creditLimits[0].successful_repayments || 0) + 1,
+                            current_limit: 50000,
+                            max_limit: 50000
                         });
                     }
 

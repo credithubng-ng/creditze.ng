@@ -202,16 +202,16 @@ export default function HowItWorks() {
                       <div className="bg-emerald-50 rounded-lg p-4 border border-emerald-200">
                         <div className="flex items-center gap-2 mb-2">
                           <Zap className="w-5 h-5 text-emerald-600" />
-                          <h4 className="font-semibold text-gray-900">Urgent ₦10,000</h4>
+                          <h4 className="font-semibold text-gray-900">Urgent ₦50,000</h4>
                         </div>
                         <p className="text-sm text-gray-600 mb-2">
-                          Start building your credit with our entry-level loan
+                          Access up to ₦50,000 for urgent needs
                         </p>
                         <ul className="text-xs space-y-1">
                           <li>• Min score: 60/100</li>
                           <li>• Interest: 15%</li>
                           <li>• Tenure: 30 days</li>
-                          <li>• Credit limit grows 20% per repayment</li>
+                          <li>• Maximum amount: ₦50,000</li>
                         </ul>
                       </div>
                       <div className="bg-gray-900 text-white rounded-lg p-4">
@@ -273,7 +273,7 @@ export default function HowItWorks() {
                     </ul>
                     <div className="bg-green-50 rounded-lg p-4 border border-green-200">
                       <p className="text-sm text-green-800">
-                        <strong>🎉 Success!</strong> Your credit limit increases by 20% after each successful repayment.
+                        <strong>🎉 Success!</strong> Successful repayment keeps you eligible for future Urgent ₦50,000 applications.
                       </p>
                     </div>
                   </div>

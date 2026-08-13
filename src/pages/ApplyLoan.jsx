@@ -38,7 +38,7 @@ export default function ApplyLoan() {
   const [successMessage, setSuccessMessage] = useState(null);
   
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [loanAmount, setLoanAmount] = useState(10000);
+  const [loanAmount, setLoanAmount] = useState(50000);
   const [loanDetails, setLoanDetails] = useState(null);
   const [mlScoreResult, setMlScoreResult] = useState(null);
   const [mlConfig, setMlConfig] = useState(null);
@@ -215,7 +215,8 @@ export default function ApplyLoan() {
     }
     
     if (product === 'urgent_10k') {
-      const maxAmount = creditLimit?.current_limit || (loanConfig?.urgent_10k_base_amount || 10000);
+      const configuredAmount = 50000;
+      const maxAmount = 50000;
       const baseRate = loanConfig?.urgent_10k_interest_rate || 15;
       const baseTenure = loanConfig?.urgent_10k_tenure_days || 30;
       
@@ -233,7 +234,7 @@ export default function ApplyLoan() {
       });
       
       setPersonalizedOfferData(personalized);
-      setLoanAmount(Math.min(loanConfig?.urgent_10k_base_amount || 10000, personalized.personalizedAmount));
+      setLoanAmount(Math.min(configuredAmount, personalized.personalizedAmount, 50000));
       setSelectedTenure(personalized.tenureOptions[0]);
       
       setLoanDetails({
@@ -242,7 +243,7 @@ export default function ApplyLoan() {
         tenureOptions: personalized.tenureOptions,
         score,
         minScore: loanConfig?.urgent_10k_min_score || 60,
-        maxAmount: personalized.personalizedAmount,
+        maxAmount: Math.min(personalized.personalizedAmount, 50000),
         isPersonalized: true,
         adjustments: personalized.adjustments
       });
@@ -371,7 +372,7 @@ export default function ApplyLoan() {
             : (loanConfig?.tier1_interest_rate || 12),
           personalized_interest_rate: loanDetails.interestRate,
           base_max_amount: selectedProduct === 'urgent_10k'
-            ? (creditLimit?.current_limit || 10000)
+            ? 50000
             : (loanConfig?.tier1_max_amount || 5000000),
           personalized_max_amount: loanDetails.maxAmount,
           base_tenure_days: selectedProduct === 'urgent_10k' 
@@ -416,7 +417,9 @@ export default function ApplyLoan() {
       if (!creditLimit) {
         await base44.entities.UserCreditLimit.create({
           user_id: user.id,
-          current_limit: 10000,
+          current_limit: 50000,
+          initial_limit: 50000,
+          max_limit: 50000,
           total_loans_taken: 1
         });
       } else {
@@ -568,7 +571,7 @@ export default function ApplyLoan() {
           >
             <h2 className="text-lg font-semibold text-gray-900">Select Loan Product</h2>
             
-            {/* Urgent 10k */}
+            {/* Urgent 50k */}
             <Card 
               className={`border-2 cursor-pointer transition hover:border-emerald-300 ${
                 selectedProduct === 'urgent_10k' ? 'border-emerald-500' : 'border-gray-200'
@@ -581,7 +584,7 @@ export default function ApplyLoan() {
                     <Zap className="w-6 h-6 text-emerald-600" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900">Urgent ₦10,000</h3>
+                    <h3 className="font-semibold text-gray-900">Urgent ₦50,000</h3>
                     <p className="text-sm text-gray-500 mb-2">Credit limit builder</p>
                     <div className="flex gap-2">
                       <Badge variant="outline">15% interest</Badge>
@@ -684,14 +687,14 @@ export default function ApplyLoan() {
                   <Slider
                     value={[loanAmount]}
                     onValueChange={([v]) => setLoanAmount(v)}
-                    min={selectedProduct === 'urgent_10k' ? 5000 : 50000}
+                    min={selectedProduct === 'urgent_10k' ? 10000 : 50000}
                     max={loanDetails.maxAmount}
                     step={selectedProduct === 'urgent_10k' ? 1000 : 10000}
                     className="py-4"
                   />
                   
                   <div className="flex justify-between text-sm text-gray-500">
-                    <span>₦{selectedProduct === 'urgent_10k' ? '5,000' : '50,000'}</span>
+                    <span>₦{selectedProduct === 'urgent_10k' ? '10,000' : '50,000'}</span>
                     <span>₦{loanDetails.maxAmount.toLocaleString()}</span>
                   </div>
 

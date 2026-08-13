@@ -23,7 +23,7 @@ export default function AdminSettings() {
   const [saving, setSaving] = useState(false);
 
   const [formData, setFormData] = useState({
-    urgent_10k_base_amount: 10000,
+    urgent_10k_base_amount: 50000,
     urgent_10k_interest_rate: 15,
     urgent_10k_tenure_days: 30,
     urgent_10k_min_score: 60,
@@ -63,7 +63,8 @@ export default function AdminSettings() {
         setConfig(configs[0]);
         setFormData({
           ...formData,
-          ...configs[0]
+          ...configs[0],
+          urgent_10k_base_amount: 50000
         });
       }
     } catch (error) {
@@ -133,7 +134,7 @@ export default function AdminSettings() {
       </div>
 
       <div className="max-w-4xl mx-auto px-6 py-6 space-y-6">
-        {/* Urgent 10k Settings */}
+        {/* Urgent 50k Settings */}
         <Card className="border-0 shadow-md">
           <CardHeader>
             <div className="flex items-center gap-3">
@@ -141,7 +142,7 @@ export default function AdminSettings() {
                 <Wallet className="w-5 h-5 text-emerald-600" />
               </div>
               <div>
-                <CardTitle className="text-lg">Urgent ₦10,000 Loan</CardTitle>
+                <CardTitle className="text-lg">Urgent ₦50,000 Loan</CardTitle>
                 <CardDescription>Credit limit builder product settings</CardDescription>
               </div>
             </div>
@@ -153,9 +154,10 @@ export default function AdminSettings() {
                 <Input
                   type="number"
                   value={formData.urgent_10k_base_amount}
-                  onChange={(e) => setFormData({ ...formData, urgent_10k_base_amount: parseInt(e.target.value) })}
+                  disabled
                   className="mt-1"
                 />
+                <p className="text-xs text-gray-500 mt-1">Fixed for the Urgent ₦50,000 product</p>
               </div>
               <div>
                 <Label>Interest Rate (%)</Label>
@@ -176,7 +178,7 @@ export default function AdminSettings() {
                 />
               </div>
             </div>
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid md:grid-cols-1 gap-4">
               <div>
                 <Label>Minimum Score Required</Label>
                 <Input
@@ -185,16 +187,6 @@ export default function AdminSettings() {
                   onChange={(e) => setFormData({ ...formData, urgent_10k_min_score: parseInt(e.target.value) })}
                   className="mt-1"
                 />
-              </div>
-              <div>
-                <Label>Credit Limit Increment (%)</Label>
-                <Input
-                  type="number"
-                  value={formData.urgent_10k_increment_percent}
-                  onChange={(e) => setFormData({ ...formData, urgent_10k_increment_percent: parseInt(e.target.value) })}
-                  className="mt-1"
-                />
-                <p className="text-xs text-gray-500 mt-1">Increase after each successful repayment</p>
               </div>
             </div>
           </CardContent>

@@ -149,7 +149,7 @@ export default function Profile() {
               <div className="grid grid-cols-3 gap-4 text-center">
                 <div>
                   <p className="text-2xl font-bold text-emerald-600">
-                    ₦{(creditLimit?.current_limit || 10000).toLocaleString()}
+                    ₦50,000
                   </p>
                   <p className="text-xs text-gray-500">Credit Limit</p>
                 </div>

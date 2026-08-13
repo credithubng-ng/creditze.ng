@@ -218,7 +218,7 @@ export default function AdminUsers() {
                         </TableCell>
                         <TableCell>
                           <span className="font-medium">
-                            ₦{(limit?.current_limit || 10000).toLocaleString()}
+                            ₦50,000
                           </span>
                         </TableCell>
                         <TableCell className="text-gray-500">

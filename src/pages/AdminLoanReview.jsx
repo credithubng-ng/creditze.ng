@@ -483,7 +483,7 @@ export default function AdminLoanReview() {
                       <div>
                         <p className="text-sm text-gray-500 mb-1">Loan Type</p>
                         <p className="font-semibold text-gray-900">
-                          {app.loan_type === 'urgent_10k' ? 'Urgent ₦10k' : 'Tier-1 Personal'}
+                          {app.loan_type === 'urgent_10k' ? 'Urgent ₦50k' : 'Tier-1 Personal'}
                         </p>
                       </div>
                       <div>

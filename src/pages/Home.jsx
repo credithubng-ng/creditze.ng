@@ -135,9 +135,9 @@ export default function Home() {
         <div className="max-w-5xl mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {[
-              { value: '₦10k', label: 'Starting Amount' },
+              { value: '₦50k', label: 'Loan Amount' },
               { value: '5 mins', label: 'Quick Approval' },
-              { value: '20%', label: 'Credit Growth' },
+              { value: '₦50k', label: 'Available Limit' },
               { value: '₦5M', label: 'Borrow Up to' }
             ].map((stat, i) => (
               <motion.div
@@ -163,7 +163,7 @@ export default function Home() {
             <p className="text-gray-600">Choose the option that works best for you</p>
           </div>
           <div className="grid md:grid-cols-2 gap-8">
-            {/* Urgent 10k */}
+            {/* Urgent 50k */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -175,13 +175,13 @@ export default function Home() {
                 <div className="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center mb-6">
                   <Zap className="w-7 h-7 text-emerald-600" />
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">Urgent ₦10,000</h3>
-                <p className="text-gray-500 mb-6">Credit limit builder for new users</p>
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">Urgent ₦50,000</h3>
+                <p className="text-gray-500 mb-6">Fast support for urgent personal needs</p>
                 <ul className="space-y-3 mb-8">
                   {[
-                    'Start with ₦10,000',
+                    'Borrow up to ₦50,000',
                     'Instant approval if eligible',
-                    '20% limit increase per repayment',
+                    'Up to ₦50,000 per application',
                     'Build your credit history'
                   ].map((item, i) => (
                     <li key={i} className="flex items-center gap-3 text-gray-700">

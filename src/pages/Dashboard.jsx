@@ -150,7 +150,7 @@ export default function Dashboard() {
               )}
             </div>
             <div className="text-3xl font-bold text-gray-900 mb-2">
-              ₦{(creditLimit?.current_limit || 10000).toLocaleString()}
+              ₦50,000
             </div>
             <div className="flex items-center gap-2 text-sm">
               <TrendingUp className="w-4 h-4 text-emerald-500" />
@@ -240,7 +240,7 @@ export default function Dashboard() {
                       </div>
                       <div>
                         <h3 className="font-semibold text-gray-900">Apply for a Loan</h3>
-                        <p className="text-sm text-gray-500">Up to ₦{(creditLimit?.current_limit || 10000).toLocaleString()}</p>
+                        <p className="text-sm text-gray-500">Up to ₦50,000</p>
                       </div>
                     </div>
                     <ChevronRight className="w-5 h-5 text-gray-400" />
