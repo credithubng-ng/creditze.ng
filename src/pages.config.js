@@ -77,6 +77,7 @@ const HowItWorks = lazy(() => import('./pages/HowItWorks'));
 const KYC = lazy(() => import('./pages/KYC'));
 const LoanDetails = lazy(() => import('./pages/LoanDetails'));
 const LoanHistory = lazy(() => import('./pages/LoanHistory'));
+const Login = lazy(() => import('./pages/Login'));
 const MyDisputes = lazy(() => import('./pages/MyDisputes'));
 const MyDocuments = lazy(() => import('./pages/MyDocuments'));
 const PremiumReportPayment = lazy(() => import('./pages/PremiumReportPayment'));
@@ -115,6 +116,7 @@ export const PAGES = {
     "KYC": KYC,
     "LoanDetails": LoanDetails,
     "LoanHistory": LoanHistory,
+    "Login": Login,
     "MyDisputes": MyDisputes,
     "MyDocuments": MyDocuments,
     "PremiumReportPayment": PremiumReportPayment,

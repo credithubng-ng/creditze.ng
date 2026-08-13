@@ -27,7 +27,8 @@ export default function HowItWorks() {
     if (auth) {
       navigate(createPageUrl('Dashboard'));
     } else {
-      base44.auth.redirectToLogin(createPageUrl('Dashboard'));
+      const returnUrl = encodeURIComponent(createPageUrl('Dashboard'));
+      navigate(`${createPageUrl('Login')}?from_url=${returnUrl}`);
     }
   };
 

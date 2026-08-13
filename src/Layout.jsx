@@ -22,7 +22,7 @@ export default function Layout({ children, currentPageName }) {
   const { user, isAuthenticated, logout } = useAuth();
 
   // Pages that don't need the bottom nav
-  const noNavPages = ['Home', 'VerifyEmployment'];
+  const noNavPages = ['Home', 'Login', 'VerifyEmployment'];
   const showNav = isAuthenticated && !noNavPages.includes(currentPageName);
 
   // Admin pages - show admin nav instead

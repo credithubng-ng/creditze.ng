@@ -63,7 +63,8 @@ export default function Home() {
     if (isAuthenticated) {
       window.location.href = createPageUrl('Dashboard');
     } else {
-      base44.auth.redirectToLogin(createPageUrl('Dashboard'));
+      const returnUrl = encodeURIComponent(createPageUrl('Dashboard'));
+      window.location.href = `${createPageUrl('Login')}?from_url=${returnUrl}`;
     }
   };
 
