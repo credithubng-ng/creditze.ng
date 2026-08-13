@@ -67,7 +67,6 @@ const AdminReferrals = lazy(() => import('./pages/AdminReferrals'));
 const AdminSettings = lazy(() => import('./pages/AdminSettings'));
 const AdminUsers = lazy(() => import('./pages/AdminUsers'));
 const ApplyLoan = lazy(() => import('./pages/ApplyLoan'));
-const CreditCheckGateway = lazy(() => import('./pages/CreditCheckGateway'));
 const CreditHistory = lazy(() => import('./pages/CreditHistory'));
 const CreditSearch = lazy(() => import('./pages/CreditSearch'));
 const CreditSearchHistory = lazy(() => import('./pages/CreditSearchHistory'));
@@ -106,7 +105,6 @@ export const PAGES = {
     "AdminSettings": AdminSettings,
     "AdminUsers": AdminUsers,
     "ApplyLoan": ApplyLoan,
-    "CreditCheckGateway": CreditCheckGateway,
     "CreditHistory": CreditHistory,
     "CreditSearch": CreditSearch,
     "CreditSearchHistory": CreditSearchHistory,
